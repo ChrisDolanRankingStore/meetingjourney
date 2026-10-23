@@ -6,8 +6,9 @@ This project is intentionally separate from AffiliateTrafficFactory and Site Bui
 
 ## Technology
 
-- ASP.NET Core and C# API
+- ASP.NET Core and C# API (legacy/local reference)
 - React and TypeScript client
+- Node.js production server for Linux hosting
 - Progressive Web App shell with an offline cache
 - IndexedDB for editable offline notes and drawing stroke data
 - Konva-backed drawing surface for mouse, finger and stylus input
@@ -25,7 +26,7 @@ This project is intentionally separate from AffiliateTrafficFactory and Site Bui
 
 The full product brief supplied for this project is reflected in [the working requirements](docs/product-requirements.md). Phase 1 intentionally uses a curated sample meeting and does not scrape or copy publication content.
 
-## Run the API
+## Run the original development stack
 
 ```powershell
 dotnet run --project src/MeetingJourney.Api/MeetingJourney.Api.csproj
@@ -40,6 +41,20 @@ npm.cmd run dev
 ```
 
 Set `VITE_API_BASE_URL` if the API is not running at `http://localhost:5080`. If the API is unavailable, the client starts from its bundled sample meeting and keeps local notes/drawings usable offline.
+
+## Run the Node.js deployment target locally
+
+From the repository root:
+
+```powershell
+cd node-app
+npm.cmd run build
+npm.cmd start
+```
+
+Then open `http://localhost:3000/`. The Node server provides the frontend, `/health`, and the meeting API from one origin, matching the SmarterASP Linux deployment.
+
+SmarterASP setup instructions are in [docs/smarterasp-deployment.md](docs/smarterasp-deployment.md).
 
 ## Phase 1 delivered
 

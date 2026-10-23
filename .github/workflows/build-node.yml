@@ -1,0 +1,38 @@
+name: Build Meeting Journey Node package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-node:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: src/MeetingJourney.Web/package-lock.json
+
+      - name: Build Node deployment package
+        working-directory: node-app
+        run: npm run build
+
+      - name: Verify Node server syntax
+        run: node --check node-app/server.js
+
+      - name: Upload Node deployment package
+        uses: actions/upload-artifact@v4
+        with:
+          name: meeting-journey-node
+          path: node-app/
+          if-no-files-found: error

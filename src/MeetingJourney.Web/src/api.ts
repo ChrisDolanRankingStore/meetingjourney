@@ -1,6 +1,9 @@
 import type { Meeting } from './types';
 
-const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? 'http://localhost:5080';
+// In production the Node.js server and the browser client share one origin.
+// Keep the API base configurable for local development, but use same-origin
+// requests by default so the hosted app does not call localhost.
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? '';
 
 export async function loadMeeting(signal?: AbortSignal): Promise<Meeting> {
   const response = await fetch(`${API_BASE}/api/meetings/current`, { signal });

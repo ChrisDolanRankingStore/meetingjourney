@@ -3,5 +3,6 @@
 **/*.tsbuildinfo
 src/MeetingJourney.Web/node_modules/
 src/MeetingJourney.Web/dist/
+node-app/public/
 *.user
 *.suo

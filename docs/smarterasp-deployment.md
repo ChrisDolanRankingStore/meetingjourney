@@ -1,24 +1,43 @@
 # GitHub to SmarterASP deployment
 
-Meeting Journey is deployed as one ASP.NET Core site. GitHub Actions builds the React/Vite client, copies it into the API `wwwroot` folder, publishes the API, and uploads the complete output to SmarterASP over FTPS.
+Meeting Journey includes a Node.js deployment target in `node-app/`. Use this target for the SmarterASP Linux/Node.js hosting package. The old ASP.NET Core project remains in the repository for reference and local development, but it is not the runtime for the Linux site.
 
-## GitHub repository secrets
+## SmarterASP website settings
 
-Add these repository secrets under **Settings → Secrets and variables → Actions**:
+In SmarterASP, open the `meetingjourney` website and configure the Node.js runtime as follows:
 
-- `SMARTERASP_FTP_SERVER` — the FTPS server supplied by SmarterASP
-- `SMARTERASP_FTP_USERNAME` — the SmarterASP FTP username
-- `SMARTERASP_FTP_PASSWORD` — the SmarterASP FTP password
-- `SMARTERASP_SERVER_DIR` — the target website directory, if SmarterASP requires one
+| Setting | Value |
+| --- | --- |
+| Node version | Node.js 24 LTS |
+| Framework | Other |
+| Application folder | `node-app` |
+| Startup file | `server.js` |
+| Health check path | `/health` |
+| Build command | `npm run build` |
 
-Do not put these values in `appsettings.json`, `.env` files, the workflow, or source code.
+The application folder is relative to the deployed repository root. The startup file is relative to `node-app`, so do not enter `node-app/server.js` in that field.
 
-## Deployment
+## Deploy from GitHub
 
-Push to `main`, or run **Build and deploy Meeting Journey** manually from the GitHub Actions tab. The workflow is in `.github/workflows/deploy-smarterasp.yml`.
+1. Connect the SmarterASP website to `ChrisDolanRankingStore/meetingjourney`.
+2. Select the `main` branch.
+3. Set the application folder and startup file above.
+4. Deploy/rebuild from the SmarterASP website panel.
+5. Start or restart the Node.js application after the upload finishes.
 
-The production frontend and API use the same origin. The React client calls `/api/...`, while ASP.NET Core serves the built frontend and API routes together.
+The build script installs and builds `src/MeetingJourney.Web`, then copies its Vite output into `node-app/public/`. The Node server serves that frontend and the same-origin `/api/...` routes.
+
+GitHub Actions now validates and packages the Node target in `.github/workflows/build-node.yml`. SmarterASP's native GitHub deployment remains the deployment path for the Linux site; uploading .NET DLLs with FTP does not start a Node application.
+
+## Verify the deployment
+
+Open these URLs after SmarterASP reports the Node app as running:
+
+- `https://meetingjourney.com/health` should return JSON with `"status":"ok"`.
+- `https://meetingjourney.com/` should show the Meeting Journey app.
+
+If `/health` returns an Nginx 404 or `/` returns 403, the Node app has not started or the website is still pointing at the wrong application folder. Check the Node application status and startup log in SmarterASP.
 
 ## Cloudflare
 
-Point the chosen hostname, such as `app.meetingjourney.com`, to the SmarterASP site using the DNS target SmarterASP provides. Keep HTTPS enabled in Cloudflare. Verify `/health` and then open the hostname in Safari before adding it to the iPhone Home Screen.
+Point the hostname at the DNS target supplied by SmarterASP. Keep HTTPS enabled in Cloudflare. Once `/health` works, open the site in Safari and use **Add to Home Screen** to test it as a phone app.
