@@ -1,0 +1,25 @@
+{
+  "name": "meeting-journey-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --pretty false"
+  },
+  "dependencies": {
+    "konva": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-konva": "latest"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "vite": "latest",
+    "typescript": "latest"
+  }
+}

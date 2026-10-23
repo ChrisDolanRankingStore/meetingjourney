@@ -1,0 +1,58 @@
+name: Build and deploy Meeting Journey
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/MeetingJourney.Web/package-lock.json
+
+      - name: Build web client
+        working-directory: src/MeetingJourney.Web
+        env:
+          VITE_API_BASE_URL: ''
+        run: |
+          npm ci
+          npm run build
+
+      - name: Place web client in API wwwroot
+        run: |
+          rm -rf src/MeetingJourney.Api/wwwroot
+          mkdir -p src/MeetingJourney.Api/wwwroot
+          cp -R src/MeetingJourney.Web/dist/. src/MeetingJourney.Api/wwwroot/
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish ASP.NET Core site
+        run: dotnet publish src/MeetingJourney.Api/MeetingJourney.Api.csproj --configuration Release --output publish/meeting-journey
+
+      - name: Deploy to SmarterASP over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.SMARTERASP_FTP_SERVER }}
+          username: ${{ secrets.SMARTERASP_FTP_USERNAME }}
+          password: ${{ secrets.SMARTERASP_FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./publish/meeting-journey/
+          server-dir: ${{ secrets.SMARTERASP_SERVER_DIR }}
+          dangerous-clean-slate: false

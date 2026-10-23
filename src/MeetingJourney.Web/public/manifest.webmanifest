@@ -1,0 +1,10 @@
+{
+  "name": "Meeting Journey",
+  "short_name": "Meeting Journey",
+  "description": "A calm Bible meeting companion for following along and recording discoveries.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#163b5c",
+  "icons": []
+}
