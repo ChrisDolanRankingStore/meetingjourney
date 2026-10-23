@@ -1,10 +1,19 @@
 using MeetingJourney.Application;
 using MeetingJourney.Infrastructure;
+using Microsoft.AspNetCore.Diagnostics;
 using System.Text.Json.Serialization;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
+builder.Logging.ClearProviders();
+builder.Logging.AddSimpleConsole(options =>
+{
+    options.IncludeScopes = true;
+    options.TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fffzzz ";
+    options.SingleLine = true;
+});
 builder.Services.AddSingleton<IMeetingCatalog, InMemoryMeetingCatalog>();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -13,8 +22,63 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 
 var app = builder.Build();
 
-app.UseExceptionHandler();
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        var traceId = Activity.Current?.Id ?? context.TraceIdentifier;
+
+        logger.LogError(exception,
+            "Unhandled request error. TraceId={TraceId} Method={Method} Path={Path}",
+            traceId,
+            context.Request.Method,
+            context.Request.Path);
+
+        context.Response.Headers["X-Trace-Id"] = traceId;
+
+        await Results.Problem(
+            statusCode: StatusCodes.Status500InternalServerError,
+            title: "An unexpected error occurred.",
+            detail: app.Environment.IsDevelopment()
+                ? exception?.Message
+                : "The error has been logged. Please provide the trace ID when contacting support.",
+            extensions: new Dictionary<string, object?>
+            {
+                ["traceId"] = traceId
+            }).ExecuteAsync(context);
+    });
+});
 app.UseCors();
+
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    var stopwatch = Stopwatch.StartNew();
+
+    try
+    {
+        await next();
+    }
+    finally
+    {
+        stopwatch.Stop();
+
+        if (context.Request.Path.StartsWithSegments("/api") ||
+            context.Request.Path.StartsWithSegments("/health"))
+        {
+            logger.LogInformation(
+                "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMilliseconds}ms TraceId={TraceId}",
+                context.Request.Method,
+                context.Request.Path,
+                context.Response.StatusCode,
+                stopwatch.ElapsedMilliseconds,
+                Activity.Current?.Id ?? context.TraceIdentifier);
+        }
+    }
+});
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
