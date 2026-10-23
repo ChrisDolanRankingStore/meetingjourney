@@ -1,11 +1,11 @@
 # Meeting Journey Node deployment
 
-This folder is the Linux/Node.js deployment target for Meeting Journey.
+This folder contains the Linux/Node.js runtime used by SmarterASP. The repository root also contains the deployment entrypoints so shared builders cannot mistake the legacy C# project for the live application.
 
 In the SmarterASP Node.js site configuration use:
 
-- Application folder: `node-app`
-- Startup file: `server.js`
+- Application folder: repository root (`.`)
+- Startup file: `server.js` at the repository root
 - Health check path: `/health`
 - Build command: `npm run build`
 

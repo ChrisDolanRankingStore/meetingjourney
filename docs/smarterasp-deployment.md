@@ -10,12 +10,12 @@ In SmarterASP, open the `meetingjourney` website and configure the Node.js runti
 | --- | --- |
 | Node version | Node.js 24 LTS |
 | Framework | Other |
-| Application folder | `node-app` |
+| Application folder | `.` |
 | Startup file | `server.js` |
 | Health check path | `/health` |
 | Build command | `npm run build` |
 
-The application folder is relative to the deployed repository root. The startup file is relative to `node-app`, so do not enter `node-app/server.js` in that field.
+The application folder is the repository root. The root `package.json`, `server.js` and `railpack.json` force the shared builder to use Node.js even though the repository still contains the legacy C# project.
 
 ## Deploy from GitHub
 
