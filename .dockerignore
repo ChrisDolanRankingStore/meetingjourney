@@ -1,0 +1,13 @@
+# The Linux hosting build is Node.js. Keep the legacy C# source locally,
+# but do not let the shared builder detect or publish the old API.
+MeetingJourney.sln
+**/*.sln
+**/*.csproj
+src/MeetingJourney.Api/
+src/MeetingJourney.Application/
+src/MeetingJourney.Domain/
+src/MeetingJourney.Infrastructure/
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/

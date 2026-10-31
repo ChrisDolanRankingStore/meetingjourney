@@ -1,0 +1,13 @@
+.listening-chips {display:flex;flex-wrap:wrap;gap:7px;margin:10px 0;}
+.listening-chips button {min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:var(--app-bg,#fffdf7);color:var(--navy);font:inherit;}
+.listening-chips button[aria-pressed=true] {border-color:var(--blue);background:var(--blue-soft);box-shadow:inset 0 0 0 1px var(--blue);}
+.listening-chips button:disabled {opacity:.55;}
+.interest-prompts {font-size:.85rem;line-height:1.5;}
+.listening-settings fieldset {min-width:0;margin:10px 0;border:1px solid var(--line);border-radius:12px;}
+.comment-ready {display:block;padding:16px;border:2px solid var(--blue);border-radius:14px;background:var(--blue-soft);color:var(--navy);font-size:1.4rem;font-weight:800;}
+.quiet-fidget {text-align:center;}
+.app .quiet-fidget > button {display:block;width:120px;height:120px;padding:8px;margin:14px auto;background:transparent;border:0;}
+.quiet-fidget svg {display:block;width:100%;height:100%;}
+.pause-offer {padding:12px;background:var(--blue-soft);border-radius:12px;}
+.rehearsal-controls {display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0;}
+.rehearsal-controls input {max-width:140px;}

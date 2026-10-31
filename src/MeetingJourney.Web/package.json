@@ -1,7 +1,7 @@
 {
   "name": "meeting-journey-web",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.5.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,10 +16,12 @@
     "react-konva": "latest"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "vite": "latest",
-    "typescript": "latest"
+    "@vitejs/plugin-react": "latest",
+    "fake-indexeddb": "6.2.6",
+    "sharp": "0.35.5",
+    "typescript": "latest",
+    "vite": "latest"
   }
 }

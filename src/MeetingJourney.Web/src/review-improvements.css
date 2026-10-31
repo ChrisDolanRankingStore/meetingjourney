@@ -1,0 +1,301 @@
+﻿.visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}.skip-link{position:fixed;top:-80px;left:12px;z-index:1000;padding:12px;background:#fff;color:#243553}.skip-link:focus{top:8px}.app button:focus-visible,.app a:focus-visible{outline:3px solid #6b61cf;outline-offset:3px}.app .eyebrow,.app .part-kicker{color:#835631}.app .header-character .character-avatar,.app .header-character .character-body,.app .header-character .character-layer-stage{display:block!important}.app .header-character .character-avatar{position:relative;width:40px;height:50px;margin:0}.app .header-character .character-body,.app .header-character .character-layer-stage{width:100%;height:100%}.header-meeting-choice{max-width:230px}.story-primary-actions{margin:8px 0}.app .primary-part-action{min-height:44px;padding:9px 15px;border:0;border-radius:14px;background:#35456b;color:white;font:inherit;font-size:.85rem}.app .storybook-part-tools{flex-wrap:wrap;gap:5px}.app .storybook-part-tools button,.app .storybook-part-tools a{min-height:44px}.app .close-companion-menu{position:absolute;right:0;top:0;z-index:10;width:32px;height:32px;border:1px solid #cbbca8;border-radius:50%;color:#35456b;background:#fffdf5}.app .companion-action-card{max-height:100%;overflow:hidden}.app .companion-scene .companion-action-card{max-width:calc(100% - 16px)}.app .companion-action-grid{padding-top:12px}.app .story-map-footer .map-companion{flex-basis:54px;height:60px}.app .story-map-footer .character-avatar{height:70px;width:48px;pointer-events:none}.app .story-map-footer>button{position:relative;z-index:2;flex-shrink:0}.app .story-map-footer{gap:5px}.app .story-map-footer p{font-size:.7rem}.app .story-map-heading h2{font-size:1.05rem}.app .treasure-terrain picture{display:contents}.settings-action-row{display:flex;gap:8px;flex-wrap:wrap}.settings-action-row button,.data-controls button:not(.text-button),.study-tools button,.meeting-review button,.settings-card>button{min-height:44px;padding:8px 12px;border:1px solid #d5c7b1;border-radius:12px;background:#fffdf5;color:#35456b;font:inherit;font-size:.8rem}.data-controls p,.data-controls label{font-size:.8rem;line-height:1.5}.data-controls input:not([type=checkbox]){width:100%;min-height:44px}.restore-preview,.delete-confirmation{margin-top:12px;padding:12px;border:1px solid #d5c7b1;border-radius:14px}.study-tools{font-size:.85rem}.study-tools h4{margin:12px 0 7px;font-size:1rem}.study-tools section{padding-bottom:12px;border-bottom:1px solid #e0d4c2}.study-tools button{cursor:pointer}.study-tools textarea,.meeting-review textarea{box-sizing:border-box;width:100%;max-height:none!important;padding:12px;border:1px solid #cabca5;border-radius:12px;font:inherit;background:#fffefa;color:#293854}.study-tools label{display:block}.paragraph-controls{display:flex;align-items:center;gap:8px;justify-content:center}.paragraph-controls label{text-align:center}.paragraph-controls input{display:block;max-width:70px;min-height:42px;text-align:center;font:inherit;border:1px solid #cdbda4;border-radius:8px}.paragraph-tracker progress{width:100%;accent-color:#5a7087}.sentence-starters,.study-tool-links{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.prepared-comment{margin-top:9px;padding:10px;border-radius:12px;background:#f4eeda;white-space:pre-wrap}.prepared-comment p{margin:4px 0}.scripture-spotter div{display:flex;align-items:center;gap:12px}.scripture-spotter output{min-width:25px;text-align:center}.talk-listening-kit button{margin-right:6px}.app .journey-tool-modal[data-tool=story]{overflow-y:auto}.meeting-review{box-sizing:border-box;max-width:700px;margin:auto;padding:20px;overflow:auto;height:100%}.review-keeps{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.review-keeps span{padding:8px;border-radius:10px;background:#eee8d7}.welcome-intro{box-sizing:border-box;max-width:550px;margin:auto;padding:24px;max-height:100dvh;overflow:auto;background:#fffbf1}.welcome-intro h1{font-size:1.9rem;line-height:1.15}.welcome-intro p{line-height:1.5}.welcome-intro nav{display:flex;gap:15px;margin-top:20px}.welcome-intro details{margin-top:20px}.welcome-intro .primary-adventure-button{width:100%;min-height:48px}.settings-card>label{display:grid;margin:10px 0;gap:4px}.settings-card>label select{min-height:44px}.app .part-card:has(.journey-tool-backdrop)>.story-primary-actions,.app .part-card:has(.journey-tool-backdrop)>.storybook-part-tools{display:none}
+:root{--valley-art:url('/assets/compact-v1/meeting-valley-960.webp')}
+@media(max-width:600px){:root{--valley-art:url('/assets/compact-v1/meeting-valley-480.webp')}.app .header-meeting-choice{font-size:.72rem;max-width:185px}.app .connection-status{font-size:.65rem}.app .storybook-part-tools{gap:3px}.app .storybook-part-tools button,.app .storybook-part-tools a{padding:5px 8px;font-size:.7rem}.app .companion-scene .companion-action-card{height:165px;top:8px}.app .companion-scene.is-open .companion-trigger{bottom:0}.app .part-screen-shell:has(.companion-scene.is-open){grid-template-rows:minmax(210px,56%) minmax(0,1fr)}}
+html[data-theme=soft] .home-scene,html[data-theme=soft] .part-story-scene,html[data-theme=soft] .illustrated-journey-map{background-blend-mode:screen;background-color:#fffcf0a8}html[data-theme=plain] .home-scene,html[data-theme=plain] .part-story-scene,html[data-theme=plain] .illustrated-journey-map,html[data-theme=plain] .character-screen{background:#edf0e8!important}html[data-theme=plain] .scene-cloud,html[data-theme=plain] .scene-sun{display:none!important}html[data-theme=plain] .treasure-terrain picture{opacity:.12}html[data-font=readable] body{font-family:Verdana,Arial,sans-serif;letter-spacing:.025em;line-height:1.6}html[data-font=readable] textarea,html[data-font=readable] input,html[data-font=readable] button{font-family:inherit}
+.official-return{position:fixed;z-index:60;left:50%;top:calc(env(safe-area-inset-top,0px) + 16px);transform:translateX(-50%);box-sizing:border-box;width:min(420px,calc(100% - 24px));padding:18px;border:1px solid #d7c7ad;border-radius:20px;box-shadow:0 10px 40px #35456b40;background:#fffbef;color:#293854}.official-return h2{font-size:1.2rem;padding-right:28px}.official-return button,.completion-check button{min-height:44px;margin:4px;padding:8px 12px;border:1px solid #c7b99f;border-radius:12px;background:#fffdf4;color:#35456b}.return-dismiss{position:absolute;right:8px;top:8px}.completion-check{padding:12px;margin:12px 0;border:1px solid #d7c7ad;border-radius:16px}.completion-check label{display:flex;gap:8px;align-items:center}.completion-check p{font-size:.85rem}
+@supports not (height:100dvh){.app{height:100vh;max-height:100vh}.meeting-picker{max-height:calc(100vh - 30px)}.welcome-intro{max-height:100vh}}
+/* Weekend song details stay out of the card until the user opens this editor. */
+.song-details-dialog {
+  box-sizing: border-box;
+  width: min(460px, calc(100% - 24px));
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+  border: 1px solid #d7c7ad;
+  border-radius: 22px;
+  background: #fffbef;
+  color: #293854;
+  box-shadow: 0 16px 60px #28344b40;
+  overflow: auto;
+  font: inherit;
+}
+.song-details-dialog::backdrop {background: #26314d80;}
+.song-details-dialog h2 {margin: 0 32px 16px 0; font-size: 1.25rem;}
+.song-details-dialog .song-details-close {
+  position: absolute; right: 8px; top: 8px; width: 44px; height: 44px;
+  padding: 0; border-radius: 50%; font-size: 1.5rem;
+}
+.meeting-details-form {display: grid; gap: 12px; font-size: .85rem;}
+.meeting-details-form p {margin: 0; line-height: 1.5;}
+.meeting-details-form label {display: grid; gap: 5px;}
+.meeting-details-form input {
+  box-sizing: border-box; width: 100%; min-width: 0; min-height: 44px;
+  padding: 10px; border: 1px solid #c9bca7; border-radius: 10px;
+  background: #fffefa; color: #293854; font: inherit;
+}
+.meeting-details-form small {line-height: 1.5;}
+.meeting-details-form [role=alert] {color: #8c3434;}
+.meeting-details-form [role=status]:empty {display: none;}
+.song-details-fields {display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px;}
+.song-details-dialog button {
+  min-height: 44px; padding: 8px 12px; border: 1px solid #d5c7b1;
+  border-radius: 12px; background: #fffdf5; color: #35456b; font: inherit;
+}
+.song-details-dialog .song-details-done {margin-top: 18px; width: 100%; background: #35456b; color: white;}
+.song-details-dialog :focus-visible {outline: 3px solid #6b61cf; outline-offset: 2px;}
+@media (max-width: 420px) {
+  .song-details-dialog {padding: 18px;}
+  .song-details-fields {grid-template-columns: 85px minmax(0, 1fr); gap: 8px;}
+}
+.language-choice label {display:flex; align-items:center; justify-content:space-between; gap:12px;}
+.language-choice select {min-height:44px; padding:8px 12px; border:1px solid #c9bca7; border-radius:12px; background:#fffdf5; color:#293854; font:inherit;}
+.language-choice-compact {display:flex; justify-content:flex-end; margin-bottom:12px;}
+.language-choice-compact select {min-width:110px; font-size:.85rem;}
+.official-song-result {padding:12px; border:1px solid #d5c7b1; border-radius:12px; background:#f1ecd9;}
+.official-song-result small,.official-song-result strong {display:block;}
+.official-song-result strong {margin-top:6px; line-height:1.4;}
+.meeting-details-form .song-custom-choice {display:flex; align-items:center; gap:10px; min-height:44px;}
+.meeting-details-form .song-custom-choice input {min-height:22px; width:22px; flex:0 0 22px;}
+html[lang=es] .mobile-nav button {font-size:.68rem; overflow-wrap:anywhere;}
+html[lang=es] .action-bubble {font-size:.68rem;}
+html[lang=es] .storybook-part-tools button,html[lang=es] .storybook-part-tools a {font-size:.72rem;}
+.app .meeting-header-language {margin-left:auto;}
+.app .meeting-header-language .language-choice {margin:0;}
+.app .meeting-header-language select {min-width:66px; width:66px; padding:8px; min-height:44px;}
+.app .app-header .header-character {position:static; transform:none; margin-left:auto;}
+.companion-complete-portrait {display:block; width:100%; height:100%; object-fit:contain; object-position:center bottom;}
+.character-avatar .character-body::before,.character-avatar .character-body::after {content:none!important; display:none!important;}
+.character-screen:has(.age-only-chooser) {padding:12px; box-sizing:border-box; height:100dvh; overflow:hidden;}
+.character-chooser.age-only-chooser {box-sizing:border-box; width:min(620px,100%); height:min(820px,calc(100dvh - 24px)); display:flex; flex-direction:column; gap:8px; padding:18px; overflow:hidden!important;}
+.age-only-chooser>.language-choice {margin:0; flex:0 0 auto;}
+.age-only-chooser h1 {margin:0; font-size:1.5rem; line-height:1.2;}
+.companion-choice-fields {display:grid; grid-template-columns:110px minmax(0,1fr); gap:12px;}
+.companion-choice-fields label {display:grid; gap:4px; font-size:.8rem;}
+.companion-choice-fields input,.companion-choice-fields select {box-sizing:border-box; min-width:0; width:100%; min-height:44px; padding:8px; border:1px solid #cdbda8; border-radius:12px; background:#fffdf5; color:#293854; font:inherit;}
+.companion-look-preview {display:flex; flex:1 1 auto; min-height:100px; align-items:center; justify-content:center; gap:12px;}
+.companion-look-preview>div {height:100%; min-height:0; display:flex; flex-direction:column; align-items:center;}
+.companion-look-preview>button {flex:0 0 44px; width:44px; height:44px; border-radius:50%; border:1px solid #cdbda8; background:#fffdf5; color:#293854; font-size:1.8rem;}
+.age-only-chooser .companion-look-preview .avatar-hero {position:relative; inset:auto; display:block; margin:0; width:180px; height:calc(100% - 24px); max-height:300px; transform:none;}
+.companion-look-preview p {margin:4px 0 0; font-size:.8rem;}
+.companion-look-strip {display:flex; overflow-x:auto; gap:6px; flex:0 0 92px; padding:2px;}
+.companion-look-strip button {position:relative; display:flex; align-items:center; justify-content:center; flex:0 0 72px; height:86px; padding:4px; border:1px solid #d3c7b6; border-radius:12px; background:#fffdf5;}
+.companion-look-strip button[aria-pressed=true] {outline:2px solid #6564d5; outline-offset:-2px; background:#f1efff;}
+.age-only-chooser .companion-look-strip .avatar-medium {position:relative; inset:auto; width:50px; height:72px; margin:0; transform:none;}
+.companion-look-strip button>span:last-child:not(.character-avatar) {position:absolute; bottom:1px; right:4px; font-size:.65rem;}
+.complete-look-note {margin:0; flex:0 0 auto; font-size:.72rem; line-height:1.35;}
+.age-only-chooser .start-journey-button {margin:0; min-height:44px; flex:0 0 auto;}
+.age-only-chooser .chooser-back {min-height:36px; flex:0 0 auto; margin:0;}
+@media(max-width:560px){.app .app-header {gap:7px; align-items:center;}.app .header-meeting-choice {max-width:140px;}.app .meeting-header-language select {font-size:.75rem;}.age-only-chooser h1 {font-size:1.25rem;}.character-chooser.age-only-chooser {padding:12px;}}
+@media(max-height:560px){.age-only-chooser .companion-look-strip {display:none;}.age-only-chooser .complete-look-note {display:none;}.character-chooser.age-only-chooser {gap:5px; padding:10px;}.age-only-chooser>.language-choice {position:absolute;right:12px;top:12px;}.age-only-chooser h1 {padding-right:115px;}}
+/* Keep the settings scroller inside the viewport row above navigation. */
+.app > main.settings-page { min-height: 0; overflow: hidden; }
+.app .settings-screen { display: flex; flex-direction: column; flex: 1 1 0; height: 100%; min-height: 0; overflow: hidden; }
+.app .settings-screen > .screen-heading { flex: 0 0 auto; }
+.app .settings-screen > .settings-grid {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 24px;
+  scroll-padding-block: 12px 24px;
+}
+.app > main.page-shell { grid-row: 2; min-width: 0; }
+.app > .mobile-nav {
+  grid-row: 3;
+  position: relative;
+  inset: auto;
+  transform: none;
+  height: auto;
+  flex-shrink: 0;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+}
+.app > .mobile-nav > button { min-width: 0; min-height: 52px; }
+.app:has(> .settings-page) > .companion-dock { display: none; }
+@media (max-height: 560px) {
+  .app .settings-screen > .screen-heading { padding-bottom: 8px; }
+  .app .settings-screen > .screen-heading p:not(.eyebrow) { font-size: .78rem; line-height: 1.3; }
+  .app .settings-screen > .screen-heading .screen-heading-icon { display: none; }
+}
+
+/* The notebook has one compact header on tablets as well as phones. */
+.app .part-card .journey-tool-modal { padding: 48px 10px 10px; }
+.app .part-card .journey-tool-modal > .tool-card-label { position:absolute;top:17px;left:12px;max-width:calc(100% - 220px);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.app .part-card .journey-tool-modal > h3 { position:absolute;width:1px;height:1px;padding:0;margin:0;overflow:hidden;clip-path:inset(50%); }
+.app .part-card .journey-tool-modal > .notebook-tabs { position:absolute;top:3px;right:47px;left:auto;display:flex;flex-wrap:nowrap;gap:2px;height:40px;margin:0;padding:0;background:transparent; }
+.app .part-card .journey-tool-modal > .notebook-tabs button { display:grid;place-items:center;width:40px;min-width:40px;height:40px;min-height:40px;padding:0;border:0;border-radius:50%;background:transparent;color:#4d5c79; }
+.app .part-card .journey-tool-modal > .notebook-tabs button[aria-pressed=true] {background:#4d5c79;color:#fff;box-shadow:0 2px 5px #35456b20;}
+.app .part-card .journey-tool-modal > .notebook-tabs button svg {width:19px;height:19px;}
+.app .notebook-tabs .notebook-tab-label {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+.app .part-card .journey-tool-close {top:3px;right:3px;width:40px;height:40px;min-height:40px;border:0;background:#eee9dd;color:#4d5c79;}
+.app .journey-tool-modal[data-tool=doodle] .notebook-save-state:not(.has-error) {position:absolute;width:1px;height:1px;padding:0;margin:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+.app .journey-tool-modal[data-tool=doodle] .drawing-notebook,
+.app .journey-tool-modal[data-tool=doodle] .drawing-card {flex:1 1 0;min-width:0;min-height:0;}
+.app .journey-tool-modal[data-tool=doodle] .canvas-shell {flex:1 1 0;min-height:0;place-items:stretch;border-color:#dacdb7;border-radius:14px;background:#fffdf7;}
+.app .drawing-icon-button svg {width:19px;height:19px;}
+.app .drawing-colour-swatch {width:22px;height:22px;}
+.app .drawing-page-badge {right:4px;bottom:3px;}
+.app .drawing-options-panel {width:min(280px,100%);padding:10px;border-color:#d9ceba;border-radius:18px;background:#fffdf6;box-shadow:0 8px 24px #26355220;}
+.app .drawing-options-heading strong {font-size:.78rem;}
+.app .drawing-options-heading .drawing-icon-button {width:36px;height:36px;}
+.app .drawing-tool-choices button {min-height:48px;gap:3px;padding:5px;border-radius:12px;}
+.app .drawing-tool-choices button svg,.app .drawing-more-actions svg {width:19px;height:19px;flex-shrink:0;}
+.app .drawing-page-choices button,.app .drawing-paper-choices button,.app .drawing-more-actions button {min-height:40px;font-size:.72rem;border-radius:12px;}
+@media(min-width:760px){
+  .app .journey-stage-page .part-screen-shell:has([data-tool=doodle]) {grid-template-columns:minmax(140px,.21fr) minmax(0,.79fr);}
+}
+/* Named companions stay inside their scene when moved in either axis. */
+.app .companion-scene .companion-trigger,
+.app .part-story-scene .companion-scene .companion-trigger,
+.app .part-screen-shell:has(.journey-tool-backdrop) .companion-scene .companion-trigger {
+  bottom:calc(8px + var(--companion-y,0) * max(0px,100% - var(--portrait-height) - 72px));
+}
+.companion-nameplate {position:absolute;z-index:9;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);display:block;width:max-content;max-width:145px;padding:4px 11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:1px solid #ded2bd;border-radius:99px;background:#fffdf5ed;color:#35456b;font-size:.7rem;line-height:1.2;box-shadow:0 2px 6px #35456b12;pointer-events:none;}
+.app .companion-scene.is-open .companion-action-card,
+.app .part-screen-shell:has(.journey-tool-backdrop) .companion-scene.is-open .companion-action-card {
+  top:clamp(38px,calc(100% - 8px - var(--companion-y,0) * max(0px,100% - var(--portrait-height) - 72px) - var(--portrait-height) - 135px),max(38px,calc(100% - 176px)));
+  height:166px;width:min(292px,calc(100% - 12px));overflow:visible;
+}
+.app .companion-scene .companion-action-grid .action-bubble {width:104px;height:66px;min-height:60px;padding:12px 10px 10px;border:0;border-radius:0;box-shadow:none;background:transparent;font-size:.73rem;line-height:1.1;isolation:isolate;filter:drop-shadow(0 3px 5px #35456b22);}
+.app .companion-scene .companion-action-grid .action-bubble:not(.action-feelings)::before {
+  content:'';position:absolute;inset:0;z-index:-1;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 76'%3E%3Cpath d='M21 65C4 65 0 48 11 39C3 25 18 10 34 15C39 0 66 1 74 13C94 3 113 18 108 33C126 43 117 65 100 65Z' fill='%23fffdf7' stroke='%23cfc8dc' stroke-width='1.2'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+}
+.app .companion-scene .companion-action-grid .action-bubble:not(.action-feelings)::after {content:'';position:absolute;display:block;width:18px;height:18px;border:0;transform:none;border-radius:0;background:radial-gradient(circle at 6px 5px,#fffdf7 3px,#cfc8dc 3.2px,transparent 4px),radial-gradient(circle at 14px 14px,#fffdf7 2px,#cfc8dc 2.2px,transparent 3px);}
+.app .companion-scene .companion-action-grid .action-move::after {right:-4px;bottom:-6px;top:auto;}
+.app .companion-scene .companion-action-grid .action-doodle::after {right:-5px;top:0;bottom:auto;}
+.app .companion-scene .companion-action-grid .action-note::after {left:-5px;top:0;right:auto;}
+.app .companion-scene .companion-action-grid .action-feelings {height:76px;min-height:76px;padding:12px 6px 24px;width:92px;}
+.app .companion-scene .companion-action-grid .action-feelings::after {display:none;}
+.app .companion-scene .companion-action-grid .action-move {left:0;top:10px;}
+.app .companion-scene .companion-action-grid .action-feelings {right:0;top:8px;}
+.app .companion-scene .companion-action-grid .action-doodle {left:0;bottom:0;}
+.app .companion-scene .companion-action-grid .action-note {right:0;bottom:0;}
+.app .companion-scene .close-companion-menu {pointer-events:auto;right:calc(50% - 18px);top:-8px;width:36px;height:36px;border:0;background:#fffdf5e8;}
+.app .companion-scene .movement-thoughts {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:30px 0 0;align-content:start;}
+.app .companion-scene .movement-thought {position:relative;inset:auto;width:100%;height:40px;min-height:40px;pointer-events:auto;border-radius:48% 52% 46% 54%;background:#fffdf6;box-shadow:0 2px 5px #35456b15;font-size:.7rem;}
+.app .companion-scene .movement-thought-back {top:0;left:0;transform:none;min-height:30px;padding:4px 8px;font-size:.7rem;}
+@media(max-width:759px){
+  .app .part-screen-shell:has([data-tool=doodle]) .companion-scene .companion-nameplate {max-width:110px;padding:2px 8px;font-size:.6rem;bottom:calc(100% - 1px);}
+  .app .part-screen-shell:has([data-tool=doodle]) .companion-scene.is-open {--portrait-height:88px;}
+  .app .journey-stage-page .part-screen-shell:has([data-tool=doodle]):has(.companion-scene.is-open) {grid-template-rows:196px minmax(0,1fr);}
+}
+
+.app .companion-scene .companion-action-grid .action-bubble {width:min(104px,calc(50% - 6px));}
+.app .companion-scene .companion-action-grid .action-feelings {width:min(92px,calc(50% - 6px));}
+.app .part-screen-shell:has(.journey-tool-backdrop) .movement-thoughts {grid-template-columns:repeat(2,minmax(0,1fr));padding-top:30px;}
+@media(max-width:759px){.app .journey-stage-page .part-screen-shell:has([data-tool=doodle]):has(.companion-scene.is-open) {grid-template-rows:220px minmax(0,1fr);}}
+
+/* Movement stays open while a user repeats an action; tapping outside the hub dismisses it. */
+.app .companion-scene .movement-thoughts {grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:30px 0 0;}
+.app .companion-scene .movement-thought {display:grid;place-items:center;width:100%;height:48px;min-height:48px;padding:6px;border:1px solid #d9d5ef;border-radius:16px;background:#fffdf7;color:#4f5ec2;box-shadow:0 2px 6px #35456b18;font-size:0;}
+.app .companion-scene .movement-thought:hover,.app .companion-scene .movement-thought:focus-visible {border-color:#5b61d6;background:#f0f1ff;transform:translateY(-1px);}
+.app .companion-scene .movement-thought .movement-icon {width:31px;height:31px;}
+.app .companion-scene .movement-thought-back {grid-column:1 / -1;width:100%;height:30px;min-height:30px;padding:3px 8px;border:0;border-radius:999px;background:#fffdf7;color:#6d7890;font-size:.72rem;}
+@media(max-width:759px){.app .companion-scene .movement-thoughts{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.app .companion-scene .movement-thought{height:46px;min-height:46px}.app .companion-scene .movement-thought .movement-icon{width:28px;height:28px}}
+/* Three movements on each side leave the companion visible in the centre. */
+.app .companion-scene.is-open.choosing-movement .companion-action-card,
+.app .part-screen-shell:has(.journey-tool-backdrop) .companion-scene.is-open.choosing-movement .companion-action-card {
+  top:auto;
+  bottom:calc(8px + var(--companion-y,0) * max(0px,100% - var(--portrait-height) - 72px) + max(0px,(var(--portrait-height) - 132px) / 2));
+  height:132px;
+}
+.app .companion-scene.choosing-movement .movement-thoughts,
+.app .part-screen-shell:has(.journey-tool-backdrop) .companion-scene.choosing-movement .movement-thoughts {
+  display:grid;grid-template-columns:44px minmax(0,1fr) 44px;grid-template-rows:repeat(3,44px);gap:0;padding:0;align-content:center;
+}
+.app .companion-scene.choosing-movement .movement-thought {
+  position:relative;inset:auto;width:44px;height:44px;min-height:44px;justify-self:center;padding:6px;border:0;border-radius:50%;background:transparent;box-shadow:none;color:#354b9a;
+}
+.app .companion-scene.choosing-movement .movement-thought:nth-child(odd) {grid-column:1;}
+.app .companion-scene.choosing-movement .movement-thought:nth-child(even) {grid-column:3;}
+.app .companion-scene.choosing-movement .movement-thought:nth-child(-n+2) {grid-row:1;}
+.app .companion-scene.choosing-movement .movement-thought:nth-child(n+3):nth-child(-n+4) {grid-row:2;}
+.app .companion-scene.choosing-movement .movement-thought:nth-child(n+5) {grid-row:3;}
+.app .companion-scene.choosing-movement .movement-thought:hover,
+.app .companion-scene.choosing-movement .movement-thought:focus-visible {background:#ffffff55;transform:none;color:#26387c;}
+.app .companion-scene.choosing-movement .movement-icon {width:32px;height:32px;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 2px 3px #fff);}
+.app .companion-scene.choosing-movement .movement-thought-back {position:absolute;top:-32px;left:0;transform:none;width:44px;height:30px;min-height:30px;margin:0;padding:3px 8px;background:#fffdf7e8;}
+
+/* Each nested journey container consumes only its allocated viewport space.
+   A notice must take room away from the card, never push its navigation down. */
+.app > main.journey-stage-page {display:flex;flex-direction:column;min-height:0;height:auto;}
+.app > main.journey-stage-page > .meeting-content-notice {flex:0 0 auto;margin:0 0 4px;}
+.app > main.journey-stage-page > .journey-layout {flex:1 1 0;min-height:0;height:auto;overflow:hidden;}
+.app .journey-stage-page .part-column {display:grid;grid-template-rows:auto minmax(0,1fr);height:100%;min-height:0;overflow:hidden;gap:4px;}
+.app .journey-stage-page .part-screen-shell {height:auto;min-height:0;align-self:stretch;}
+.app .journey-stage-page .next-nav {position:static;inset:auto;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap;min-height:48px;margin:0;padding:2px 0;overflow:visible;}
+.app .journey-stage-page .next-nav button {flex:0 0 auto;min-height:44px;margin:0;padding:7px 12px;}
+.app .journey-stage-page .next-nav > span {min-width:0;text-align:center;font-size:.72rem;}
+/* The navigation owns the home-indicator inset, separately from the controls. */
+.app > .mobile-nav {padding:4px 4px max(8px,env(safe-area-inset-bottom,0px));}
+/* Float the portrait above a compact tab rather than sizing the bar around it. */
+.app > .mobile-nav {overflow:visible;}
+.app > .mobile-nav > .nav-profile {position:relative;display:block;height:52px;padding:0;background:transparent;overflow:visible;}
+.app > .mobile-nav > .nav-profile > .character-avatar {position:absolute;left:50%;top:-19px;transform:translateX(-50%);display:block;width:42px;height:54px;min-height:0;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;pointer-events:none;}
+.app > .mobile-nav > .nav-profile > span:last-child {position:absolute;left:0;right:0;bottom:3px;min-height:0;line-height:1.2;}
+/* A heart alone: keep a useful touch target and an accessible spoken label. */
+.app .companion-action-grid .action-bubble.action-feelings,
+.app .companion-scene .companion-action-grid .action-bubble.action-feelings {display:grid;place-items:center;width:56px;height:56px;min-height:56px;padding:5px;border:0;border-radius:0;background:transparent;box-shadow:none;clip-path:none;color:#ba647d;filter:drop-shadow(0 2px 4px #7e3d5018);}
+.app .companion-action-grid .action-bubble.action-feelings::before,
+.app .companion-action-grid .action-bubble.action-feelings::after {content:none;display:none;}
+.app .companion-action-grid .action-bubble.action-feelings svg {width:42px;height:42px;fill:#f4cbd7;stroke:currentColor;stroke-width:1.4;}
+
+/* Keep official-source copy readable: actions belong below the explanation. */
+.app .material-link-card {display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:12px;}
+.app .material-link-card > div:first-child {min-width:0;}
+.app .material-link-card strong {display:block;}
+.app .material-link-card small {display:block;max-width:none;}
+.app .material-link-card .official-link-actions {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%;min-width:0;justify-content:stretch;}
+.app .material-link-card .official-link-actions a {display:flex;align-items:center;justify-content:center;width:auto;min-width:0;min-height:42px;padding:8px 10px;box-sizing:border-box;text-align:center;white-space:normal;}
+.app .source-tool-card {display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:12px;}
+.app .source-tool-card > div {min-width:0;}
+.app .source-tool-card .official-jw-link {width:100%;box-sizing:border-box;text-align:center;}
+@media (max-width:600px) {
+  .app .material-link-card {gap:10px;padding:13px 14px;}
+  .app .material-link-card .official-link-actions {grid-template-columns:1fr;}
+  .app .material-link-card .official-link-actions a {min-height:40px;}
+}
+
+.app .bible-reference-links {display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
+.app .bible-reference-links a {display:inline-flex;align-items:center;min-height:30px;padding:5px 9px;border:1px solid #b8d9cf;border-radius:999px;color:#176c59;background:#f4fbf8;font-size:.74rem;font-weight:800;text-decoration:none;text-underline-offset:3px;}
+.app .bible-reference-links a:hover,.app .bible-reference-links a:focus-visible {border-color:#176c59;background:#e3f6ee;}
+.app .spiritual-gems-card {margin:0 0 14px;padding:13px 15px;border:1px solid #e8c77f;border-left:4px solid #e7896f;border-radius:0 14px 14px 0;background:linear-gradient(135deg,#fff9e6,#fffdf7);}
+.app .spiritual-gems-heading {display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.app .spiritual-gems-heading .activity-label {margin:0;color:#9a5a27;}
+.app .spiritual-gems-mark {display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#f6d98f;color:#8d5d1e;font-size:1rem;}
+.app .spiritual-gems-card h3 {margin:4px 0 3px;font-size:1rem;color:#27385d;}
+.app .spiritual-gems-question {margin:0;color:#586783;line-height:1.45;}
+.app .spiritual-gems-links {display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:10px;}
+.app .spiritual-gems-links .bible-reference-links {display:contents;}
+.app .spiritual-gems-links a {display:inline-flex;align-items:center;min-height:32px;padding:5px 10px;border:1px solid #b8d9cf;border-radius:999px;background:#f4fbf8;color:#176c59;font-size:.74rem;font-weight:800;text-decoration:none;}
+.app .spiritual-gems-links a:hover,.app .spiritual-gems-links a:focus-visible {border-color:#176c59;background:#e3f6ee;}
+@media(max-width:600px){.app .spiritual-gems-card{padding:11px 12px}.app .spiritual-gems-links{gap:6px}.app .spiritual-gems-links a{min-height:30px;padding:4px 8px;font-size:.7rem}}
+/* Weekly scene packs: the current illustrated route is safely reused while
+   seasonal and future world artwork can be dropped in through sceneSets.ts. */
+.app[class*="scene-season-"] { --scene-season-overlay: #fff8e408; }
+.app.scene-season-winter { --scene-season-overlay: #b8d9e22b; --scene-season-glow: #eaf6ff; }
+.app.scene-season-spring { --scene-season-overlay: #cfe9c21c; --scene-season-glow: #fffbe7; }
+.app.scene-season-summer { --scene-season-overlay: #ffd28a1c; --scene-season-glow: #fff2c6; }
+.app.scene-season-autumn { --scene-season-overlay: #d99b6c24; --scene-season-glow: #fff0d3; }
+.app .part-story-scene { background-image: linear-gradient(var(--scene-season-overlay), var(--scene-season-overlay)), var(--scene-image, var(--valley-art)); background-position: var(--scene-position, center 68%); }
+.storybook-home .home-scene { background-image: linear-gradient(var(--scene-season-overlay), var(--scene-season-overlay)), var(--scene-home-image, url('/assets/compact-v1/journey-gate-v1-960.webp')); background-position: var(--scene-position, center 48%); }
+.app.scene-season-winter .home-scene::after, .app.scene-season-spring .home-scene::after, .app.scene-season-summer .home-scene::after, .app.scene-season-autumn .home-scene::after { background: var(--scene-season-glow); opacity: .1; }
+.brand-mark { position: relative; font-size: 0; }
+.brand-mark::before { content: ''; display: block; width: 29px; height: 29px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M10 33C14 25 18 25 21 29C25 34 28 32 31 25C34 18 37 16 40 18' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round'/%3E%3Ccircle cx='10' cy='33' r='4' fill='%23fff'/%3E%3Cpath d='M36 9L32 19H39L33 30' fill='none' stroke='%23ffd978' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='40' cy='18' r='4' fill='%23ffd978'/%3E%3C/svg%3E") center/contain no-repeat; }
+.palette-picker { padding: 12px 0 0; margin: 14px 0 0; border: 0; border-top: 1px solid var(--line); }
+.palette-picker legend { padding: 0; color: var(--navy); font-size: .82rem; font-weight: 800; }
+.palette-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 8px; }
+.palette-option { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 12px; color: var(--navy); background: var(--app-bg, #fffdf7); text-align: left; }
+.palette-option:hover, .palette-option:focus-visible, .palette-option.selected { border-color: var(--blue); background: var(--blue-soft); }
+.palette-option strong, .palette-option small { display: block; }
+.palette-option strong { font-size: .75rem; }
+.palette-option small { margin-top: 2px; color: var(--muted); font-size: .65rem; line-height: 1.2; }
+.palette-swatch { flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%; background: var(--palette-swatch); box-shadow: inset 0 0 0 2px #ffffffaa, 0 0 0 1px #65728a55; }
+.settings-help { display: block; margin-top: 8px; color: var(--muted); font-size: .7rem; }
+html[data-palette="ocean"] { --navy: #173952; --blue: #2e77b7; --blue-soft: #e8f4ff; --gold: #d28f3b; --mint: #51a99d; --line: #cfe0ee; --muted: #526b7c; --page-bg: #edf7fb; --app-bg: #f4fafb; --brand-start: #2e77b7; --brand-end: #51a99d; }
+html[data-palette="meadow"] { --navy: #24452f; --blue: #548f67; --blue-soft: #e9f5ea; --gold: #b77c31; --mint: #77b58d; --line: #cfe1d0; --muted: #5e7464; --page-bg: #f3f8f1; --app-bg: #f8fbf5; --brand-start: #548f67; --brand-end: #9acb8c; }
+html[data-palette="sunset"] { --navy: #4b2c39; --blue: #9b5ea0; --blue-soft: #f8effa; --gold: #c9783f; --mint: #c78380; --line: #ead3db; --muted: #76616c; --page-bg: #fbf4ef; --app-bg: #fffaf5; --brand-start: #9b5ea0; --brand-end: #d79560; }
+html[data-palette="high-contrast"] { --navy: #101c2d; --blue: #123f8c; --blue-soft: #e5efff; --gold: #8b4a00; --mint: #006a58; --line: #8091a3; --muted: #394a5f; --page-bg: #ffffff; --app-bg: #ffffff; --brand-start: #123f8c; --brand-end: #006a58; }
+html[data-palette] body { background: radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--gold) 12%, white) 0, transparent 28rem), var(--page-bg, #f5f6ff); }
+html[data-palette] .app { background: var(--app-bg, #f8f4eb); }
+html[data-palette] .brand-mark { background: linear-gradient(135deg, var(--brand-start, #6f74e8), var(--brand-end, #59b89b)); }

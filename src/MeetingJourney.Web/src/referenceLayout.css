@@ -1,0 +1,303 @@
+.app .part-card { background: #fff9ec; border-color: #dfc9a1; }
+.app .storybook-home.artwork-painted { grid-template-rows: minmax(250px, 1fr) auto; border: 1px solid #c8b487; border-radius: 18px; background: #fbf2da; overflow: auto; }
+.app .artwork-painted .home-scene { position: relative; container-type: size; background-position: center 30%; }
+.app .artwork-painted .home-scene > .scene-message { display: none; }
+.painted-welcome-copy { position: relative; z-index: 1; display: grid; justify-items: center; gap: 3px; padding: 15px 12px 30px; text-align: center; color: #30466b; background: linear-gradient(#fff9e9ee, #fff8e6bf 72%, #fff8e600); pointer-events: none; }
+.painted-welcome-copy p { margin: 0; font-size: .95rem; }
+.painted-welcome-copy h2 { margin: 0 0 4px; font-family: Georgia, serif; font-size: clamp(1.7rem, 5vw, 2.4rem); font-weight: 600; }
+.painted-welcome-copy strong { font-family: Georgia, serif; font-size: 1.05rem; }
+.painted-welcome-copy span { max-width: 100%; font-size: .75rem; overflow-wrap: anywhere; }
+.app .artwork-painted .home-copy { padding: 10px 16px 12px; background: #fbf3e1; border-top: 1px solid #d7c09a; box-shadow: inset 0 8px 14px #b78c4a0c; }
+.artwork-painted .home-copy > .eyebrow,
+.artwork-painted .home-copy > h2,
+.artwork-painted .home-copy > .home-details { display: none; }
+.artwork-painted .home-copy .home-actions { margin: 7px 0; }
+.artwork-painted .home-copy .primary-adventure-button { min-height: 48px; border-radius: 12px; border-color: #264462; background: #3e6486; color: #fffdf6; font-family: Georgia, serif; font-size: 1.15rem; }
+.app .artwork-painted .storybook-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: 7px 0 0; }
+.artwork-painted .storybook-links > button,
+.artwork-painted .storybook-links > a { display: flex; align-items: center; justify-content: center; gap: 7px; min-width: 0; min-height: 44px; padding: 6px 8px; border: 1px solid #cdb58c; border-radius: 10px; background: #f9edcf; color: #3e526b; font: inherit; font-size: .73rem; text-decoration: none; }
+.artwork-painted .storybook-links > a { grid-column: 1 / -1; border-color: transparent; background: transparent; min-height: 38px; }
+.artwork-painted .storybook-links svg { flex: 0 0 20px; width: 20px; height: 20px; }
+.home-bible-links > summary { display: flex; align-items: center; gap: 6px; min-height: 36px; color: #3e526b; font-size: .72rem; cursor: pointer; }
+.home-bible-links > summary::after { content: "+"; margin-left: auto; font-size: 1.1rem; }
+.home-bible-links[open] > summary::after { content: "-"; }
+.home-bible-links > summary svg { width: 18px; height: 18px; }
+.app .artwork-painted .home-scene .companion-scene { --portrait-height: clamp(120px, calc(100cqh - 170px), 250px); }
+.app .artwork-painted .home-scene .companion-trigger { bottom: calc(8px + var(--companion-y, 0) * max(0px, 100% - var(--portrait-height) - 170px)); }
+.app .artwork-painted .story-map-list { background: #fbf2dd; }
+.app .artwork-painted .illustrated-stop { align-items: flex-start; flex-direction: column; padding: 8px; box-sizing: border-box; border-radius: 9px; background: #fff9e9f2; border: 1px solid #d1b987; box-shadow: 0 3px 5px #5e4d2f24; }
+.app .artwork-painted .illustrated-stop-marker { margin-top: -22px; }
+.app .artwork-painted .illustrated-stop-caption strong { display: block; overflow: visible; font-size: .77rem; line-height: 1.3; overflow-wrap: anywhere; }
+.app .artwork-painted .illustrated-stop-caption small { margin-top: 4px; font-size: .62rem; }
+.app .artwork-painted .illustrated-stop-caption > svg { width: 22px; height: 22px; margin: 0 0 4px auto; color: var(--section-colour); }
+:root[data-artwork="painted"] .part-story-scene { background-size: cover; }
+:root[data-artwork="painted"] .journey-tool-modal { border-color: #c9ad7b; background-color: #fff6e2; }
+:root[data-artwork="painted"] .part-workspace-tabs button,
+:root[data-artwork="painted"] .part-thought-tiles button { border-radius: 8px; box-shadow: inset 0 1px #fffdf2, 0 2px 2px #866a3820; }
+:root[data-theme="plain"] .painted-welcome-copy,
+:root[data-palette="high-contrast"] .painted-welcome-copy { background: #fffdf5; }
+:root[data-theme="plain"] .storybook-home.artwork-painted .home-scene { background-image: none; background-color: #f0eadc; }
+:root[data-palette="high-contrast"] .artwork-painted .illustrated-stop { background: #fff; color: #182b44; border-color: #182b44; }
+@media (min-width: 700px) {
+  .app .storybook-home.artwork-painted { grid-template-rows: minmax(300px, 1fr) auto; }
+  .app .artwork-painted .home-copy { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 4px 18px; }
+  .artwork-painted .home-copy .home-actions { grid-column: 1; }
+  .artwork-painted .home-copy .storybook-links { grid-column: 2; grid-row: 1 / span 3; align-content: center; }
+}
+@media (max-height: 700px) and (max-width: 699px) {
+  .app .storybook-home.artwork-painted { grid-template-rows: minmax(210px, 1fr) auto; }
+  .painted-welcome-copy { padding-top: 8px; gap: 1px; }
+  .painted-welcome-copy h2 { font-size: 1.65rem; }
+  .app .artwork-painted .home-copy { padding: 6px 12px; }
+}
+@media (max-height: 600px) and (max-width: 699px) {
+  .app .artwork-painted .home-copy { padding-block: 4px; }
+  .artwork-painted .home-copy .home-actions { margin-block: 4px; }
+  .app .artwork-painted .storybook-links { margin-top: 4px; }
+  .painted-welcome-copy { padding-bottom: 12px; }
+  .painted-welcome-copy p { font-size: .75rem; }
+  .painted-welcome-copy h2 { font-size: 1.4rem; }
+  .painted-welcome-copy strong { font-size: .85rem; }
+  .painted-welcome-copy span { font-size: .68rem; }
+  .app .artwork-painted .home-scene .companion-scene { --portrait-height: clamp(70px, calc(100cqh - 148px), 250px); }
+  .app .artwork-painted .home-scene .companion-trigger { bottom: 8px; }
+}
+.app .part-card > h2 { color: #293d68; font-size: clamp(1.05rem, 3.9vw, 1.4rem); line-height: 1.25; }
+.app .part-kicker { padding-bottom: 8px; border-bottom: 1px solid #e6d7bb; color: #6b5887; }
+.part-workspace-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 5px; margin-block: 12px; }
+.part-workspace-tabs button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; min-width: 0; min-height: 62px; padding: 6px 2px; border: 1px solid #dbc8a7; border-radius: 9px; color: #4c5267; background: #f6ecd7; font: inherit; font-size: .7rem; }
+.part-workspace-tabs button:first-child { color: #355a79; background: #fdfcf4; border-color: #b7c8ce; }
+.part-workspace-tabs button:hover, .part-workspace-tabs button:focus-visible { background: var(--blue-soft); }
+.part-thought-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-block: 12px; }
+.part-thought-tiles button { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 64px; padding: 9px; border: 1px solid #dfcba7; border-radius: 11px; background: #fffcf4; color: #495269; font: inherit; font-size: .76rem; text-align: left; }
+.part-thought-tiles svg { flex: 0 0 25px; color: #af814d; }
+.part-thought-tiles button[aria-pressed="true"] { border-color: #617fa1; background: #e7eef1; }
+.need-a-clue { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 44px; margin-top: 12px; padding: 8px 11px; border: 1px solid #dfcba7; border-radius: 10px; background: #f7e7c7; color: #4c5267; font: inherit; font-size: .8rem; }
+.need-a-clue > svg:last-child { margin-left: auto; }
+.app .part-card:has(.journey-tool-backdrop) > .part-workspace-tabs,
+.app .part-card:has(.journey-tool-backdrop) > .part-thought-tiles,
+.app .part-card:has(.journey-tool-backdrop) > .part-reflection-choices,
+.app .part-card:has(.journey-tool-backdrop) > .need-a-clue { display: none; }
+.app .journey-tool-modal[data-tool="story"] { background: #f9edcf; border: 5px solid #d6bd8b; }
+.mission-introduction { padding: 12px; border-radius: 10px; background: #fffaf0; line-height: 1.5; font-size: .85rem; }
+.app .clue-card { margin: 0; padding: 0; border: 0; background: transparent; }
+.app .clue-row { display: flex; align-items: flex-start; gap: 10px; margin-block: 10px; padding: 14px; border: 1px solid #dec9a3; border-radius: 9px; background: #fffcf3; }
+.app .clue-row > svg { flex: 0 0 26px; width: 26px; height: 26px; color: #8c744f; }
+.app .clue-row p { margin: 7px 0 0; font-size: .85rem; line-height: 1.5; }
+.app .clue-row strong { font-size: .8rem; }
+.app .clue-row button { display: block; min-height: 44px; margin-top: 6px; border: 1px solid #d5bd90; border-radius: 9px; background: #f7eedc; color: #44546c; }
+.idea-connections { display: grid; grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr); align-items: stretch; margin-block: 14px; }
+.idea-column { display: grid; grid-template-rows: repeat(4, minmax(85px, 1fr)); gap: 0; }
+.idea-column button { display: flex; align-items: center; gap: 5px; min-width: 0; margin-block: 5px; padding: 8px; border: 1px solid #ceb78d; border-radius: 10px; background: #fff9e9; color: #44546c; font: inherit; font-size: .75rem; overflow-wrap: anywhere; }
+.idea-column button[aria-pressed="true"] { background: #e3edf0; border-color: #617fa1; outline: 2px solid #617fa1; outline-offset: -3px; }
+.idea-column svg { flex: 0 0 20px; }
+.idea-connections > svg { width: 100%; height: 100%; min-height: 340px; overflow: visible; }
+.idea-connections > svg path { fill: none; stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.connection-summary { padding-left: 18px; color: #536978; font-size: .75rem; }
+.connect-activity textarea { width: 100%; min-width: 0; box-sizing: border-box; }
+.discovery-view-picker { display: flex; gap: 4px; margin-left: auto; }
+.discovery-view-picker .icon-action[aria-pressed="true"] { color: var(--blue); background: var(--blue-soft); border-color: var(--blue); }
+.discovery-filters { display: flex; gap: 6px; padding: 0 2px 10px; }
+.discovery-filters button { flex: 1; min-width: 0; min-height: 38px; padding: 5px; border: 1px solid #d8c6a5; border-radius: 20px; background: #fff9e9; color: #4c5671; font: inherit; font-size: .7rem; }
+.discovery-filters button[aria-pressed="true"] { background: #354e78; color: white; }
+.discovery-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 12px; overflow: auto; padding: 12px; }
+.discovery-gallery-card { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 8px; border: 1px solid #dbc4a1; border-radius: 11px; background: #fffcf4; color: #364d68; text-align: left; font: inherit; }
+.discovery-gallery-card .treasure-drawing-preview { width: 100%; height: 145px; object-fit: contain; border-radius: 6px; background: #fdfaf0; }
+.discovery-gallery-card strong { font-size: .8rem; line-height: 1.3; }
+.discovery-gallery-card small { font-size: .65rem; color: #8a795f; }
+.gallery-thought-preview { display: grid; align-content: center; min-height: 145px; padding: 8px; box-sizing: border-box; background: #f3ead6; border-radius: 7px; }
+.gallery-thought-preview svg { color: #9c7d52; }
+.gallery-thought-preview p { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; font-size: .85rem; line-height: 1.4; }
+.app .overview-section { border: 1px solid #dac5a0; border-radius: 12px; padding: 10px; background: #f7edd6; }
+.app .overview-treasures { background: #eee7cb; }
+.app .overview-fieldministry { background: #f1e0cf; }
+.app .overview-living, .app .overview-watchtower { background: #e5e9d1; }
+.app .overview-closing { background: #f1e0d5; }
+@media (min-width: 900px) { .discovery-gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 440px) {
+  .discovery-map-heading { flex-wrap: wrap; }
+  .discovery-map-heading > div:first-child { flex: 1; min-width: 150px; }
+  .discovery-view-picker .icon-action { flex-basis: 38px; width: 38px; min-width: 38px; }
+}
+.official-link-pair { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; max-width: 100%; }
+.official-link-pair a { display: inline-flex; align-items: center; min-height: 44px; overflow-wrap: anywhere; }
+.bible-reference-links > .official-link-pair { padding: 2px 6px; border: 1px solid #d5c4a4; border-radius: 8px; background: #fffaf0; }
+.bible-reference-links .bible-web-fallback { font-size: .68rem; color: #536d86; }
+.official-app-help { font-size: .75rem; line-height: 1.5; color: #675e52; }
+.illustrated-icon { display: block; flex: 0 0 auto; width: 42px; height: 42px; object-fit: contain; }
+.movement-icon { object-fit: contain; }
+.app > .mobile-nav { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 5px; border-top: 1px solid #c8a572; background: #f5e7cc; padding-top: 5px; }
+.app > .mobile-nav > .icon-action { display: flex; flex-direction: column; justify-content: center; gap: 2px; height: 48px; min-height: 48px; border: 1px solid #d5b987; border-radius: 9px 7px 10px 8px; background: #fff5df; color: #64503b; }
+.app > .mobile-nav > .icon-action svg { width: 22px; height: 22px; }
+.app > .mobile-nav > .icon-action.active { background: #294d60; color: #fff3d1; border-color: #294d60; }
+.app > .mobile-nav .icon-action-label { max-width: 100%; color: inherit; font-size: clamp(.55rem,1.9vw,.7rem); font-weight: 700; line-height: 1.2; white-space: nowrap; }
+.app .story-map-list .overview-section { grid-template-columns: 30px minmax(0,1fr); gap: 7px; padding: 9px 7px; border-left: 5px solid #a87c55; background: #fff3d9; }
+.app .story-map-list .overview-treasures { border-left-color: #648e79; background: #edf2e4; }
+.app .story-map-list .overview-fieldministry { border-left-color: #b69a48; background: #fbf0ce; }
+.app .story-map-list .overview-living, .app .story-map-list .overview-watchtower { border-left-color: #ad766b; background: #f6e5dc; }
+.app .story-map-list .overview-section-icon { width: 28px; height: 28px; border-radius: 7px; font-size: 1rem; }
+.app .story-map-list .overview-stop { grid-template-columns: 23px minmax(0,1fr) auto; min-height: 44px; gap: 5px; padding: 7px 2px; }
+.app .story-map-list .overview-stop strong { white-space: normal; overflow-wrap: anywhere; line-height: 1.35; }
+.app .story-map-list .overview-stop small { max-width: 70px; text-align: right; }
+.outline-official-links { margin: 12px 4px; }
+.part-reference-links { display: grid; gap: 7px; min-width: 0; }
+.part-citations { display: grid; gap: 8px; padding-block: 5px; }
+.part-citations .official-link-pair { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.part-citations small { display: block; color: var(--muted); }
+.app .overview-item { border-bottom: 1px solid #cfbc963d; padding-bottom: 7px; margin-bottom: 5px; }
+.app .overview-item .part-reference-links { padding-left: 28px; font-size: .73rem; }
+.app .overview-item .official-link-pair { display: flex; flex-wrap: wrap; gap: 5px; }
+.app .overview-item .official-link-pair a { display: inline-flex; align-items: center; min-height: 32px; padding: 3px 5px; overflow-wrap: anywhere; }
+.app .overview-item .part-reference-links summary { min-height: 32px; padding: 6px 0; cursor: pointer; color: var(--navy); }
+html[data-palette="high-contrast"] .app > .mobile-nav > .icon-action { border-color: #31455b; color: #172b45; background: #fffdf5; }
+html[data-palette="high-contrast"] .app > .mobile-nav > .icon-action.active { color: white; background: #123f8c; }
+.app .part-card {
+  --section-ink: #695286;
+  --section-wash: #e8dbed;
+  background-color: #fff9e9;
+  background-image: radial-gradient(ellipse at 0 100%, #dcc49b26, transparent 65%), radial-gradient(ellipse at 100% 0, #f8e6b645, transparent 60%);
+  box-shadow: inset 0 0 20px #cfb17d1c;
+}
+.app .part-card[data-section="FieldMinistry"] { --section-ink: #795141; --section-wash: #edd4c5; }
+.app .part-card[data-section="Living"], .app .part-card[data-section="Watchtower"] { --section-ink: #426b55; --section-wash: #dce5ca; }
+.app .part-card[data-section="Programme"], .app .part-card[data-section="PublicTalk"] { --section-ink: #365e7a; --section-wash: #dce8e7; }
+.app .part-card[data-section="Opening"], .app .part-card[data-section="Closing"] { --section-ink: #895445; --section-wash: #efdbca; }
+.app .part-card > .part-kicker {
+  margin: -12px -12px 12px; padding: 11px 12px; background: linear-gradient(110deg, var(--section-ink), #655e7d);
+  color: #fffaf0; border: 0; font-size: .69rem; letter-spacing: .02em;
+}
+.app .part-card > h2 { margin: 0 0 10px; font-size: clamp(1.15rem, 3.8vw, 1.5rem); }
+.part-workspace-tabs { gap: 7px; margin: 8px 0 10px; }
+.app .part-workspace-tabs button {
+  min-height: 62px; gap: 3px; padding: 5px 2px; border-radius: 7px; color: #493e37;
+  border: 1px solid #d8be91; background: linear-gradient(150deg, #fffdf6, #f2dfb9);
+  box-shadow: inset 0 1px #fff, 0 2px 3px #806b431a; font-size: .71rem; font-weight: 600;
+}
+.app .part-workspace-tabs button:first-child { background: linear-gradient(150deg, #fffefa, #e0eceb); border-color: #a7bdc1; color: #305568; }
+.app .part-workspace-tabs .illustrated-icon { width: 30px; height: 30px; }
+.app .part-workspace-tabs button:active, .app .part-thought-tiles button:active { transform: translateY(1px); box-shadow: inset 0 1px 5px #7f63352b; }
+.app .part-workspace-tabs button:focus-visible, .app .part-thought-tiles button:focus-visible,
+.app .discovery-activity-picker button:focus-visible { outline: 3px solid #386689; outline-offset: 2px; }
+.part-focus-panel {
+  min-height: 106px; padding: 12px 30% 12px 12px; border: 1px solid #d7c19a; border-radius: 8px; box-sizing: border-box;
+  background-image: linear-gradient(90deg, #fff9eafc 0%, #fff9eaf5 49%, #fff9ea28 100%), var(--focus-landscape);
+  background-size: cover; background-position: center; box-shadow: inset 0 0 12px #fff5d473;
+}
+.part-focus-panel h3 { margin: 0 0 7px; font-size: .92rem; color: #303e5a; line-height: 1.3; }
+.app .part-focus-panel .part-summary { margin: 0; padding: 0; border: 0; background: none; font-size: .78rem; line-height: 1.5; color: #4e4b46; }
+.part-thought-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 10px 0; }
+.app .part-thought-tiles button {
+  position: relative; flex-direction: column; justify-content: flex-start; gap: 5px; min-height: 88px;
+  padding: 8px 4px; border-radius: 7px; text-align: center; font-size: .66rem; line-height: 1.3;
+  background: linear-gradient(145deg, #fffcf3, #f6e8c9); box-shadow: inset 0 1px #fff, 0 2px 3px #826b4414;
+}
+.app .part-thought-tiles .illustrated-icon { flex-basis: auto; width: 30px; height: 30px; }
+.app .part-thought-tiles button > svg:not(.illustrated-icon) { position: absolute; top: 5px; right: 5px; width: 16px; height: 16px; color: #2f6c56; }
+.app .part-thought-tiles button[aria-pressed="true"] { border-color: #5d8d77; background: #e5eddc; box-shadow: inset 0 0 0 1px #5d8d77; }
+.app .need-a-clue { min-height: 44px; border-radius: 7px; background: linear-gradient(90deg, #f8e4ae, #fcf1d8); box-shadow: inset 0 1px #fff9e6; font-weight: 600; }
+.need-a-clue > .illustrated-icon { width: 26px; height: 26px; }
+.app .part-card .journey-tool-modal {
+  padding: 0 12px 12px; border: 1px solid #d6bd8b; background: radial-gradient(ellipse at top, #fffcf1, #f7e8c9);
+}
+.app .journey-stage-page .part-column:has(.journey-tool-backdrop) { grid-template-rows: minmax(0, 1fr); gap: 0; }
+.app .journey-stage-page .part-column:has(.journey-tool-backdrop) > .part-toolbar { display: none; }
+.app .journey-stage-page .part-column .part-screen-shell:has(.journey-tool-backdrop) { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+.app .part-screen-shell:has(.journey-tool-backdrop) > .part-story-scene { display: none; }
+.app .part-screen-shell:has(.journey-tool-backdrop) > .part-card { grid-row: 1 / -1; }
+.app .journey-stage-page .part-column { grid-template-rows: minmax(0, 1fr); gap: 0; }
+.app .journey-stage-page .part-column .part-screen-shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; border-radius: 10px; }
+.app .journey-stage-page .part-column .part-card { min-height: 0; padding: 12px; }
+.app .journey-stage-page .part-card > h2 { margin: 0 0 7px; font-size: clamp(1.05rem, 3.8vw, 1.5rem); line-height: 1.25; }
+.app .journey-stage-page .part-card > .part-kicker { display: flex; justify-content: space-between; gap: 12px; margin: -12px -12px 8px; padding: 10px 12px; }
+.part-kicker > span:last-child { flex-shrink: 0; }
+.part-duration { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; color: #6a6152; font-size: .75rem; }
+.part-duration svg { width: 17px; height: 17px; }
+.part-inline-sources { margin: 0 0 10px; font-size: .8rem; }
+.part-inline-sources .part-reference-links,
+.part-inline-sources .part-citations { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 12px; }
+.part-inline-sources .part-citations { padding: 0; }
+.part-inline-sources a { display: inline-flex; align-items: center; min-height: 36px; overflow-wrap: anywhere; }
+.app .part-reflection-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 12px; min-width: 0; margin: 12px 0; padding: 6px 0 0; border: 0; border-top: 1px solid #d5c8ad; }
+.app .part-reflection-choices legend { padding: 0 8px 0 0; color: #595744; font-size: .76rem; font-weight: 600; }
+.app .part-reflection-choices label { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 44px; padding: 4px; color: #494f45; font-size: .8rem; line-height: 1.35; cursor: pointer; }
+.app .part-reflection-choices input { flex: 0 0 19px; width: 19px; height: 19px; margin: 0; accent-color: #426851; }
+.app .part-reflection-choices label:has(input:checked) { color: #294c37; font-weight: 600; background: #e8eedf; border-radius: 4px; }
+.app .part-reflection-choices label:has(input:disabled) { opacity: .6; cursor: default; }
+.app .part-reflection-choices label:focus-within { outline: 2px solid #426851; outline-offset: 1px; border-radius: 4px; }
+.app .part-reflection-choices .reflection-write-action { display: flex; align-items: center; justify-content: flex-start; gap: 6px; min-height: 44px; padding: 4px; border: 0; border-radius: 0; background: none; box-shadow: none; color: #38556c; font: inherit; font-size: .8rem; text-align: left; text-decoration: underline; }
+.app .part-reflection-choices .reflection-write-action svg { flex: 0 0 16px; width: 16px; height: 16px; }
+html[data-palette="high-contrast"] .app .part-reflection-choices label { color: #172b45; }
+html[data-palette="high-contrast"] .app .part-reflection-choices label:has(input:checked) { background: #e5efff; outline: 1px solid #123f8c; }
+.part-scene-details { min-height: 0; border-top: 1px solid #d8c29a; background: #fbf0d7; }
+.part-scene-details > summary { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; color: #44566d; font-size: .75rem; cursor: pointer; list-style: none; }
+.part-scene-details > summary::-webkit-details-marker { display: none; }
+.part-scene-details > summary > svg:last-child { margin-left: auto; }
+.part-scene-details[open] > summary > svg:last-child { transform: rotate(180deg); }
+.part-scene-details[open] { height: min(280px, 42dvh); }
+.app .part-scene-details .part-story-scene { height: min(236px, calc(42dvh - 44px)); min-height: 0; border-radius: 0; }
+.app .part-scene-details .companion-scene { --portrait-height: clamp(90px, 20dvh, 160px); }
+.app .part-scene-details .journey-chapter-pill { top: 6px; padding-block: 4px; font-size: .65rem; }
+.app .part-screen-shell:has(.journey-tool-backdrop) > .part-scene-details { display: none; }
+.illustrated-tool-heading { display: flex; flex: 0 0 auto; align-items: center; gap: 10px; min-height: 66px; margin: 0 -12px 10px; padding: 8px 52px 8px 12px; border-bottom: 1px solid #c7ac7d; background: linear-gradient(120deg, #f4e3bf, #fff8e6); }
+.illustrated-tool-heading > div { min-width: 0; }
+.app .part-card .illustrated-tool-heading h3 { max-width: none; margin: 0 0 4px; color: #2f4665; font-size: 1.05rem; }
+.illustrated-tool-heading p { margin: 0; color: #75654e; font-size: .67rem; line-height: 1.35; }
+.app .part-card .journey-tool-close { top: 8px; right: 5px; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 1px solid #d6bd8b; border-radius: 8px; background: #fff8e6; color: #6f5741; }
+.app .part-card .journey-tool-modal > .notebook-tabs {
+  position: static; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; height: auto;
+  flex: 0 0 auto; margin: 0 0 10px; padding: 0; background: transparent;
+}
+.app .part-card .journey-tool-modal > .notebook-tabs button { display: flex; justify-content: center; align-items: center; gap: 6px; width: auto; min-width: 0; min-height: 44px; height: auto; border: 1px solid #d6bd8b; border-radius: 7px; background: #fffbef; color: #4a536b; font-size: .72rem; }
+.app .part-card .journey-tool-modal > .notebook-tabs button[aria-pressed="true"] { background: #3e5a78; border-color: #3e5a78; color: #fff; }
+.app .notebook-tabs .notebook-tab-label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; white-space: normal; }
+.mission-introduction { margin: 10px 0; padding: 12px 14px; border: 1px solid #d9c39c; border-radius: 8px 18px 18px 18px; background: #fffdf3; font-size: .78rem; }
+.discovery-activity-picker { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+.discovery-activity-picker button { display: flex; align-items: center; gap: 6px; flex: 1 1 110px; min-width: 0; min-height: 48px; padding: 7px; border: 1px solid #d5bc8d; border-radius: 7px; background: #fff9e9; color: #4e5368; font: inherit; font-size: .7rem; }
+.discovery-activity-picker .illustrated-icon { width: 28px; height: 28px; }
+.discovery-activity-picker button[aria-pressed="true"] { border-color: #9c7a46; background: #eed9ac; box-shadow: inset 0 0 0 1px #b39766; }
+.app .clue-row { border-radius: 6px 12px 7px 10px; background: linear-gradient(120deg, #fff9e8, #f5e4bd); box-shadow: 0 3px 4px #8060361c, inset 0 0 12px #e6ca9526; padding: 10px; }
+.app .clue-row > .illustrated-icon { flex: 0 0 42px; width: 42px; height: 42px; }
+.app .clue-row.revealed { background: linear-gradient(120deg, #fffdf4, #faedce); border-left: 3px solid #c49a52; }
+.app .clue-row button { padding: 7px 12px; background: #fffaf0; font: inherit; font-size: .78rem; }
+.app .clue-row p { font-size: .82rem; }
+.app .clue-card .clue-listening-goal { margin: 8px 0 10px; padding: 10px 12px; border: 1px solid #d9c39c; border-radius: 8px; background: #fffcf1; font-size: .78rem; line-height: 1.5; }
+.activity-secondary-action { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; margin: 6px; padding: 8px 12px; border: 1px solid #d5bc8d; border-radius: 7px; background: #fffaf0; color: #485a73; font: inherit; font-size: .75rem; }
+.app .modal-note-editor textarea { padding: 14px; border: 1px solid #cfb990; border-radius: 6px; color: #314f70; background: repeating-linear-gradient(#fffdf5 0 29px, #dce3e6 30px, #fffdf5 31px); line-height: 31px; font-size: 1rem; }
+.drawing-paper-workspace { position: relative; display: flex; flex: 1 1 0; gap: 7px; min-width: 0; min-height: 0; overflow: hidden; box-sizing: border-box; padding: 24px 4px 4px; border: 5px solid #c9ab7f; border-radius: 10px 12px 8px 9px; background: #f4e3bf; }
+.drawing-paper-workspace::before { content: ""; position: absolute; top: 0; left: 52px; right: 4px; height: 24px; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='24' viewBox='0 0 28 24'%3E%3Ccircle cx='14' cy='18' r='4' fill='%23816a4d'/%3E%3Cpath d='M14 19C5 19 5 1 14 1S23 16 16 18' fill='none' stroke='%236d5941' stroke-width='3'/%3E%3Cpath d='M13 18C7 17 7 3 14 3' fill='none' stroke='%23e4cc9d' stroke-width='1.5'/%3E%3C/svg%3E") left top / 28px 24px repeat-x; }
+.app .journey-tool-modal[data-tool="doodle"] .drawing-paper-workspace .canvas-shell { flex: 1 1 0; width: 0; min-width: 0; border-radius: 4px; }
+.app .drawing-paper-workspace .drawing-options-panel { top: 24px; bottom: auto; left: 56px; width: min(280px, calc(100% - 60px)); max-height: calc(100% - 28px); }
+.app .journey-tool-modal[data-tool="doodle"] .drawing-icon-toolbar { margin-bottom: 0; }
+.app .idea-column button { border-radius: 7px; background: linear-gradient(125deg, #fff7dd, #ebd0a0); border-color: #c4a16d; box-shadow: inset 0 0 9px #c29a6026, 0 2px 3px #785a341c; }
+.app .connect-activity { margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.app .connect-activity > p { font-size: .78rem; line-height: 1.4; }
+.app .idea-column .illustrated-icon { flex: 0 0 34px; width: 34px; height: 34px; }
+.connection-dot { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #55917b; }
+.connection-dot[data-colour="1"] { background: #b87746; }
+.connection-dot[data-colour="2"] { background: #7474b0; }
+.connection-dot[data-colour="3"] { background: #c36e68; }
+.app .discovery-gallery-card { padding: 6px 6px 10px; border-radius: 5px 8px 7px 5px; background: #fffaf0; border-color: #d0b98e; box-shadow: 0 3px 6px #80654020; }
+.app .discovery-gallery-card .treasure-drawing-preview { background: #fffdf7; border-radius: 2px; border-bottom: 1px solid #e8d7b8; }
+.gallery-thought-preview { background: radial-gradient(ellipse, #fffefa, #f7ecd5); border: 1px solid #e3c9b0; border-radius: 5px 20px 20px 20px; color: #466c91; }
+@media (min-width: 600px) {
+  .part-thought-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .app .part-thought-tiles button { min-height: 96px; }
+}
+@media (max-width: 359px) {
+  .app .part-workspace-tabs button { font-size: .64rem; }
+  .part-focus-panel { padding-right: 25%; }
+  .illustrated-tool-heading .illustrated-icon { width: 34px; height: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app .part-workspace-tabs button:active, .app .part-thought-tiles button:active { transform: none; }
+}
+html[data-theme="plain"] .app .part-focus-panel,
+html[data-theme="plain"] .app .part-card,
+html[data-theme="plain"] .app .journey-tool-modal { background-image: none; background-color: #fffdf6; }
+html[data-theme="plain"] .app .part-focus-panel { padding-right: 13px; }
+html[data-palette="high-contrast"] .app .part-workspace-tabs button,
+html[data-palette="high-contrast"] .app .part-thought-tiles button,
+html[data-palette="high-contrast"] .app .need-a-clue,
+html[data-palette="high-contrast"] .app .clue-row,
+html[data-palette="high-contrast"] .app .discovery-activity-picker button { color: #172b45; border-color: #52667b; background: #fffdf5; }
+html[data-palette="high-contrast"] .app .part-thought-tiles button[aria-pressed="true"] { border-color: #123f8c; box-shadow: inset 0 0 0 2px #123f8c; background: #e5efff; }

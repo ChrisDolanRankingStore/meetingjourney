@@ -1,0 +1,31 @@
+.word-bingo { min-width: 0; color: var(--navy); }
+.bingo-instruction { margin: 0 0 10px; font-size: .82rem; line-height: 1.4; }
+.bingo-size-picker { display: flex; justify-content: flex-end; gap: 0; margin-bottom: 8px; }
+.app .bingo-size-picker button { min-height: 36px; padding: 5px 15px; border: 1px solid #bc9868; border-radius: 0 8px 8px 0; background: #fff3d7; color: #233750; font-weight: 700; }
+.app .bingo-size-picker button:first-child { border-radius: 8px 0 0 8px; }
+.app .bingo-size-picker button[aria-pressed="true"] { background: #294d60; color: #fff3d1; }
+.word-bingo > small { display: block; color: var(--muted); line-height: 1.4; margin-top: 7px; font-size: .73rem; }
+.bingo-workspace { display: grid; gap: 10px; align-items: start; }
+.word-bingo-board { display: grid; grid-template-columns: repeat(var(--bingo-size), minmax(0, 1fr)); gap: 5px; padding: 7px; border: 1px solid #c7a46d; border-radius: 12px 9px 13px 10px; background: #e8c58f; box-shadow: inset 0 0 10px #ba854b38; }
+.app .word-bingo-board button { position: relative; min-width: 0; min-height: 62px; padding: 9px 2px; border: 1px solid #cda66e; border-radius: 10px 8px 11px 8px; background: radial-gradient(ellipse at 40% 30%, #fff9e8, #f3ddb1); color: #233750; font: inherit; font-family: Georgia, serif; font-weight: 700; font-size: clamp(.75rem, 2.5vw, 1rem); overflow-wrap: anywhere; box-shadow: inset 0 0 7px #c79b5426, 0 1px 2px #86653730; }
+.app .word-bingo-board button[aria-pressed="true"] { border-color: #6b854c; background: radial-gradient(ellipse, #edf0c7, #bdce8a); color: #254c34; padding-top: 17px; }
+.bingo-check { position: absolute; top: 0; right: 4px; color: #386443; font: 700 .95rem system-ui; }
+.app .word-bingo-board button.is-line { outline: 2px solid #587b40; outline-offset: -4px; }
+.bingo-listening-card { padding: 11px; border: 1px solid #cfad78; border-radius: 12px 9px 11px 8px; background: #fff3d7; }
+.bingo-listening-card h4 { display: flex; align-items: center; gap: 6px; margin: 0; font: 700 1rem Georgia, serif; }
+.bingo-listening-card h4 .illustrated-icon { width: 30px; height: 30px; }
+.bingo-listening-card > p { margin: 6px 0 10px; font-size: .82rem; line-height: 1.4; }
+.bingo-progress { display: grid; gap: 5px; font-size: .8rem; }
+.bingo-progress progress { width: 100%; height: 12px; accent-color: #748e4d; }
+.app .bingo-clue { display: flex; align-items: center; gap: 5px; min-height: 44px; margin-top: 9px; font-size: .8rem; }
+.bingo-clue .illustrated-icon, .bingo-notebook-actions .illustrated-icon { width: 27px; height: 27px; }
+.bingo-notebook-actions { display: flex; gap: 8px; margin-top: 9px; }
+.app .bingo-notebook-actions button { display: flex; flex: 1; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 6px; border: 1px solid #c5a16b; background: #fff2d6; border-radius: 9px; font-size: .8rem; }
+@media (min-width: 650px) {
+  .bingo-workspace { grid-template-columns: minmax(0, 1.6fr) minmax(190px, 1fr); }
+  .app .word-bingo-board button { min-height: 84px; }
+}
+html[data-theme="plain"] .word-bingo-board, html[data-theme="plain"] .bingo-listening-card { background: #fffdf6; box-shadow: none; }
+html[data-theme="plain"] .app .word-bingo-board button { background: #fffdf6; box-shadow: none; }
+html[data-palette="high-contrast"] .app .word-bingo-board button { border-color: #31455b; color: #172b45; background: #fffdf5; }
+html[data-palette="high-contrast"] .app .word-bingo-board button[aria-pressed="true"] { background: #d3e6ba; border-color: #254c34; color: #16351f; }

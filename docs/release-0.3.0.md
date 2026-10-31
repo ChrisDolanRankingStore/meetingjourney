@@ -1,0 +1,13 @@
+﻿# Release 0.3.0 — review implementation
+
+The upload package is `publish-node`. It contains the Node runtime and compiled web client, not the legacy .NET target. Upload its full contents, restart Node, then reopen the installed web app. Settings > Your journal shows App version 0.3.0. Do not clear website data to update.
+
+Implemented: compact WebP scenery at phone/tablet sizes with JPEG picture fallbacks, smaller selected portraits and drawing-code splitting; selective background offline preparation and a manual retry/save action; correct missing-asset/offline handling; consistent week labels, accessible navigation, skip link, visible focus and numbered map order; a short family introduction, public About/Privacy/Install pages, icons and social metadata; security headers and ETag revalidation; local journal backup with editable strokes and page sizes, previewed merge restore, storage information and explicit deletion confirmation; study paragraph tracking, comment drafts/starters/prepared comments, voluntary sharing checkboxes, scripture noticing and quiet pauses; an optional meeting review/finish/check-in and voluntary return-from-JW question; device-only local titles; soft/plain scenes and clear-text options; more neutral teen journal language.
+
+Personal content stays on the device. Public meeting metadata and original app assets are the only app downloads. The API remains read-only. Neither opening JW Library nor navigating the cards marks attendance or completion automatically. No pressure streaks, countdowns, negative companion states or cloud backup were added.
+
+Validation: production build, TypeScript, 30 data/API/offline tests, public server routes and headers, editable backup round trips and version-one database preservation. Seven 960px WebP scenes total 1,941,774 bytes versus 21,589,173 bytes for their PNG originals: 91% smaller at that size. This is an asset-file comparison, not a measured first-visit network trace.
+
+Browser inspection was blocked when automatic approval review hit its usage limit while opening a review tab. A physical tablet check of visual layout, stylus/finger drawing, return from JW Library, offline reopening and backup file handling remains necessary. Source artwork remains available for editing; unused originals are omitted from the runnable upload.
+
+Not all items from the long-term review are finished. Native Android/iPad packaging and store release, local notifications, additional reviewed weekly/paragraph-specific material, separate local child profiles/PIN controls, richer share/PDF output and song-verse metadata remain follow-up work. The repository currently has a reviewed file feed, not the automated publication scraper described in the external review.

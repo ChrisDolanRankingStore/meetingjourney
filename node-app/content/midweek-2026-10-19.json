@@ -1,0 +1,402 @@
+{
+  "approved": true,
+  "reviewedAt": "2026-10-28",
+  "meeting": {
+    "id": "meeting-2026-10-19",
+    "weekOf": "2026-10-19",
+    "theme": "Keep seeking Jehovah's help",
+    "bibleReading": "Jeremiah 45–46",
+    "material": {
+      "title": "Companion outline",
+      "introduction": "Meeting Journey is an independent companion. It keeps your place, prompts and notes here while the official reading and meeting material open in JW Library or on JW.org.",
+      "sections": [
+        {
+          "id": "theme",
+          "heading": "This week's focus",
+          "body": "Keep seeking Jehovah's help. The meeting workbook covers October 19–25 and Jeremiah 45–46."
+        },
+        {
+          "id": "reading",
+          "heading": "Bible reading",
+          "body": "Jeremiah 46:13–24. Listen for the images, ideas or words you would like to remember.",
+          "reference": "Jeremiah 46:13–24"
+        },
+        {
+          "id": "treasures",
+          "heading": "Treasures from God's Word",
+          "body": "Baruch became discontent, but Jehovah helped him refocus by giving him hope. The spiritual gems question considers the sound of Egypt in Jeremiah 46:22.",
+          "reference": "Jeremiah 45:3, 5; Jeremiah 46:22"
+        },
+        {
+          "id": "ministry",
+          "heading": "Apply yourself to the ministry",
+          "body": "The demonstrations explore starting conversations with people who are happy, angry or sad, followed by a talk about Jesus.",
+          "reference": "Informal witnessing; house to house; lmd appendix A point 20"
+        },
+        {
+          "id": "living",
+          "heading": "Living as Christians",
+          "body": "The discussion considers why Christians share, what we can share and how to learn generosity now.",
+          "reference": "Hebrews 13:16; 2 Corinthians 8:2–4"
+        }
+      ],
+      "sourceUrl": "https://www.jw.org/en/library/jw-meeting-workbook/september-october-2026-mwb/Life-and-Ministry-Meeting-Schedule-for-October-19-25-2026/",
+      "appUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=202026258"
+    },
+    "parts": [
+      {
+        "id": "opening-song",
+        "title": "Song 21 and prayer",
+        "durationMinutes": 5,
+        "section": "Opening",
+        "type": "Song",
+        "summary": "Begin the meeting together with song and prayer.",
+        "references": [],
+        "activities": [
+          {
+            "id": "notice-opening-song",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "Begin the meeting together with song and prayer.",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "Begin the meeting together with song and prayer.",
+              "clues": [
+                "Notice a word you hear in the song.",
+                "Does the song remind you of something from the meeting?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "opening-comments",
+        "title": "Opening comments",
+        "durationMinutes": 1,
+        "section": "Opening",
+        "type": "Comments",
+        "summary": "A brief welcome and preview of the meeting.",
+        "references": [],
+        "activities": [
+          {
+            "id": "notice-opening-comments",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "A brief welcome and preview of the meeting.",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "A brief welcome and preview of the meeting.",
+              "clues": [
+                "Notice one word, scripture or example.",
+                "How does that thought connect to the main idea?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "part-1",
+        "number": 1,
+        "title": "Hope Is Key to Contentment",
+        "durationMinutes": 10,
+        "section": "Treasures",
+        "type": "Talk",
+        "summary": "Notice how Baruch became discontent, how discontent can affect joy and decisions, and how Jehovah helped him refocus with hope.",
+        "references": [],
+        "activities": [
+          {
+            "id": "activity-1",
+            "type": "ClueCards",
+            "title": "Follow the hope trail",
+            "prompt": "Listen for the change from discontent to hope.",
+            "mission": {
+              "title": "Follow the hope trail",
+              "listeningObjective": "Notice what changes when Baruch is helped to look beyond his immediate situation.",
+              "clues": [
+                "Listen for why Baruch was unhappy.",
+                "Notice what discontent can affect.",
+                "Look for the hopeful refocusing thought from Jeremiah 45:5."
+              ],
+              "scriptureReference": "Jeremiah 45:3, 5",
+              "answerSuggestions": [
+                "A changed outlook",
+                "Protecting joy",
+                "Hope beyond today"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "part-2",
+        "number": 2,
+        "title": "Spiritual gems",
+        "question": "Why would the sound of Egypt be like a slithering serpent?",
+        "textReference": "Jeremiah 46:22",
+        "researchUrl": "https://www.jw.org/finder?wtlocale=E&docid=1200004566&par=18",
+        "durationMinutes": 10,
+        "section": "Treasures",
+        "type": "Talk",
+        "summary": "Find one encouraging thought from Jeremiah 45–46 and keep it in your own words.",
+        "references": [],
+        "activities": [
+          {
+            "id": "activity-2",
+            "type": "SpotTheClue",
+            "title": "Spot the gem",
+            "prompt": "Listen for an idea you would like to remember. One question considers why the sound of Egypt would be like a slithering serpent."
+          }
+        ]
+      },
+      {
+        "id": "part-3",
+        "number": 3,
+        "title": "Bible reading",
+        "durationMinutes": 4,
+        "section": "Treasures",
+        "type": "BibleReading",
+        "summary": "Listen to Jeremiah 46:13–24 and draw or write one image, word or idea that stays with you.",
+        "references": [{"label": "Reading and Teaching - study 10", "url": "https://www.jw.org/finder?wtlocale=E&docid=1102018450"}],
+        "activities": [
+          {
+            "id": "activity-3",
+            "type": "DrawYourDiscovery",
+            "title": "Draw what stayed with you",
+            "prompt": "Make a quick sketch or use a few words to hold on to one image from the reading."
+          }
+        ]
+      },
+      {
+        "id": "part-4",
+        "number": 4,
+        "title": "Starting a conversation",
+        "durationMinutes": 3,
+        "section": "FieldMinistry",
+        "type": "Demonstration",
+        "summary": "Informal witnessing: notice how a conversation might begin with someone who looks happy.",
+        "references": [{"label": "Love People - lesson 2, point 3", "url": "https://www.jw.org/finder?wtlocale=E&docid=1102023302&par=13"}],
+        "activities": [
+          {
+            "id": "activity-4",
+            "type": "MyThoughtBubble",
+            "title": "My conversation thought",
+            "prompt": "What opening question would feel natural in this situation?"
+          }
+        ]
+      },
+      {
+        "id": "part-5",
+        "number": 5,
+        "title": "Starting a conversation",
+        "durationMinutes": 2,
+        "section": "FieldMinistry",
+        "type": "Demonstration",
+        "summary": "House to house: notice a kind way to respond when the person is angry.",
+        "references": [{"label": "Love People - lesson 4, point 5", "url": "https://www.jw.org/finder?wtlocale=E&docid=1102023304&par=15"}],
+        "activities": [
+          {
+            "id": "notice-part-5",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "House to house: notice a kind way to respond when the person is angry.",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "House to house: notice a kind way to respond when the person is angry.",
+              "clues": [
+                "Notice how one person listens to the other.",
+                "What feels kind or helpful about the conversation?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "part-6",
+        "number": 6,
+        "title": "Starting a conversation",
+        "durationMinutes": 2,
+        "section": "FieldMinistry",
+        "type": "Demonstration",
+        "summary": "House to house: notice a kind way to respond when the person comes to the door looking sad.",
+        "references": [{"label": "Love People - lesson 2, point 4", "url": "https://www.jw.org/finder?wtlocale=E&docid=1102023302&par=14"}],
+        "activities": [
+          {
+            "id": "notice-part-6",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "House to house: notice a kind way to respond when the person comes to the door looking sad.",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "House to house: notice a kind way to respond when the person comes to the door looking sad.",
+              "clues": [
+                "Notice how one person listens to the other.",
+                "What feels kind or helpful about the conversation?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "part-7",
+        "number": 7,
+        "title": "Talk",
+        "durationMinutes": 4,
+        "section": "FieldMinistry",
+        "type": "Talk",
+        "summary": "Listen for the main idea in the talk about Jesus and how it could help in the ministry.",
+        "references": [
+          {"label": "Love People - appendix A, point 20", "url": "https://www.jw.org/finder?wtlocale=E&docid=1102023316&par=37"},
+          {"label": "Reading and Teaching - study 7", "url": "https://www.jw.org/finder?wtlocale=E&docid=1102018447"}
+        ],
+        "activities": [
+          {
+            "id": "notice-part-7",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "Listen for the main idea in the talk about Jesus and how it could help in the ministry.",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "Listen for the main idea in the talk about Jesus and how it could help in the ministry.",
+              "clues": [
+                "Notice one word, scripture or example.",
+                "How does that thought connect to the main idea?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "living-song",
+        "title": "Song 117",
+        "durationMinutes": 5,
+        "section": "Living",
+        "type": "Song",
+        "summary": "Sing together before the Living as Christians section.",
+        "references": [],
+        "activities": [
+          {
+            "id": "notice-living-song",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "Sing together before the Living as Christians section.",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "Sing together before the Living as Christians section.",
+              "clues": [
+                "Notice a word you hear in the song.",
+                "Does the song remind you of something from the meeting?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "part-8",
+        "number": 8,
+        "title": "Share what you have with others",
+        "durationMinutes": 15,
+        "section": "Living",
+        "type": "Talk",
+        "summary": "Consider why Christians share, what we can share and how to learn generosity now.",
+        "references": [],
+        "activities": [
+          {
+            "id": "activity-8",
+            "type": "MyThoughtBubble",
+            "title": "One thing I can share",
+            "prompt": "Choose one practical, kind idea you would like to remember this week."
+          }
+        ]
+      },
+      {
+        "id": "part-9",
+        "number": 9,
+        "title": "Congregation Bible study",
+        "durationMinutes": 30,
+        "section": "Living",
+        "type": "CongregationBibleStudy",
+        "summary": "Walk Courageously With God, chapter 13. Notice what helped Joshua follow Jehovah's instructions.",
+        "appUrl": "https://www.jw.org/finder?wtlocale=E&docid=1102025913",
+        "sourceUrl": "https://www.jw.org/finder?wtlocale=E&docid=1102025913",
+        "references": [{"label": "Walk Courageously With God - chapter 13", "url": "https://www.jw.org/finder?wtlocale=E&docid=1102025913"}],
+        "activities": [
+          {
+            "id": "notice-part-9",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "Follow the study and record one personal discovery.",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "Follow the study and record one personal discovery.",
+              "clues": [
+                "Notice one word, scripture or example.",
+                "How does that thought connect to the main idea?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "closing-comments",
+        "title": "Concluding comments",
+        "durationMinutes": 3,
+        "section": "Closing",
+        "type": "Comments",
+        "summary": "Review the meeting's main encouragement.",
+        "references": [],
+        "activities": [
+          {
+            "id": "notice-closing-comments",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "Review the meeting's main encouragement.",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "Review the meeting's main encouragement.",
+              "clues": [
+                "Notice one word, scripture or example.",
+                "How does that thought connect to the main idea?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "closing-song",
+        "title": "Song 87 and prayer",
+        "durationMinutes": 5,
+        "section": "Closing",
+        "type": "Song",
+        "summary": "Close the meeting together with song and prayer.",
+        "references": [],
+        "activities": [
+          {
+            "id": "notice-closing-song",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "Close the meeting together with song and prayer.",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "Close the meeting together with song and prayer.",
+              "clues": [
+                "Notice a word you hear in the song.",
+                "Does the song remind you of something from the meeting?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "kind": "midweek",
+    "contentStatus": "dated"
+  }
+}

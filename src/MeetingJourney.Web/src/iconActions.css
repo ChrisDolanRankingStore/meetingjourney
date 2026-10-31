@@ -1,0 +1,65 @@
+/* One shared touch target for compact actions. Text stays on primary actions. */
+.app > .app-header {display:grid;grid-template-columns:36px minmax(0,1fr) 58px;gap:8px;padding-inline:12px;}
+.app > .app-header > div:not(.meeting-header-language) {min-width:0;}
+.app > .app-header .brand-mark {width:36px;height:36px;padding:0;}
+.app .meeting-header-language {margin-left:0;min-width:0;}
+.app .meeting-header-language select {width:58px;min-width:58px;}
+.app .header-meeting-choice {display:flex;align-items:center;gap:4px;width:100%;min-width:0;max-width:none;min-height:30px;padding:0;white-space:nowrap;text-align:left;font-size:clamp(.7rem,3vw,.85rem);}
+.app .header-meeting-label {display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.app .header-meeting-choice > svg {flex:0 0 15px;width:15px;height:15px;}
+.app .icon-action {display:inline-grid;place-items:center;flex:0 0 44px;width:44px;min-width:44px;height:44px;min-height:44px;padding:0;border:1px solid var(--line);border-radius:13px;background:var(--app-bg,#fffdf7);color:var(--navy);text-decoration:none;box-sizing:border-box;}
+.app .icon-action svg {display:block;width:22px;height:22px;flex:none;pointer-events:none;}
+.app .icon-action:hover {background:var(--blue-soft);border-color:var(--blue);}
+.app .icon-action:disabled {opacity:.38;}
+.app .compact-tools {display:flex;align-items:center;flex-wrap:nowrap;gap:4px;min-width:0;}
+.app .storybook-part-tools.compact-tools {display:grid;grid-auto-flow:column;grid-auto-columns:minmax(44px,1fr);gap:4px;}
+.app .compact-tools .icon-action {width:100%;padding:0;}
+.app .story-primary-actions {display:flex;align-items:center;gap:8px;}
+.app .story-primary-actions .primary-part-action {flex:1;min-width:0;}
+.app .part-toolbar.compact-tools {justify-content:flex-end;}
+.app .storybook-links {display:flex;align-items:center;justify-content:space-around;gap:8px;}
+.app .storybook-links .icon-action {width:44px;min-height:44px;border:0;border-radius:12px;}
+.app > .mobile-nav {min-height:52px;overflow:visible;box-sizing:border-box;padding:4px 6px max(8px,env(safe-area-inset-bottom,0px));}
+.app > .mobile-nav > button {position:relative;display:grid;place-items:center;min-width:0;width:100%;height:44px;min-height:44px;padding:0;margin:0;border:0;border-radius:14px;background:transparent;color:var(--muted,#778097);}
+.app > .mobile-nav > .icon-action {flex:auto;}
+.app > .mobile-nav > button.nav-profile {height:44px;min-height:44px;}
+.app > .mobile-nav > .icon-action svg {width:24px;height:24px;}
+.app > .mobile-nav > .icon-action.active {color:var(--blue);background:var(--blue-soft);}
+.app > .mobile-nav > .nav-profile > .character-avatar {top:-14px;width:42px;height:56px;border:0;border-radius:0;background:transparent;box-shadow:none;}
+.app > .mobile-nav > .nav-profile > .visually-hidden {position:absolute;inset:auto;}
+.app .story-map-screen {grid-template-rows:auto minmax(0,1fr) auto;}
+.app .story-map-heading {display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:10px;padding:9px 12px;}
+.app .story-map-heading > div {min-width:0;}
+.app .story-map-heading h2 {font-size:clamp(.95rem,3.8vw,1.12rem);line-height:1.2;}
+.app .story-map-heading .icon-action {min-height:44px;padding:0;}
+.app .story-map-footer {min-height:66px;padding:10px 16px;box-sizing:border-box;gap:12px;}
+.app .story-map-footer .map-continue {display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:44px;flex-shrink:0;white-space:nowrap;padding:8px 12px;}
+.app .story-map-footer p {font-size:.75rem;line-height:1.35;}
+.app .story-map-footer small {font-size:.68rem;}
+.app .illustrated-stop {min-height:46px;}
+.app .illustrated-stop-caption strong {font-size:clamp(.7rem,2.9vw,.8rem);line-height:1.2;}
+.app .illustrated-stop-caption small {font-size:.62rem;}
+.app .next-nav .icon-action {width:44px;padding:0;}
+.app .storybook-touch-hint {display:none;}
+.app .part-story-scene::after {content:none;}
+@media (max-width:360px) {.app .storybook-part-tools.compact-tools {gap:2px;}.app .part-card {padding-inline:10px;}}
+.circuit-visit-settings {min-width:0;}
+.circuit-visit-settings form {display:grid;gap:12px;min-width:0;}
+.circuit-visit-settings form > label {display:flex;align-items:center;gap:8px;}
+.circuit-visit-settings form > .visit-title {display:grid;gap:6px;min-width:0;}
+.circuit-visit-settings .visit-title input {box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fffefa;color:var(--navy);}
+.circuit-visit-settings button {min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:#fffdf5;color:var(--navy);font:inherit;font-size:.8rem;}
+.saved-visit-dates ul {display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0;}
+.saved-visit-dates li {min-width:0;max-width:100%;}
+.saved-visit-dates button {max-width:100%;white-space:normal;}
+.saved-visit-dates button[aria-pressed="true"] {background:var(--blue-soft);border-color:var(--blue);}
+.assembly-settings select {box-sizing:border-box;min-width:0;width:100%;min-height:44px;font:inherit;}
+.assembly-dates {padding:0;list-style:none;}
+.assembly-dates li {display:flex;flex-wrap:wrap;gap:6px;margin-block:8px;}
+.assembly-dates li button:first-child {flex:1;min-width:0;}
+.assembly-question {margin-block:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--blue-soft);}
+.assembly-question button {min-height:44px;}
+.convention-day-choices {display:flex;flex-wrap:wrap;gap:6px;margin-block:10px;}
+.convention-day-choices button {min-height:44px;flex:1;min-width:80px;}
+.settings-update-button {display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;flex-shrink:0;box-sizing:border-box;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:12px;background:#fffdf5;color:var(--navy);font-size:.8rem;font-weight:700;text-decoration:none;}
+@media (max-width:700px) {.app .settings-screen > .settings-grid {grid-template-columns:minmax(0,1fr);}}

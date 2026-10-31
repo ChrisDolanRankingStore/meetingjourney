@@ -1,4 +1,5 @@
-export type MeetingSection = 'Opening' | 'Treasures' | 'FieldMinistry' | 'Living' | 'Closing';
+export type MeetingSection = 'Opening' | 'Treasures' | 'FieldMinistry' | 'Living' | 'PublicTalk' | 'Watchtower' | 'Closing' | 'Programme';
+export type ProgrammePartType = 'Talk' | 'PublicTalk' | 'Symposium' | 'Baptism' | 'Experiences' | 'WatchtowerSummary' | 'ChairmanAddress' | 'Video' | 'MusicVideo' | 'Review' | 'Song' | 'Music';
 export type ActivityType = 'ClueCards' | 'SpotTheClue' | 'DrawYourDiscovery' | 'MyThoughtBubble';
 
 export interface ReferenceLink {
@@ -40,20 +41,42 @@ export interface EngagementActivity {
   drawingTemplate?: string;
 }
 
+export interface StudyGuide { paragraphCount: number; cues: { from: number; to: number; prompt: string; pointChoices?: string[] }[]; }
+
 export interface MeetingPart {
+  /** Optional original listening words supplied with the weekly outline. */
+  listeningWords?: { en?: string[]; es?: string[] };
+  /** Song details entered locally for this meeting. */
+  songNumber?: number;
+  songTitle?: string;
+  speakerName?: string;
+  studyGuide?: StudyGuide;
   id: string;
   number?: number;
   title: string;
   durationMinutes: number;
+  programmeTime?: string;
+  assemblyQuestion?: number;
   section: MeetingSection;
   type: string;
   summary: string;
   references: ReferenceLink[];
   activities: EngagementActivity[];
+  /** Optional reviewed prompt and source links for a specific meeting stop. */
+  question?: string;
+  textReference?: string;
+  researchUrl?: string;
+  /** Optional deep link to the official meeting material for this stop. */
+  appUrl?: string;
+  sourceUrl?: string;
 }
 
 export interface Meeting {
   id: string;
+  kind?: 'midweek' | 'weekend' | 'assembly' | 'convention';
+  eventDate?: string;
+  contentStatus?: 'dated' | 'general';
+  contentNotice?: string;
   weekOf: string;
   theme: string;
   bibleReading: string;

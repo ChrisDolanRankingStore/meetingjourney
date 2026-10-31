@@ -3,6 +3,10 @@ import { createServer } from 'node:http';
 import { extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { currentMeeting } from './meeting.js';
+import { getMeeting } from './meeting-catalog.js';
+import { readPublishedMeeting } from './published-content.js';
+const meetingFor = (kind, date) => { try { return readPublishedMeeting(kind, date) ?? getMeeting(kind, date); } catch (error) { if (error instanceof RangeError) throw error; console.error(JSON.stringify({ level: 'error', message: 'Published outline could not be loaded', error: error.message })); return getMeeting(kind, date); } };
+import { localDateKey, suggestedMeeting, monthWeeks } from './meeting-schedule.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const publicDir = join(root, 'public');
@@ -21,7 +25,11 @@ const json = (res, status, body) => {
 
 const notFound = (res) => json(res, 404, { error: 'Not found' });
 
-const findMeeting = (id) => id === currentMeeting.id ? currentMeeting : undefined;
+const findMeeting = (id) => {
+  const match = /^(meeting|weekend)-(\d{4}-\d{2}-\d{2})$/.exec(id);
+  if (!match) return undefined;
+  try { const meeting = meetingFor(match[1] === 'weekend' ? 'weekend' : 'midweek', match[2]); return meeting.id === id ? meeting : undefined; } catch { return undefined; }
+};
 const findPart = (id) => currentMeeting.parts.find((part) => part.id === id);
 
 function contentType(path) {
@@ -30,7 +38,7 @@ function contentType(path) {
     '.js': 'text/javascript; charset=utf-8',
     '.css': 'text/css; charset=utf-8',
     '.json': 'application/json; charset=utf-8',
-    '.png': 'image/png',
+    '.png': 'image/png', '.webp': 'image/webp', '.avif': 'image/avif', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml; charset=utf-8',
     '.jpg': 'image/jpeg',
     '.jpeg': 'image/jpeg',
     '.svg': 'image/svg+xml',
@@ -57,15 +65,30 @@ async function handle(request, response) {
   }
 
   if (pathname === '/health') {
-    return json(response, 200, { service: 'meeting-journey-node', status: 'ok' });
+    return json(response, 200, { service: 'meeting-journey-node', version: '0.5.3', status: 'ok' });
   }
 
   if (pathname === '/api/v1') {
     return json(response, 200, { name: 'Meeting Journey API', version: 'v1', status: 'phase-1' });
   }
 
+  if (pathname === '/api/meetings/month') {
+    try {
+      const date = url.searchParams.get('date') ?? localDateKey();
+      const meetings = monthWeeks(date).flatMap(week => ['midweek', 'weekend'].map(kind => meetingFor(kind, week)));
+      return json(response, 200, { month: date.slice(0, 7), meetings });
+    } catch (error) {
+      return json(response, 400, { error: error instanceof Error ? error.message : 'Invalid month' });
+    }
+  }
+
   if (pathname === '/api/meetings/current') {
-    return json(response, 200, currentMeeting);
+    const suggestion = suggestedMeeting(localDateKey());
+    try {
+      return json(response, 200, meetingFor(url.searchParams.get('type') ?? suggestion.type, url.searchParams.get('date') ?? suggestion.date));
+    } catch (error) {
+      return json(response, 400, { error: error instanceof Error ? error.message : 'Invalid meeting selection' });
+    }
   }
 
   let match = pathname.match(/^\/api\/meetings\/([^/]+)\/journey$/);
@@ -115,7 +138,9 @@ async function handle(request, response) {
     return notFound(response);
   }
 
-  const requestedPath = safePublicPath(pathname);
+  const route = ({ '/about': '/about.html', '/privacy': '/privacy.html', '/welcome': '/welcome.html', '/refresh': '/refresh.html' })[pathname] ?? pathname;
+  const requestedPath = safePublicPath(route);
+  if (!requestedPath || (extname(route) && !existsSync(requestedPath))) return notFound(response);
   const filePath = requestedPath && existsSync(requestedPath) && statSync(requestedPath).isFile()
     ? requestedPath
     : join(publicDir, 'index.html');
@@ -124,6 +149,10 @@ async function handle(request, response) {
     return json(response, 503, { error: 'Web client has not been built yet' });
   }
 
+  const details = statSync(filePath);
+  const etag = 'W/' + JSON.stringify(details.size + '-' + details.mtimeMs);
+  response.setHeader('ETag', etag);
+  if (request.headers['if-none-match'] === etag) { response.writeHead(304); return response.end(); }
   response.writeHead(200, {
     'Content-Type': contentType(filePath),
     'Cache-Control': pathname.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache',
@@ -144,6 +173,11 @@ async function handle(request, response) {
 
 const server = createServer(async (request, response) => {
   const started = Date.now();
+  response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
+  response.setHeader('Referrer-Policy', 'no-referrer');
+  response.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  response.setHeader('X-Frame-Options', 'DENY');
+  if (request.headers['x-forwarded-proto'] === 'https') response.setHeader('Strict-Transport-Security', 'max-age=31536000');
   try {
     await handle(request, response);
   } catch (error) {
@@ -151,7 +185,7 @@ const server = createServer(async (request, response) => {
       level: 'error',
       message: 'Unhandled request error',
       method: request.method,
-      url: request.url,
+      url: (request.url || '/').split('?')[0],
       error: error instanceof Error ? error.stack : String(error)
     }));
     if (!response.headersSent) json(response, 500, { error: 'Unexpected server error' });
@@ -160,7 +194,7 @@ const server = createServer(async (request, response) => {
     console.log(JSON.stringify({
       level: 'info',
       method: request.method,
-      url: request.url,
+      url: (request.url || '/').split('?')[0],
       status: response.statusCode || 500,
       durationMs: Date.now() - started
     }));
@@ -173,5 +207,5 @@ server.on('error', (error) => {
 });
 
 server.listen(port, host, () => {
-  console.log(JSON.stringify({ level: 'info', message: 'Meeting Journey Node server started', host, port }));
+  console.log(JSON.stringify({ level: 'info', message: 'Meeting Journey Node server started', host, port: server.address().port }));
 });

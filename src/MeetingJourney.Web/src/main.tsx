@@ -2,6 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles.css';
+import './storyboard.css';
+import './discoveries.css';
+import './notebook.css';
+import './meetingPicker.css';
+import './review-improvements.css';
+import './iconActions.css';
+import './sceneWorlds.css';
+import './referenceLayout.css';
+import './homeGuide.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);
 if ('serviceWorker' in navigator) {
@@ -18,6 +27,6 @@ if ('serviceWorker' in navigator) {
       return;
     }
 
-    navigator.serviceWorker.register('/sw.js?v=20261023').catch(() => undefined);
+    navigator.serviceWorker.register('/sw.js', {updateViaCache:'none'}).catch(() => undefined);
   });
 }

@@ -133,7 +133,7 @@ select { min-width: 155px; padding: 9px 11px; }
 .source-card span { margin-top: 3px; color: var(--muted); font-size: .8rem; }
 .source-card .source-link { flex: 0 0 auto; margin-top: 0; }
 .material-panel { padding: 22px 24px; margin: 0 0 24px; border: 1px solid #b8d1e5; border-radius: 18px; background: white; box-shadow: var(--card-shadow); }
-.material-panel-adventure { position: relative; overflow: hidden; border-color: #d9c8a6; background-image: linear-gradient(145deg, rgba(255,253,248,.96), rgba(255,248,232,.94)), url('/assets/meeting-valley.png'); background-position: center, right center; background-size: auto, cover; }
+.material-panel-adventure { position: relative; overflow: hidden; border-color: #d9c8a6; background-image: linear-gradient(145deg, rgba(255,253,248,.96), rgba(255,248,232,.94)), var(--valley-art); background-position: center, right center; background-size: auto, cover; }
 .material-panel-adventure::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 7px; background: linear-gradient(90deg, #5b61d6, #e7896f, #83ceb8); }
 .material-header { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
 .material-header h2 { margin: 0; color: var(--navy); font-size: 1.35rem; }
@@ -284,7 +284,7 @@ body { background: #f8f4ec; }
 .brand-mark { border-radius: 14px; background: #30406d; box-shadow: 0 8px 18px rgba(48,64,109,.22); }
 .page-shell { padding-top: 28px; }
 .welcome-card { display: grid; grid-template-columns: 230px minmax(0, 1fr) 180px; align-items: stretch; gap: 0; min-height: 260px; padding: 0; overflow: hidden; border: 1px solid #e6dfd4; border-radius: 30px; background: #fffdf8; box-shadow: 0 18px 44px rgba(73,67,53,.11); }
-.adventure-scene { position: relative; min-height: 260px; overflow: hidden; background-image: linear-gradient(180deg, rgba(39,62,84,.06), rgba(255,229,169,.2)), url('/assets/meeting-valley.png'); background-position: center 68%; background-size: cover; }
+.adventure-scene { position: relative; min-height: 260px; overflow: hidden; background-image: linear-gradient(180deg, rgba(39,62,84,.06), rgba(255,229,169,.2)), var(--valley-art); background-position: center 68%; background-size: cover; }
 .scene-sun { position: absolute; top: 28px; left: 30px; width: 55px; height: 55px; border-radius: 50%; background: #ffd278; box-shadow: 0 0 0 9px rgba(255,210,120,.18); }
 .scene-cloud { position: absolute; width: 66px; height: 18px; border-radius: 99px; background: rgba(255,255,255,.72); }
 .scene-cloud::before, .scene-cloud::after { content: ''; position: absolute; bottom: 0; border-radius: 50%; background: inherit; }
@@ -330,6 +330,19 @@ body { background: #f8f4ec; }
 .part-kicker { color: #a85b4b; }
 .part-card h2 { color: #263552; }
 .part-summary { color: #68748a; }
+.part-card .quest-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 16px 0 15px; counter-reset: storyboard-step; }
+.part-card .quest-actions button { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; align-items: center; column-gap: 7px; min-height: 58px; padding: 9px 8px; border: 1px solid #e3dacd; border-radius: 13px; color: #6d7181; background: #fffaf0; text-align: left; }
+.part-card .quest-actions button::before { display: grid; place-items: center; grid-row: 1 / -1; width: 23px; height: 23px; border-radius: 50%; color: #fff; background: #aeb4c6; content: counter(storyboard-step); counter-increment: storyboard-step; font-size: .7rem; font-weight: 900; }
+.part-card .quest-actions button::after { grid-column: 2; color: #8b8d99; content: 'Listen for one idea'; font-size: .64rem; line-height: 1.15; }
+.part-card .quest-actions button:nth-child(2)::after { content: 'Open the source'; }
+.part-card .quest-actions button:nth-child(3)::after { content: 'React or draw'; }
+.part-card .quest-actions button:nth-child(4)::after { content: 'Save a thought'; }
+.part-card .quest-actions button { color: #4d5060; font-size: .76rem; font-weight: 800; }
+.part-card .quest-actions button:hover, .part-card .quest-actions button:focus-visible { border-color: #5b61d6; color: #30406d; background: #eef0ff; box-shadow: 0 5px 12px rgba(91,97,214,.1); }
+.part-card .quest-actions button:hover::before, .part-card .quest-actions button:focus-visible::before { background: #5b61d6; }
+.part-card .part-summary { margin: 0 0 14px; padding: 13px 15px; border-left: 4px solid #e7896f; border-radius: 0 12px 12px 0; background: #fff8ed; }
+.part-card > .source-card { position: relative; margin-top: 14px; }
+.part-card > .source-card::before { content: 'Story card'; position: absolute; top: -9px; left: 12px; padding: 2px 7px; border-radius: 99px; color: #176c59; background: #e3f6ee; font-size: .6rem; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
 .source-card { border-color: #d8e6e1; background: #eff8f4; }
 .activity-card { border-color: #eed9a8; border-radius: 20px; background: #fffaf0; }
 .visual-activity { border-color: #d6d9ef; background: #f7f8ff; }
@@ -375,7 +388,7 @@ body { background: #f8f4ec; }
 }
 
 /* Companion creator: simple first choice, optional detail after it. */
-.character-screen { padding: 24px 14px 40px; background-image: linear-gradient(rgba(244,237,224,.62), rgba(244,237,224,.78)), url('/assets/meeting-valley.png'); background-position: center; background-size: cover; }
+.character-screen { padding: 24px 14px 40px; background-image: linear-gradient(rgba(244,237,224,.62), rgba(244,237,224,.78)), var(--valley-art); background-position: center; background-size: cover; }
 .character-chooser { width: min(540px, 100%); padding: 28px 24px; border-color: #dfcfb9; border-radius: 28px; background: rgba(255,251,242,.96); box-shadow: 0 22px 55px rgba(70,56,38,.22); }
 .character-chooser h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); }
 .character-intro { margin-bottom: 17px; font-size: .94rem; }
@@ -413,15 +426,16 @@ body { background: #f8f4ec; }
 .accessory-options button { display: block; color: var(--muted); font-size: .78rem; font-weight: 750; text-align: center; }
 .start-journey-button { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 20px; padding: 13px 16px; border: 0; border-radius: 12px; color: white; background: #30406d; box-shadow: 0 8px 16px rgba(48,64,109,.2); font-weight: 800; }
 .start-journey-button:hover, .start-journey-button:focus-visible { background: #253253; }
-.character-art { transform: translateY(var(--variant-y, 0px)) scaleX(var(--variant-x, 1)) scaleY(var(--variant-y-scale, 1)) scale(var(--age-scale, 1)); transform-origin: 50% 100%; }
+.character-body { position: absolute; inset: 0; transform: translateY(var(--variant-y, 0px)) scaleX(var(--variant-x, 1)) scaleY(var(--variant-y-scale, 1)) scale(var(--age-scale, 1)); transform-origin: 50% 100%; }
+.character-art { transform: none; }
 .age-child { --age-scale: .86; }
 .age-preteen { --age-scale: .94; }
 .age-teen { --age-scale: 1; }
-.variant-tall .character-art { --variant-y-scale: 1.08; --variant-x: .96; }
-.variant-short .character-art { --variant-y-scale: .9; --variant-x: 1.08; --variant-y: 8px; }
-.variant-slim .character-art { --variant-y-scale: 1.02; --variant-x: .86; }
-.variant-robust .character-art { --variant-y-scale: .99; --variant-x: 1.14; }
-.variant-chunky .character-art { --variant-y-scale: .97; --variant-x: 1.2; }
+.variant-tall { --variant-y-scale: 1.08; --variant-x: .96; }
+.variant-short { --variant-y-scale: .9; --variant-x: 1.08; --variant-y: 8px; }
+.variant-slim { --variant-y-scale: 1.02; --variant-x: .86; }
+.variant-robust { --variant-y-scale: .99; --variant-x: 1.14; }
+.variant-chunky { --variant-y-scale: .97; --variant-x: 1.2; }
 @media (max-width: 440px) {
   .character-chooser { padding: 24px 16px; }
   .character-catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -430,10 +444,81 @@ body { background: #f8f4ec; }
   .age-option small { font-size: .64rem; }
 }
 
+/* Place control and reliable composable accessories. */
+.where-am-i { position: relative; margin: -8px 0 18px; }
+.where-am-i-compact { margin: 16px 0 0; }
+.where-am-i-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 12px; padding: 12px 14px; border: 1px solid #d8c8b5; border-radius: 14px; color: var(--navy); background: #fffdf8; text-align: left; box-shadow: 0 8px 18px rgba(73,67,53,.06); }
+.where-am-i-toggle span:first-child { display: grid; gap: 3px; min-width: 0; }
+.where-am-i-toggle small { color: #a96741; font-size: .68rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.where-am-i-toggle strong { overflow: hidden; font-size: .86rem; text-overflow: ellipsis; white-space: nowrap; }
+.where-am-i-toggle > span:last-child { flex: 0 0 auto; color: var(--blue); font-size: .78rem; font-weight: 850; }
+.where-am-i-list { position: absolute; z-index: 8; top: calc(100% + 7px); right: 0; left: 0; display: grid; gap: 4px; max-height: min(440px, 55vh); overflow: auto; padding: 8px; border: 1px solid #d8c8b5; border-radius: 15px; background: #fffdf8; box-shadow: 0 18px 36px rgba(38,53,82,.18); }
+.where-am-i-list button { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 9px 8px; border: 1px solid transparent; border-radius: 10px; color: var(--navy); background: transparent; text-align: left; }
+.where-am-i-list button:hover, .where-am-i-list button:focus-visible, .where-am-i-list button.selected { border-color: #c7cbed; background: var(--blue-soft); }
+.where-am-i-list button > span { display: grid; place-items: center; width: 25px; height: 25px; border-radius: 50%; color: white; background: var(--blue); font-size: .7rem; font-weight: 850; }
+.where-am-i-list strong { overflow: hidden; font-size: .78rem; text-overflow: ellipsis; white-space: nowrap; }
+.where-am-i-list small { color: var(--muted); font-size: .7rem; }
+.character-backpack { z-index: 1; left: 8%; bottom: 27%; width: 25%; height: 34%; border: 3px solid #303542; border-radius: 35% 30% 25% 25%; background: linear-gradient(135deg, #273244, #59647a); transform: rotate(8deg); box-shadow: inset -3px 0 0 rgba(255,255,255,.14); }
+.character-backpack::before { content: ''; position: absolute; top: -9%; left: 18%; width: 64%; height: 18%; border: 2px solid #303542; border-bottom: 0; border-radius: 50% 50% 0 0; }
+.character-glasses { z-index: 5; top: 13%; left: 25%; width: 50%; height: 13%; transform: rotate(-4deg); background: linear-gradient(#15233e, #15233e) center 48% / 20% 3px no-repeat; }
+.character-glasses::before, .character-glasses::after { top: 0; width: 43%; height: 86%; border: 3px solid #15233e; background: rgba(255,255,255,.32); }
+.character-glasses::before { left: 0; }
+.character-glasses::after { right: 0; }
+.character-cap { z-index: 5; top: 3%; left: 22%; width: 56%; height: 14%; border-top: 7px solid #5b61d6; }
+.character-cap::after { height: 7px; }
+.official-jw-link { font-size: .82rem; }
+
+@media (max-width: 560px) {
+  .page-shell { padding: 14px 10px 88px; }
+  .app-header { min-height: 74px; padding: 12px 14px; gap: 9px; }
+  .brand-mark { width: 38px; height: 38px; border-radius: 13px; }
+  .app-header h1 { font-size: .88rem; }
+  .app-header .eyebrow { font-size: .64rem; }
+  .header-character { padding: 2px 5px 2px 2px; }
+  .connection-status { margin-top: 50px; right: 14px; font-size: .68rem; }
+  .adventure-home { border-radius: 22px; }
+  .home-scene { min-height: 285px; }
+  .home-scene .character-avatar { width: 140px; height: 218px; bottom: -4px; }
+  .scene-message { top: 13px; right: 10px; max-width: 164px; padding: 9px 10px; font-size: .7rem; }
+  .home-copy { padding: 20px 15px 24px; }
+  .home-copy h2 { margin: 4px 0 8px; font-size: clamp(1.9rem, 10vw, 2.35rem); }
+  .home-details { font-size: .8rem; line-height: 1.4; }
+  .where-am-i { margin: 12px 0 12px; }
+  .where-am-i-compact { margin-top: 14px; }
+  .where-am-i-toggle { padding: 10px 11px; }
+  .where-am-i-toggle strong { font-size: .78rem; }
+  .progress-card { gap: 9px; padding: 11px 12px; margin-bottom: 12px; }
+  .progress-card small { display: none; }
+  .progress-percent { font-size: .74rem; }
+  .trail-card { margin-bottom: 12px; padding: 14px 12px; }
+  .trail-heading h2 { font-size: 1.12rem; }
+  .part-toolbar { gap: 5px; }
+  .part-toolbar button { min-height: 38px; padding: 7px 8px; font-size: .7rem; }
+  .part-card { padding: 17px 13px; border-radius: 18px; }
+  .part-card::before { top: 17px; right: 15px; }
+  .part-card h2 { max-width: 82%; margin: 10px 0 7px; font-size: 1.65rem; }
+  .part-summary { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: .84rem; line-height: 1.42; }
+  .quest-banner { margin-bottom: 12px; padding: 8px 9px; }
+  .quest-actions { gap: 5px; margin: 8px 0 12px; }
+  .quest-actions button { min-height: 40px; padding: 6px 3px; font-size: .68rem; }
+  .source-card { padding: 10px 11px; }
+  .official-part-card { margin: 12px 0; padding: 12px; border-radius: 14px; }
+  .official-part-card > p { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin: 6px 0 9px; font-size: .76rem; line-height: 1.4; }
+  .official-part-heading h3 { font-size: .92rem; }
+  .official-part-links { display: grid; grid-template-columns: 1fr; gap: 6px; }
+  .official-part-links a { display: flex; align-items: center; justify-content: space-between; min-height: 43px; padding: 8px 9px; }
+  .source-confirmations { gap: 5px; }
+  .source-confirmations label { font-size: .72rem; }
+  .feedback-card, .activity-card, .notes-card { padding: 13px; border-radius: 16px; }
+  .feedback-card p, .activity-card p, .notes-card textarea { font-size: .8rem; }
+  .next-nav { position: sticky; bottom: 70px; z-index: 6; margin: 12px -3px 0; padding: 7px; border: 1px solid #e3dacd; border-radius: 14px; background: rgba(255,253,249,.95); box-shadow: 0 8px 20px rgba(73,67,53,.1); }
+  .next-nav button { min-height: 40px; padding: 7px 10px; font-size: .72rem; }
+}
+
 /* Adventure screens: the meeting is entered as a story, then opened one stop at a time. */
 .adventure-home-page, .overview-page { padding-top: 18px; }
 .adventure-home { display: grid; min-height: calc(100vh - 140px); overflow: hidden; border: 1px solid #dfcfb9; border-radius: 30px; background: #fffaf0; box-shadow: 0 20px 48px rgba(70,56,38,.15); }
-.home-scene { position: relative; min-height: 360px; overflow: hidden; background-image: linear-gradient(180deg, rgba(44,64,91,.04), rgba(255,227,168,.28)), url('/assets/meeting-valley.png'); background-position: center 68%; background-size: cover; }
+.home-scene { position: relative; min-height: 360px; overflow: hidden; background-image: linear-gradient(180deg, rgba(44,64,91,.04), rgba(255,227,168,.28)), var(--valley-art); background-position: center 68%; background-size: cover; }
 .home-scene .character-avatar { position: absolute; z-index: 2; left: 50%; bottom: 8px; --character-anchor-x: -50%; transform: translateX(-50%); }
 .scene-message { position: absolute; z-index: 3; top: 26px; right: 20px; max-width: 210px; padding: 11px 13px; border: 2px solid rgba(255,255,255,.76); border-radius: 16px 16px 5px 16px; color: #263552; background: rgba(255,252,239,.94); box-shadow: 0 12px 24px rgba(38,53,82,.16); font-size: .78rem; font-weight: 800; line-height: 1.35; }
 .scene-message::after { content: ''; position: absolute; right: 22px; bottom: -10px; width: 16px; height: 16px; border-right: 2px solid rgba(255,255,255,.76); border-bottom: 2px solid rgba(255,255,255,.76); background: rgba(255,252,239,.94); transform: rotate(45deg); }
@@ -524,12 +609,201 @@ body { background: #f8f4ec; }
 .quest-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin: 4px 0 18px; }
 .quest-actions button { min-height: 48px; padding: 8px 5px; border: 1px solid #e0d2bf; border-radius: 10px; color: #4d5060; background: #fffaf0; font-size: .76rem; font-weight: 800; }
 .quest-actions button:hover, .quest-actions button:focus-visible { border-color: #30406d; color: #30406d; background: #eef0ff; }
+.quick-capture { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: -7px 0 16px; padding: 9px 11px; border: 1px solid #ead9bd; border-radius: 12px; background: #fff8e9; color: #6b625e; font-size: .76rem; }
+.quick-capture span { margin-right: auto; font-weight: 750; }
+.quick-capture button { padding: 7px 10px; border: 1px solid #c7cbed; border-radius: 99px; color: #30406d; background: white; font-size: .74rem; font-weight: 800; }
+.quick-capture button:hover, .quick-capture button:focus-visible { color: white; background: #5b61d6; }
+.quick-notes-card { display: grid; gap: 7px; padding: 13px; margin: -2px 0 16px; border: 1px solid #d8e6e1; border-radius: 12px; background: #f3faf7; }
+.quick-notes-card label { color: #30406d; font-size: .9rem; font-weight: 800; }
+.quick-notes-card textarea { width: 100%; padding: 10px; resize: vertical; line-height: 1.45; }
+.quick-notes-card small { color: var(--muted); font-size: .76rem; }
 .part-screen-shell { display: grid; gap: 12px; }
 .part-movement-strip { display: flex; justify-content: flex-end; }
 .part-movement-strip .movement-menu { width: min(100%, 560px); margin-top: 0; padding: 10px 13px; border: 1px solid #e3dacd; border-radius: 13px; background: rgba(255,253,249,.78); }
-.part-story-scene { position: relative; min-height: 142px; overflow: hidden; border: 1px solid #d9c8a6; border-radius: 20px; background-image: linear-gradient(180deg, rgba(255,251,238,.12), rgba(255,239,190,.38)), url('/assets/meeting-valley.png'); background-position: center 66%; background-size: cover; box-shadow: 0 10px 24px rgba(70,56,38,.1); }
+.part-story-scene { position: relative; min-height: 142px; overflow: hidden; border: 1px solid #d9c8a6; border-radius: 20px; background-image: linear-gradient(180deg, rgba(255,251,238,.12), rgba(255,239,190,.38)), var(--valley-art); background-position: center 66%; background-size: cover; box-shadow: 0 10px 24px rgba(70,56,38,.1); }
 .part-story-scene::after { content: 'A new stop to explore'; position: absolute; left: 18px; bottom: 15px; padding: 6px 9px; border-radius: 99px; color: #493e3a; background: rgba(255,251,238,.9); font-size: .7rem; font-weight: 800; }
 .part-story-scene .character-avatar { position: absolute; z-index: 2; right: 14%; bottom: -8px; width: 86px; height: 112px; --character-anchor-x: 0; transform: translateX(0); }
+.part-story-scene .character-avatar { right: auto; left: calc(15% + (var(--route-progress, 0) * 70%)); transition: left .45s ease; }
+
+/* Last-mile phone layout fixes.  The action bubbles belong inside the story
+   card; placing them above the avatar made the top row disappear behind the
+   card/grid clipping on small screens. */
+.part-story-scene .companion-scene .companion-action-card {
+  top: 8px;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  width: min(258px, calc(100% - 16px));
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: translateX(-50%);
+}
+.part-story-scene .companion-scene .companion-action-grid { width: 100%; max-width: 258px; margin: 0 auto; }
+.part-story-scene .companion-scene .companion-trigger .character-avatar { width: 150px; height: 198px; }
+.part-story-scene .companion-scene.is-open .companion-trigger .character-avatar { width: 170px; height: 222px; }
+.journey-stage-page .next-nav { position: relative; bottom: auto; z-index: 3; flex-shrink: 0; margin: 4px 0 0; }
+
+/* Keep all separate accessory drawings tied to the portrait stage.  This is
+   intentionally after the legacy preview rules so they cannot reintroduce
+   the oversized ear-level glasses or body-sized bag. */
+.character-layer-stage .character-accessory { object-fit: fill; }
+.character-layer-stage .character-glasses { top: 17.2%; left: 28.5%; width: 43%; height: 14%; }
+.character-style-asian-boy .character-layer-stage .character-glasses,
+.character-style-asian-girl .character-layer-stage .character-glasses { top: 16.6%; left: 29.5%; width: 41%; height: 14%; }
+.character-style-african-boy .character-layer-stage .character-glasses,
+.character-style-african-girl .character-layer-stage .character-glasses { top: 17%; left: 28%; width: 44%; height: 14%; }
+.character-style-wheelchair-boy .character-layer-stage .character-glasses,
+.character-style-wheelchair-girl .character-layer-stage .character-glasses { top: 16.8%; left: 28%; width: 44%; height: 14%; }
+.character-layer-stage img.character-backpack { top: 36%; left: 3%; width: 24%; height: 24%; right: auto; bottom: auto; }
+
+@media (max-width: 560px) {
+  .part-story-scene .companion-scene .character-avatar { width: 140px; height: 184px; }
+  .part-story-scene .companion-scene.is-open .companion-trigger .character-avatar { width: 160px; height: 210px; }
+  .journey-stage-page .next-nav { min-height: 40px; padding: 4px; }
+}
+
+/* Shared view frame: every app view owns the viewport below the header. */
+.app { height: 100svh; min-height: 0; overflow: hidden; }
+.app > .page-shell { height: calc(100svh - 68px); min-height: 0; padding: 12px 14px 8px; overflow: hidden; }
+.app > footer { display: none; }
+.adventure-home-page > .material-panel { position: fixed; z-index: 50; inset: 76px 14px 78px; max-width: 790px; max-height: none; margin: auto; overflow: auto; box-shadow: 0 24px 60px rgba(31,39,64,.25); }
+.adventure-home-page, .overview-page, .discovery-page, .tool-page, .settings-page { display: flex; flex-direction: column; }
+.adventure-home-page > .adventure-home { flex: 1; min-height: 0; height: 100%; }
+.overview-page > .meeting-overview, .discovery-page > .discoveries-screen, .tool-page > .tool-screen, .settings-page > .settings-screen { min-height: 0; height: 100%; }
+.meeting-overview, .discoveries-screen, .tool-screen, .settings-screen { overflow: hidden; }
+.screen-heading { flex: 0 0 auto; padding-top: 4px; padding-bottom: 12px; }
+.overview-sections, .discovery-grid, .settings-grid, .tool-grid { min-height: 0; }
+.overview-sections, .discovery-grid, .settings-grid { overflow: auto; padding: 2px 3px 8px; }
+.overview-sections { flex: 1; }
+.discovery-grid, .settings-grid { flex: 1; align-content: start; }
+.overview-start { flex: 0 0 auto; margin-top: 8px; }
+.tool-screen { overflow: auto; padding-bottom: 8px; }
+.journey-stage-page .part-screen-shell { overflow: visible; }
+
+/* The chooser keeps the device viewport stable while its long catalogue remains
+   available inside the card rather than creating a second page scroll. */
+.character-screen { height: 100svh; min-height: 0; overflow: hidden; }
+.character-chooser { max-height: calc(100svh - 20px); overflow: auto; }
+
+/* Home is a single welcome card with a scene above a concise action area. */
+.adventure-home { height: 100%; min-height: 0; }
+.home-copy { min-height: 0; overflow: hidden; }
+.home-actions { margin-top: 14px; }
+.movement-dock, .home-copy > .movement-menu { margin-top: 12px; }
+
+@media (max-width: 679px) {
+  .app > .page-shell { height: calc(100svh - 74px - 66px); padding: 7px 9px 4px; }
+  .adventure-home { grid-template-rows: minmax(205px, 40%) minmax(0, 1fr); }
+  .home-scene { min-height: 0; }
+  .home-copy { padding: 14px 14px 12px; }
+  .home-copy h2 { margin: 3px 0 7px; font-size: clamp(1.75rem, 8vw, 2.3rem); }
+  .home-details { font-size: .78rem; line-height: 1.35; }
+  .home-actions { gap: 6px; margin-top: 10px; }
+  .primary-adventure-button, .secondary-adventure-button { min-height: 40px; padding: 0 11px; font-size: .78rem; }
+  .home-copy .where-am-i-toggle { min-height: 38px; padding: 7px 9px; }
+  .home-copy > .movement-menu { display: none; }
+  .overview-page > .meeting-overview, .discovery-page > .discoveries-screen, .settings-page > .settings-screen { overflow: hidden; }
+  .overview-sections, .discovery-grid, .settings-grid { overflow: auto; }
+}
+
+/* Full-screen journey stage: the meeting stop is the screen, not a page to scroll through. */
+.journey-stage-page { height: calc(100svh - 68px - 66px); min-height: 0; padding: 10px 14px 8px; overflow: hidden; }
+.journey-stage-page > .welcome-card, .journey-stage-page > .progress-card, .journey-stage-page > .where-am-i, .journey-stage-page > .trail-card { display: none; }
+.journey-stage-page > .journey-layout { display: block; height: 100%; min-height: 0; }
+.journey-stage-page .part-column { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100%; min-height: 0; }
+.journey-stage-page .part-toolbar { min-height: 30px; margin: 0 0 5px; }
+.journey-stage-page .part-toolbar button { padding: 4px 7px; border: 0; color: #5b61d6; background: transparent; font-size: .72rem; text-decoration: underline; }
+.journey-stage-page > .material-panel, .journey-stage-page .journey-map { position: fixed; z-index: 50; inset: 76px 14px 78px; max-width: 790px; max-height: none; margin: auto; overflow: auto; box-shadow: 0 24px 60px rgba(31,39,64,.25); }
+.journey-stage-page .part-screen-shell { grid-template-rows: minmax(190px, 43%) minmax(0, 1fr); height: 100%; min-height: 0; overflow: hidden; }
+.journey-stage-page .part-movement-strip { display: none; }
+.journey-stage-page .part-card { min-height: 0; margin-top: -15px; overflow: hidden; padding: 16px 18px; border-radius: 22px; }
+.journey-stage-page .part-card .part-summary { display: -webkit-box; max-height: 3.2em; margin-bottom: 0; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: .84rem; line-height: 1.45; }
+.journey-stage-page .part-card > .source-card, .journey-stage-page .part-card > .references, .journey-stage-page .part-card > .quick-capture, .journey-stage-page .part-card > .quick-notes-card, .journey-stage-page .part-card > .official-part-card, .journey-stage-page .part-card > .feedback-card, .journey-stage-page .part-card > .notes-card, .journey-stage-page .part-card > .drawing-actions, .journey-stage-page .part-card > .drawing-card, .journey-stage-page .part-card > .activity-card, .journey-stage-page .part-card > .connect-card, .journey-stage-page .part-card > .quiet-note { display: none; }
+.journey-stage-page .next-nav { margin: 6px 0 0; padding: 5px; }
+
+/* The companion grows into the focus point; its links are thoughts, not a button grid. */
+.companion-scene.is-open .companion-trigger .character-avatar { width: 148px; height: 194px; transition: width .2s ease, height .2s ease; }
+.companion-scene .companion-trigger .character-avatar { transition: width .2s ease, height .2s ease; }
+.companion-action-card { min-width: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+.companion-scene .companion-action-card { width: 258px; }
+.companion-action-title { width: max-content; max-width: 100%; margin: 0 auto 5px; padding: 8px 13px; border: 1px solid #e7d8be; border-radius: 52% 48% 50% 46%; color: #493e3a; background: #fffaf0; box-shadow: 0 7px 16px rgba(73,67,53,.12); font-size: .75rem; }
+.companion-action-grid { position: relative; display: block; width: 258px; height: 184px; }
+.companion-action-grid .action-bubble { position: absolute; display: grid; place-items: center; gap: 1px; min-height: 58px; padding: 7px 8px; border: 1px solid #d9d5ef; border-radius: 48% 52% 46% 54%; color: #30406d; background: #fff; box-shadow: 0 7px 15px rgba(48,64,109,.13); font-size: .68rem; font-weight: 850; line-height: 1.05; }
+.companion-action-grid .action-bubble span { display: block; color: #5b61d6; font-size: 1rem; line-height: 1; }
+.companion-action-grid .action-bubble::after { position: absolute; width: 10px; height: 10px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; background: inherit; content: ''; transform: rotate(45deg); }
+.companion-action-grid .action-move { top: 4px; left: 4px; width: 74px; }
+.companion-action-grid .action-move::after { right: -5px; bottom: 9px; }
+.companion-action-grid .action-feelings { top: 0; right: 2px; width: 80px; min-height: 74px; border: 0; border-radius: 0; color: #a44762; background: #ffe2ea; clip-path: polygon(50% 100%, 7% 42%, 10% 22%, 26% 8%, 41% 12%, 50% 28%, 59% 12%, 74% 8%, 90% 22%, 93% 42%); box-shadow: none; }
+.companion-action-grid .action-feelings span { color: #d15e7b; }
+.companion-action-grid .action-feelings::after { display: none; }
+.companion-action-grid .action-doodle { top: 76px; left: 31px; width: 76px; }
+.companion-action-grid .action-doodle::after { left: -5px; bottom: 8px; }
+.companion-action-grid .action-note { top: 82px; right: 28px; width: 70px; }
+.companion-action-grid .action-note::after { right: -5px; bottom: 10px; }
+.companion-action-grid .action-source { bottom: 0; left: 0; width: 108px; border-color: #b9dacc; background: #eff9f4; }
+.companion-action-grid .action-source::after { left: 17px; bottom: -5px; }
+.companion-action-grid .action-story { right: 0; bottom: 0; width: 86px; border-color: #efd19b; background: #fff4d5; }
+.companion-action-grid .action-story::after { right: 18px; bottom: -5px; }
+.journey-tool-backdrop { position: fixed; z-index: 60; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(31,39,64,.34); }
+.journey-tool-modal { position: relative; width: min(560px, 100%); max-height: min(720px, calc(100svh - 32px)); overflow: auto; padding: 24px 20px 20px; border: 1px solid #e0d2bf; border-radius: 24px; background: #fffdf8; box-shadow: 0 24px 60px rgba(31,39,64,.25); }
+.journey-tool-modal h3 { margin: 7px 0 12px; color: #263552; font-size: 1.5rem; }
+.journey-tool-close { position: absolute; top: 11px; right: 11px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #d8d3c7; border-radius: 50%; color: #30406d; background: #fff; font-size: 1.25rem; }
+.modal-note-editor { display: grid; gap: 9px; }
+.modal-note-editor p { margin: 0; color: #68748a; font-size: .86rem; }
+.modal-note-editor textarea { width: 100%; padding: 12px; border: 1px solid #b8c9d8; border-radius: 12px; color: #263552; background: #fff; resize: none; }
+.modal-note-editor small { color: #6e907d; font-size: .75rem; }
+.journey-tool-modal .feedback-card { margin: 0; border: 0; padding: 0; background: transparent; box-shadow: none; }
+@media (max-width: 560px) {
+  .journey-stage-page { height: calc(100svh - 74px - 66px); padding: 6px 9px 3px; }
+  .journey-stage-page .part-toolbar { justify-content: center; }
+  .journey-stage-page .part-screen-shell { grid-template-rows: minmax(185px, 40%) minmax(0, 1fr); }
+  .journey-stage-page .part-card { padding: 13px 12px; border-radius: 20px; }
+  .journey-stage-page .part-card .quest-banner { margin-bottom: 8px; padding: 7px 9px; }
+  .journey-stage-page .part-card .quest-actions { gap: 4px; margin: 8px 0 10px; }
+  .journey-stage-page .part-card .quest-actions button { min-height: 38px; padding: 5px 3px; font-size: .65rem; }
+  .companion-scene.is-open .companion-trigger .character-avatar { width: 142px; height: 186px; }
+  .companion-scene .companion-action-card { width: 238px; }
+  .companion-action-grid { width: 238px; height: 174px; }
+}
+
+/* Story-card journey hub: keep the companion visible and make the next action obvious. */
+.part-screen-shell { gap: 10px; touch-action: pan-y; }
+.part-story-scene { min-height: clamp(250px, 42svh, 380px); overflow: visible; touch-action: pan-y; }
+.part-story-scene .companion-scene { position: absolute; z-index: 4; left: calc(5% + (var(--route-progress, 0) * 78%)); bottom: -8px; transition: left .45s ease; }
+.part-story-scene .companion-scene .companion-trigger { padding: 0; border: 0; background: transparent; cursor: pointer; }
+.part-story-scene .companion-scene .character-avatar { position: relative; left: auto; bottom: auto; width: 124px; height: 164px; }
+.companion-action-hub { position: relative; }
+.companion-action-card { position: absolute; z-index: 8; min-width: 220px; padding: 12px; border: 1px solid #e0d2bf; border-radius: 16px; color: #30406d; background: rgba(255,253,249,.97); box-shadow: 0 14px 30px rgba(73,67,53,.18); }
+.companion-scene .companion-action-card { left: 50%; bottom: calc(100% + 10px); width: min(220px, calc(100vw - 24px)); transform: translateX(-50%); }
+.companion-dock { position: fixed; z-index: 30; right: 18px; bottom: 24px; }
+.companion-dock .companion-trigger { display: grid; place-items: center; width: 64px; height: 64px; padding: 6px; border: 1px solid #d7d3ee; border-radius: 50%; background: #fffdf9; box-shadow: 0 10px 24px rgba(48,64,109,.2); cursor: pointer; }
+.companion-dock .companion-action-card { right: 0; bottom: calc(100% + 10px); }
+.companion-action-title { margin: 0 0 9px; color: #263552; font-size: .8rem; font-weight: 850; }
+.companion-action-grid, .companion-movement-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.companion-movement-grid { margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee5d8; }
+.companion-action-grid button, .companion-movement-grid button { min-height: 38px; padding: 6px 5px; border: 1px solid #d7d9ee; border-radius: 10px; color: #30406d; background: #f7f7ff; font-size: .72rem; font-weight: 800; }
+.companion-action-grid button:hover, .companion-action-grid button:focus-visible, .companion-movement-grid button:hover, .companion-movement-grid button:focus-visible { border-color: #5b61d6; background: #eef0ff; }
+.companion-action-card small { display: block; margin-top: 9px; color: #7b7880; font-size: .65rem; text-align: center; }
+.story-swipe-hint { position: absolute; z-index: 3; right: 12px; bottom: 12px; padding: 6px 9px; border-radius: 99px; color: #493e3a; background: rgba(255,251,238,.88); font-size: .68rem; font-weight: 800; }
+.part-card { position: relative; z-index: 2; margin-top: -20px; }
+@media (max-width: 560px) {
+  .part-story-scene { min-height: clamp(235px, 38svh, 310px); border-radius: 20px 20px 14px 14px; }
+  .part-story-scene .companion-scene .character-avatar { width: 112px; height: 148px; }
+  .companion-dock { right: 12px; bottom: 84px; }
+  .companion-dock .companion-action-card { right: -2px; min-width: min(220px, calc(100vw - 24px)); }
+  .part-card { margin-top: -14px; }
+  .story-swipe-hint { font-size: .62rem; }
+}
+
+/* The compact header should hide only the companion label, never the avatar body. */
+@media (max-width: 560px) {
+  .header-character .character-avatar .character-body { display: block; }
+  .header-character > span:last-child { display: none; }
+}
 .story-sun { position: absolute; top: 21px; left: 10%; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,210,120,.86); box-shadow: 0 0 0 8px rgba(255,210,120,.18); }
 .story-path { position: absolute; right: 25%; bottom: -35px; width: 150px; height: 110px; border: 12px solid rgba(255,246,218,.72); border-left-color: transparent; border-bottom-color: transparent; border-radius: 50%; transform: rotate(20deg); }
 @media (min-width: 680px) {
@@ -551,3 +825,268 @@ body { background: #f8f4ec; }
   .settings-choice-row { grid-template-columns: 1fr; }
   .screen-heading { padding-left: 0; padding-right: 0; }
 }
+
+/* Final phone pass: keep the adventure card readable and make the current place easy to change. */
+@media (max-width: 560px) {
+  .adventure-home { border-radius: 22px; }
+  .home-scene { min-height: 285px; }
+  .home-scene .character-avatar { width: 140px; height: 218px; bottom: -4px; }
+  .home-copy { padding: 20px 15px 24px; }
+  .home-copy h2 { margin: 4px 0 8px; font-size: clamp(1.9rem, 10vw, 2.35rem); }
+  .home-details { font-size: .8rem; line-height: 1.4; }
+  .part-card { padding: 17px 13px; border-radius: 18px; }
+  .part-card h2 { max-width: 82%; margin: 10px 0 7px; font-size: 1.65rem; }
+  .part-summary { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: .84rem; line-height: 1.42; }
+  .official-part-card > p { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: .76rem; line-height: 1.4; }
+  .official-part-links { display: grid; grid-template-columns: 1fr; gap: 6px; }
+  .official-part-links a { display: flex; align-items: center; justify-content: space-between; min-height: 43px; }
+  .next-nav { position: sticky; bottom: 70px; z-index: 6; margin: 12px -3px 0; padding: 7px; border: 1px solid #e3dacd; border-radius: 14px; background: rgba(255,253,249,.95); box-shadow: 0 8px 20px rgba(73,67,53,.1); }
+}
+
+/* Companion colour controls: keep them tactile, clear and usable on a phone. */
+.colour-picker { display: grid; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #e9dfd1; }
+.colour-picker-group { display: grid; gap: 7px; }
+.colour-swatches { display: flex; flex-wrap: wrap; gap: 7px; }
+.colour-swatch-button { display: grid; justify-items: center; gap: 3px; min-width: 52px; padding: 5px 4px; border: 1px solid #ded3c3; border-radius: 10px; color: var(--muted); background: #fffdf8; font-size: .65rem; }
+.colour-swatch-button.selected { border-color: #5b61d6; background: #eef0ff; box-shadow: inset 0 0 0 1px #5b61d6; }
+.colour-swatch { width: 22px; height: 22px; border: 2px solid rgba(36,54,83,.22); border-radius: 50%; background: var(--swatch-colour); }
+.colour-swatch-button[data-colour="natural"] .colour-swatch { background: conic-gradient(#8a5a3b 0 50%, #d8a94d 50%); }
+.character-hair-tint { position: absolute; z-index: 3; top: 3%; left: 16%; width: 68%; height: 28%; border-radius: 50% 50% 35% 35%; background: var(--hair-colour); opacity: .22; mix-blend-mode: color; pointer-events: none; }
+.character-hair-natural .character-hair-tint { display: none; }
+.character-eye-tint { position: absolute; z-index: 6; top: 15.2%; width: 6%; height: 4%; border: 1px solid rgba(255,255,255,.68); border-radius: 50%; background: var(--eye-colour); box-shadow: 0 0 0 1px rgba(21,35,62,.25); pointer-events: none; }
+.character-eye-tint.eye-left { left: 39%; }
+.character-eye-tint.eye-right { right: 39%; }
+@media (max-width: 560px) {
+  .colour-swatches { gap: 5px; }
+  .colour-swatch-button { min-width: 46px; padding: 4px 2px; font-size: .58rem; }
+  .colour-swatch { width: 19px; height: 19px; }
+}
+
+/* Updated illustrated companion accessories. The standing portraits already include
+   their own satchels, so wheelchair companions receive a matching ministry bag. */
+.character-backpack { display: none; }
+.character-style-wheelchair-boy .character-backpack,
+.character-style-wheelchair-girl .character-backpack { display: grid; z-index: 4; right: 0; bottom: 31%; left: auto; width: 27%; height: 26%; border: 2px solid #6b432d; border-radius: 10% 10% 18% 18%; background: linear-gradient(145deg, #c18a55, #7d4d32); box-shadow: inset -3px 3px 0 rgba(255,236,194,.25), 0 4px 5px rgba(20,32,55,.24); transform: rotate(-4deg); }
+.character-style-wheelchair-boy .character-backpack::before,
+.character-style-wheelchair-girl .character-backpack::before { top: -19%; left: 9%; width: 82%; height: 34%; border: 2px solid #6b432d; border-bottom: 0; border-radius: 50% 50% 0 0; }
+.character-style-wheelchair-boy .character-backpack::after,
+.character-style-wheelchair-girl .character-backpack::after { content: ''; position: absolute; top: 32%; right: 0; left: 0; height: 31%; border-top: 2px solid rgba(255,236,194,.45); border-bottom: 2px solid rgba(82,48,32,.35); background: linear-gradient(180deg, rgba(255,236,194,.16), transparent); }
+.character-style-wheelchair-boy .character-backpack { right: 0; bottom: 31%; width: 27%; height: 26%; border-color: #6b432d; border-radius: 10% 10% 18% 18%; background: linear-gradient(145deg, #c18a55, #7d4d32); box-shadow: inset -3px 3px 0 rgba(255,236,194,.25), 0 4px 5px rgba(20,32,55,.24); transform: rotate(-4deg); }
+.character-style-wheelchair-boy .character-backpack::before { border-color: #6b432d; }
+.character-glasses { z-index: 8; top: 14.2%; left: 28%; width: 44%; height: 9%; transform: rotate(-4deg); background: linear-gradient(#263b61, #263b61) center 47% / 18% 1px no-repeat; }
+.character-glasses::before, .character-glasses::after { top: 2%; width: 42%; height: 82%; border: 1.8px solid #263b61; border-radius: 48%; background: rgba(218,238,255,.3); box-shadow: inset 0 0 5px rgba(255,255,255,.45), 0 1px 1px rgba(20,32,55,.18); }
+.character-glasses::before { left: 0; }
+.character-glasses::after { right: 0; }
+.character-cap { z-index: 8; top: 1.8%; left: 22%; width: 56%; height: 14%; border: 0; border-radius: 50% 50% 28% 28%; background: linear-gradient(155deg, #7181e2 0%, #4d5bc2 55%, #34448e 100%); box-shadow: inset 0 3px 0 rgba(255,255,255,.27), 0 3px 4px rgba(20,32,55,.2); transform: rotate(-5deg); }
+.character-cap::before { content: ''; position: absolute; top: 18%; left: 14%; width: 55%; height: 24%; border-radius: 50%; background: rgba(255,255,255,.15); }
+.character-cap::after { right: -11%; top: 56%; width: 58%; height: 22%; border-radius: 50% 20% 50% 20%; background: #34448e; transform: rotate(7deg); }
+.character-cap { display: none !important; }
+.character-tablet { z-index: 7; right: 9%; bottom: 36%; width: 30%; height: 19%; border: 2px solid #263b61; border-radius: 8%; background: linear-gradient(145deg, #91b7cf, #304f73); box-shadow: inset 0 0 0 2px rgba(255,255,255,.22), 0 3px 4px rgba(20,32,55,.22); transform: rotate(-8deg); }
+.character-tablet::after { content: ''; position: absolute; top: 14%; right: 12%; width: 8%; height: 8%; border-radius: 50%; background: #f5c866; }
+.character-phone { z-index: 7; right: 18%; bottom: 42%; width: 13%; height: 22%; border: 2px solid #263b61; border-radius: 20%; background: linear-gradient(145deg, #304f73, #162a49); box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 0 3px 4px rgba(20,32,55,.22); transform: rotate(8deg); }
+.character-phone::after { content: ''; position: absolute; right: 25%; bottom: 8%; left: 25%; height: 2px; border-radius: 99px; background: rgba(255,255,255,.65); }
+.accessory-options button:disabled { cursor: default; opacity: .72; }
+
+/* Keep the glasses on the eyes rather than the ears. The portrait assets are
+   full-body illustrations, so these coordinates are deliberately tied to the
+   face area of the artwork. Lens fill is neutral so it cannot make brown eyes
+   appear blue. */
+.character-glasses { z-index: 8; top: 33.2%; left: 45%; width: 15%; height: 7%; transform: rotate(-2deg); background: linear-gradient(#263b61, #263b61) center 47% / 16% 1px no-repeat; }
+.character-glasses::before, .character-glasses::after { top: 2%; width: 42%; height: 82%; border: 1.25px solid #263b61; border-radius: 48%; background: rgba(255,255,255,.08); box-shadow: inset 0 0 3px rgba(255,255,255,.35), 0 1px 1px rgba(20,32,55,.14); }
+.character-glasses::before { left: 0; }
+.character-glasses::after { right: 0; }
+
+/* The eye tint is a small iris overlay aligned to the eyes in the portrait,
+   not a large coloured patch over the face. */
+.character-eye-tint { z-index: 6; top: 35.1%; width: 3.8%; height: 2.8%; border: 1px solid rgba(21,35,62,.38); border-radius: 50%; background: var(--eye-colour); box-shadow: 0 0 0 1px rgba(255,255,255,.28); pointer-events: none; }
+.character-eye-tint.eye-left { left: 46.6%; }
+.character-eye-tint.eye-right { right: 42.2%; }
+
+/* Illustrated detail layers: eyes and accessories are bitmap artwork, not CSS shapes. */
+.character-eye-tint { display: none; }
+.character-eye-art { position: absolute; z-index: 6; top: 11%; left: 32%; width: 36%; height: 15%; object-fit: contain; pointer-events: none; }
+.character-accessory { object-fit: contain; background: none !important; border: 0 !important; box-shadow: none !important; }
+.character-glasses { display: block; top: 9%; left: 27%; width: 46%; height: 16%; transform: rotate(-2deg); }
+.character-glasses::before, .character-glasses::after { display: none; }
+.character-tablet { display: block; top: 45%; right: 5%; width: 22%; height: 24%; transform: rotate(-8deg); }
+.character-phone { display: block; top: 47%; right: 13%; width: 12%; height: 22%; transform: rotate(8deg); }
+img.character-backpack { display: block; top: 31%; right: auto; bottom: auto; left: 2%; width: 30%; height: 32%; transform: rotate(-4deg); }
+
+/* Final companion scale pass: make the character easier to recognise while
+   keeping the small mobile controls compact. */
+.avatar-small { width: 36px; height: 46px; }
+.avatar-medium { width: 64px; height: 82px; }
+.avatar-large { width: 116px; height: 145px; }
+.avatar-hero { width: 175px; height: 216px; }
+.header-character .avatar-small { width: 36px; height: 46px; }
+.mobile-nav .character-avatar { width: 28px; height: 36px; min-height: 28px; }
+.character-card .avatar-medium, .variant-picker .avatar-medium { width: 64px; height: 82px; }
+
+/* These accessories are held items, not body-sized blocks. */
+.character-tablet { z-index: 7; top: 51%; right: 17%; bottom: auto; width: 18%; height: 14%; border-width: 1.5px; border-radius: 8%; transform: rotate(-8deg); }
+.character-phone { z-index: 7; top: 51%; right: 22%; bottom: auto; width: 8%; height: 14%; border-width: 1.5px; transform: rotate(8deg); }
+
+/* Keep optional held items separate when a user selects more than one. They
+   stay inside the scaled character body, so the placements follow every
+   avatar size and movement variant without colliding with one another. */
+.character-tablet { top: 49%; right: 5%; width: 18%; height: 17%; transform: rotate(-8deg); }
+.character-phone { top: 55%; right: -4%; width: 9%; height: 14%; transform: rotate(8deg); }
+
+@media (max-width: 700px) {
+  .adventure-scene .avatar-hero { width: 136px; height: 168px; }
+}
+
+@media (max-width: 560px) {
+  .home-scene .character-avatar { width: 156px; height: 242px; bottom: -4px; }
+  .part-story-scene .character-avatar { width: 82px; height: 106px; }
+}
+
+/* Final avatar layer model. The portrait files have different canvas ratios,
+   so accessories must live on the same centred art stage as the portrait.
+   This keeps glasses, bags and held devices attached when the avatar is
+   resized, moved through the journey, or changed to a wheelchair portrait. */
+.character-body { --art-width: 100%; position: absolute; inset: 0; }
+.character-style-wheelchair-boy .character-body,
+.character-style-wheelchair-girl .character-body { --art-width: 100%; }
+.character-layer-stage { position: absolute; top: 0; bottom: 0; left: 50%; width: var(--art-width); transform: translateX(-50%); }
+.character-layer-stage .character-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+
+/* The source artwork already contains the face, eyes and hair. Do not paint
+   large approximations over it; those overlays were the cause of the blue
+   eyes and blocky blonde-head preview. */
+.character-hair-tint,
+.character-eye-art { display: none !important; }
+
+/* Glasses are a separate transparent drawing, anchored to the face area of
+   the corresponding portrait family rather than to the outer avatar box. */
+.character-glasses {
+  z-index: 8;
+  /* The glasses artwork is a transparent, wide drawing.  It must fill the
+     face anchor box; `contain` shrinks it again because the portrait stage is
+     intentionally narrower than the original artwork canvas. */
+  top: 17.2%;
+  left: 28.5%;
+  width: 43%;
+  height: 14%;
+  object-fit: fill;
+  transform: rotate(-2deg);
+}
+.character-style-classic-boy .character-glasses,
+.character-style-classic-girl .character-glasses { top: 17.2%; left: 28.5%; width: 43%; height: 14%; }
+.character-style-asian-boy .character-glasses,
+.character-style-asian-girl .character-glasses { top: 16.6%; left: 29.5%; width: 41%; height: 14%; }
+.character-style-african-boy .character-glasses,
+.character-style-african-girl .character-glasses { top: 17%; left: 28%; width: 44%; height: 14%; }
+.character-style-auburn-girl .character-glasses { top: 17%; left: 28.5%; width: 43%; height: 14%; }
+.character-style-sandy-boy .character-glasses { top: 17%; left: 28.5%; width: 43%; height: 14%; }
+.character-style-wheelchair-boy .character-glasses,
+.character-style-wheelchair-girl .character-glasses { top: 16.8%; left: 28%; width: 44%; height: 14%; }
+
+.customise-layer-note { margin: 12px 0 0; color: var(--muted); font-size: .72rem; line-height: 1.45; }
+
+/* Held items use the same stage, so their positions scale with the portrait
+   instead of floating at unrelated positions in each preview card. */
+.character-layer-stage .character-backpack { top: 36%; right: auto; bottom: auto; left: 3%; width: 24%; height: 24%; object-fit: fill; transform: rotate(-4deg); }
+.character-layer-stage .character-tablet { top: 49%; right: 5%; bottom: auto; width: 18%; height: 17%; transform: rotate(-8deg); }
+.character-layer-stage .character-phone { top: 55%; right: -4%; bottom: auto; width: 9%; height: 14%; transform: rotate(8deg); }
+
+/* Wheelchair companions use the same movement controls. Their full portrait has
+   a transparent chair canvas, so animate the shared art stage as well as the
+   outer avatar to make every movement unmistakably visible. */
+.character-style-wheelchair-boy.character-action-fidget .character-layer-stage,
+.character-style-wheelchair-girl.character-action-fidget .character-layer-stage { animation: wheelchair-fidget 1.2s ease-in-out; }
+.character-style-wheelchair-boy.character-action-bounce .character-layer-stage,
+.character-style-wheelchair-girl.character-action-bounce .character-layer-stage { animation: wheelchair-bounce .85s ease-in-out; }
+.character-style-wheelchair-boy.character-action-stretch .character-layer-stage,
+.character-style-wheelchair-girl.character-action-stretch .character-layer-stage { animation: wheelchair-stretch 1.1s ease-in-out; }
+.character-style-wheelchair-boy.character-action-sway .character-layer-stage,
+.character-style-wheelchair-girl.character-action-sway .character-layer-stage { animation: wheelchair-sway 1.2s ease-in-out; }
+.character-style-wheelchair-boy.character-action-shake .character-layer-stage,
+.character-style-wheelchair-girl.character-action-shake .character-layer-stage { animation: wheelchair-shake .9s ease-in-out; }
+.character-style-wheelchair-boy.character-action-dance .character-layer-stage,
+.character-style-wheelchair-girl.character-action-dance .character-layer-stage { animation: wheelchair-dance 1.5s ease-in-out; }
+@keyframes wheelchair-fidget { 0%, 100% { transform: translateX(-50%) rotate(0); } 20% { transform: translateX(calc(-50% - 3px)) rotate(-2deg); } 40% { transform: translateX(calc(-50% + 3px)) rotate(2deg); } 60% { transform: translateX(calc(-50% - 2px)) rotate(-2deg); } 80% { transform: translateX(calc(-50% + 2px)) rotate(1deg); } }
+@keyframes wheelchair-bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 35% { transform: translateX(-50%) translateY(-8px); } 60% { transform: translateX(-50%) translateY(2px); } 80% { transform: translateX(-50%) translateY(-3px); } }
+@keyframes wheelchair-stretch { 0%, 100% { transform: translateX(-50%) scale(1); } 35% { transform: translateX(-50%) translateY(-4px) scale(1.04); } 65% { transform: translateX(-50%) translateY(1px) scale(.99); } }
+@keyframes wheelchair-sway { 0%, 100% { transform: translateX(-50%) rotate(0); } 25% { transform: translateX(calc(-50% - 4px)) rotate(-4deg); } 75% { transform: translateX(calc(-50% + 4px)) rotate(4deg); } }
+@keyframes wheelchair-shake { 0%, 100% { transform: translateX(-50%); } 20%, 60% { transform: translateX(calc(-50% - 6px)); } 40%, 80% { transform: translateX(calc(-50% + 6px)); } }
+@keyframes wheelchair-dance { 0%, 100% { transform: translateX(-50%) rotate(0) translateY(0); } 25% { transform: translateX(calc(-50% - 6px)) rotate(-4deg) translateY(-4px); } 50% { transform: translateX(-50%) rotate(0) translateY(0); } 75% { transform: translateX(calc(-50% + 6px)) rotate(4deg) translateY(-4px); } }
+.sensory-calm .character-style-wheelchair-boy.character-action-fidget .character-layer-stage,
+.sensory-calm .character-style-wheelchair-girl.character-action-fidget .character-layer-stage { animation: wheelchair-fidget 1.2s ease-in-out !important; }
+.sensory-calm .character-style-wheelchair-boy.character-action-bounce .character-layer-stage,
+.sensory-calm .character-style-wheelchair-girl.character-action-bounce .character-layer-stage { animation: wheelchair-bounce .85s ease-in-out !important; }
+.sensory-calm .character-style-wheelchair-boy.character-action-stretch .character-layer-stage,
+.sensory-calm .character-style-wheelchair-girl.character-action-stretch .character-layer-stage { animation: wheelchair-stretch 1.1s ease-in-out !important; }
+.sensory-calm .character-style-wheelchair-boy.character-action-sway .character-layer-stage,
+.sensory-calm .character-style-wheelchair-girl.character-action-sway .character-layer-stage { animation: wheelchair-sway 1.2s ease-in-out !important; }
+.sensory-calm .character-style-wheelchair-boy.character-action-shake .character-layer-stage,
+.sensory-calm .character-style-wheelchair-girl.character-action-shake .character-layer-stage { animation: wheelchair-shake .9s ease-in-out !important; }
+.sensory-calm .character-style-wheelchair-boy.character-action-dance .character-layer-stage,
+.sensory-calm .character-style-wheelchair-girl.character-action-dance .character-layer-stage { animation: wheelchair-dance 1.5s ease-in-out !important; }
+
+/* Quiet journey marker: a contextual stop indicator, never a countdown or control. */
+.adventure-home .scene-sun { display: grid; place-items: center; width: 48px; height: 48px; border: 2px solid rgba(255,255,255,.78); background: rgba(255,210,120,.72); box-shadow: 0 0 0 7px rgba(255,210,120,.16), 0 5px 12px rgba(70,56,38,.1); pointer-events: none; }
+.adventure-home .scene-sun::after { content: attr(data-label); color: #5e4939; font-size: .67rem; font-weight: 900; letter-spacing: -.02em; }
+
+/* Personal study and meeting preparation tools. */
+.tool-page { padding-top: 22px; }
+.quick-capture { margin-left: 0; margin-right: 0; }
+@media (max-width: 560px) {
+  .quick-capture { align-items: stretch; }
+  .quick-capture span { flex-basis: 100%; }
+  .quick-capture button { flex: 1; }
+  .quick-notes-card { margin-bottom: 12px; }
+}
+.tool-screen { display: grid; gap: 14px; }
+.tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.tool-card { padding: 20px; border: 1px solid #e1c9a8; border-radius: 20px; background: #fffdf8; box-shadow: 0 10px 24px rgba(73,67,53,.06); }
+.tool-card h3 { margin: 7px 0 8px; color: #263552; }
+.tool-card p { margin: 0 0 13px; color: #68748a; line-height: 1.5; }
+.tool-card-label { color: #a96741; font-size: .7rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+.tool-choice-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 0; }
+.tool-choice-row button { padding: 9px 11px; border: 1px solid #ded3c3; border-radius: 99px; color: #493e3a; background: #fffaf0; font-size: .76rem; font-weight: 750; }
+.tool-choice-row button.selected { border-color: #5b61d6; color: #30406d; background: #eef0ff; box-shadow: inset 0 0 0 1px #5b61d6; }
+.tool-field { display: grid; gap: 6px; color: #263552; font-size: .8rem; font-weight: 800; }
+.tool-field input, .tool-card textarea { width: 100%; padding: 11px 12px; border: 1px solid #d7c7af; border-radius: 10px; color: #263552; background: #fffdf8; font: inherit; }
+.tool-card textarea { resize: vertical; line-height: 1.45; }
+.tool-saved { display: block; margin-top: 7px; color: #6e907d; font-size: .72rem; }
+.source-tool-card { display: flex; align-items: center; justify-content: space-between; gap: 18px; border-color: #d8e6e1; background: #eff8f4; }
+.source-tool-card h3 { margin-bottom: 3px; }
+.source-tool-card p { margin-bottom: 0; }
+.tool-links-card { grid-column: 1 / -1; }
+.tool-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.tool-links .settings-action { flex: 1 1 180px; }
+.tool-card-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.prep-progress { display: block; width: min(180px, 38%); height: 8px; overflow: hidden; border-radius: 99px; background: #e8e4ee; }
+.prep-progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #5b61d6, #78b8a1); transition: width .2s ease; }
+.prep-items { display: grid; gap: 8px; margin-top: 14px; }
+.prep-items label { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid #e1d6c6; border-radius: 11px; color: #493e3a; background: #fffaf0; font-size: .83rem; }
+.prep-items label.checked { border-color: #b7d6c8; color: #456c5b; background: #f0f8f3; }
+.prep-items input { width: 18px; height: 18px; accent-color: #5b61d6; }
+@media (max-width: 700px) {
+  .tool-grid { grid-template-columns: 1fr; }
+  .source-tool-card { align-items: stretch; flex-direction: column; }
+  .source-tool-card .official-jw-link { width: 100%; }
+  .tool-card-heading { align-items: stretch; flex-direction: column; }
+  .prep-progress { width: 100%; }
+}
+
+/* Final illustrated-layer pass: these transparent drawings replace the old CSS overlays.
+   Keep this block last so the old preview rules above cannot override it. */
+.character-eye-tint { display: none; }
+.character-eye-art { position: absolute; z-index: 6; top: 11%; left: 32%; width: 36%; height: 15%; object-fit: contain; pointer-events: none; }
+.character-accessory { object-fit: fill; background: none !important; border: 0 !important; box-shadow: none !important; }
+.character-glasses { display: block; top: 17.2%; left: 28.5%; width: 43%; height: 14%; transform: rotate(-2deg); }
+.character-style-asian-boy .character-glasses,
+.character-style-asian-girl .character-glasses { top: 16.6%; left: 29.5%; width: 41%; height: 14%; }
+.character-style-african-boy .character-glasses,
+.character-style-african-girl .character-glasses { top: 17%; left: 28%; width: 44%; height: 14%; }
+.character-style-wheelchair-boy .character-glasses,
+.character-style-wheelchair-girl .character-glasses { top: 16.8%; left: 28%; width: 44%; height: 14%; }
+.character-glasses::before, .character-glasses::after { display: none; }
+.character-tablet { display: block; top: 49%; right: 5%; width: 18%; height: 17%; transform: rotate(-8deg); }
+.character-phone { display: block; top: 55%; right: -4%; width: 9%; height: 14%; transform: rotate(8deg); }
+img.character-backpack,
+.character-style-wheelchair-boy img.character-backpack,
+.character-style-wheelchair-girl img.character-backpack { display: block; top: 36%; right: auto; bottom: auto; left: 3%; width: 24%; height: 24%; transform: rotate(-4deg); }
+.part-story-scene .character-avatar { right: auto; left: calc(15% + (var(--route-progress, 0) * 70%)); transition: left .45s ease; }

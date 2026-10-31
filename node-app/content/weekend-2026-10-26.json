@@ -1,0 +1,202 @@
+{
+  "approved": true,
+  "reviewedAt": "2026-10-25",
+  "meeting": {
+    "id": "weekend-2026-10-26",
+    "kind": "weekend",
+    "weekOf": "2026-10-26",
+    "contentStatus": "dated",
+    "theme": "Weekend meeting",
+    "bibleReading": "Cherish “the Privilege of Fearlessly Rendering Sacred Service”",
+    "material": {
+      "title": "Weekend companion outline",
+      "introduction": "Follow the public talk and the study at your own pace. Read the official material in JW Library.",
+      "appUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523",
+      "sourceUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523",
+      "sections": [
+        {
+          "id": "theme",
+          "heading": "Begin together",
+          "body": "Listen to the song and settle in at your own pace."
+        },
+        {
+          "id": "public-talk",
+          "heading": "Public talk",
+          "body": "Listen for one helpful idea. The talk topic is chosen by your congregation.",
+          "sourceUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523"
+        },
+        {
+          "id": "watchtower",
+          "heading": "Cherish “the Privilege of Fearlessly Rendering Sacred Service”",
+          "body": "Follow the study in JW Library. Keep a word, a sketch or a personal thought here.",
+          "sourceUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523"
+        },
+        {
+          "id": "closing",
+          "heading": "Take a thought with you",
+          "body": "You can return to your notes or drawing whenever you want."
+        }
+      ]
+    },
+    "parts": [
+      {
+        "id": "opening-song",
+        "title": "Opening song and prayer",
+        "durationMinutes": 5,
+        "section": "Opening",
+        "type": "Song",
+        "summary": "Which words in the song stand out to you?",
+        "references": [],
+        "activities": [
+          {
+            "id": "notice-opening-song",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "Which words in the song stand out to you?",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "Which words in the song stand out to you?",
+              "clues": [
+                "Notice a word you hear in the song.",
+                "Does the song remind you of something from the meeting?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ],
+        "appUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523",
+        "sourceUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523"
+      },
+      {
+        "id": "public-talk",
+        "title": "Public talk",
+        "durationMinutes": 30,
+        "section": "PublicTalk",
+        "type": "PublicTalk",
+        "summary": "Listen for one helpful idea or scripture. You can draw or write what you notice.",
+        "references": [],
+        "activities": [
+          {
+            "id": "talk-discovery",
+            "type": "ClueCards",
+            "title": "One thought to keep",
+            "prompt": "Notice one idea you would like to remember from the talk.",
+            "mission": {
+              "title": "One thought to keep",
+              "listeningObjective": "Notice one idea you would like to remember from the talk.",
+              "clues": [
+                "Listen for a word or idea that catches your attention.",
+                "Notice an example or scripture connected to that idea.",
+                "Draw it or keep it in your own words. You can also just listen."
+              ]
+            }
+          }
+        ],
+        "appUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523",
+        "sourceUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523"
+      },
+      {
+        "id": "study-song",
+        "title": "Song 62",
+        "durationMinutes": 5,
+        "section": "Watchtower",
+        "type": "Song",
+        "summary": "Is there a word or feeling in this song you would like to keep?",
+        "references": [],
+        "activities": [
+          {
+            "id": "notice-study-song",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "Is there a word or feeling in this song you would like to keep?",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "Is there a word or feeling in this song you would like to keep?",
+              "clues": [
+                "Notice a word you hear in the song.",
+                "Does the song remind you of something from the meeting?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ],
+        "appUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523"
+      },
+      {
+        "id": "watchtower-study",
+        "title": "Cherish “the Privilege of Fearlessly Rendering Sacred Service”",
+        "durationMinutes": 60,
+        "section": "Watchtower",
+        "type": "WatchtowerStudy",
+        "summary": "Follow the discussion in JW Library. Keep a personal discovery in words or a drawing.",
+        "references": [],
+        "activities": [
+          {
+            "id": "study-discovery",
+            "type": "ClueCards",
+            "title": "One thought to keep",
+            "prompt": "Notice one thought from the discussion that helps you.",
+            "mission": {
+              "title": "One thought to keep",
+              "listeningObjective": "Notice one thought from the discussion that helps you.",
+              "clues": [
+                "Listen for a word or idea that catches your attention.",
+                "Notice an example or scripture connected to that idea.",
+                "Draw it or keep it in your own words. You can also just listen."
+              ]
+            }
+          }
+        ],
+        "appUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523",
+        "sourceUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523",
+        "studyGuide": {
+          "paragraphCount": 16,
+          "cues": [
+            {
+              "from": 1,
+              "to": 6,
+              "prompt": "Notice the gift being discussed and why it matters."
+            },
+            {
+              "from": 7,
+              "to": 11,
+              "prompt": "Listen for encouragement for someone who feels unworthy."
+            },
+            {
+              "from": 12,
+              "to": 16,
+              "prompt": "Notice a reason to share something helpful with others."
+            }
+          ]
+        }
+      },
+      {
+        "id": "closing-song",
+        "title": "Closing song and prayer",
+        "durationMinutes": 5,
+        "section": "Closing",
+        "type": "Song",
+        "summary": "What would you like to take with you from today’s meeting?",
+        "references": [],
+        "activities": [
+          {
+            "id": "notice-closing-song",
+            "type": "ClueCards",
+            "title": "A thought to keep",
+            "prompt": "What would you like to take with you from today’s meeting?",
+            "mission": {
+              "title": "A thought to keep",
+              "listeningObjective": "What would you like to take with you from today’s meeting?",
+              "clues": [
+                "Notice a word you hear in the song.",
+                "Does the song remind you of something from the meeting?",
+                "Keep it as a word, a drawing or a question. Listening is enough too."
+              ]
+            }
+          }
+        ],
+        "appUrl": "https://www.jw.org/finder?srcid=jwlshare&wtlocale=E&prefer=lang&docid=2026523"
+      }
+    ]
+  }
+}

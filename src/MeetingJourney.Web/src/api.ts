@@ -5,9 +5,18 @@ import type { Meeting } from './types';
 // requests by default so the hosted app does not call localhost.
 const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? '';
 
-export async function loadMeeting(signal?: AbortSignal): Promise<Meeting> {
-  const response = await fetch(`${API_BASE}/api/meetings/current`, { signal });
+export async function loadMeeting(signal?: AbortSignal, kind?: 'midweek' | 'weekend', date?: string): Promise<Meeting> {
+  const query = kind && date ? `?${new URLSearchParams({ type: kind, date })}` : '';
+  const response = await fetch(`${API_BASE}/api/meetings/current${query}`, { signal, cache: 'no-store' });
   if (!response.ok) throw new Error(`Meeting request failed (${response.status})`);
   return response.json() as Promise<Meeting>;
+}
+
+export async function loadMeetingMonth(date: string, signal?: AbortSignal): Promise<Meeting[]> {
+  const response = await fetch(`${API_BASE}/api/meetings/month?${new URLSearchParams({ date })}`, { signal, cache: 'no-store' });
+  if (!response.ok) throw new Error(`Meeting month request failed (${response.status})`);
+  const result = await response.json() as { month: string; meetings: Meeting[] };
+  if (result.month !== date.slice(0, 7) || !Array.isArray(result.meetings)) throw new Error('Invalid meeting month');
+  return result.meetings;
 }
 

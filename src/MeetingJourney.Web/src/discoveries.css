@@ -1,0 +1,77 @@
+/* Location artwork changes with the section; no moving backgrounds or auto-play. */
+.app .journey-stage-page .part-story-scene { background-image: linear-gradient(#fff9e408, #fff9e415), var(--scene-image, var(--valley-art)); }
+.storybook-home .home-scene { background-image: linear-gradient(#fff9e408, #fff9e418), url('/assets/compact-v1/journey-gate-v1-960.webp'); background-position: center 48%; }
+
+.app .discovery-map-screen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: 100%; height: 100%; min-height: 0; overflow: hidden; }
+.discovery-map-heading { display: flex; align-items: center; gap: 12px; padding: 5px 4px 11px; }
+.discovery-map-heading .eyebrow { margin: 0 0 3px; font-size: .64rem; }
+.discovery-map-heading h2 { margin: 0; color: #324362; font-size: clamp(1.3rem, 3vw, 1.8rem); }
+.discovery-map-heading p:last-child { margin: 4px 0 0; color: #7c725f; font-size: .77rem; }
+.discovery-map-heading > button { margin-left: auto; min-height: 40px; min-width: 50px; border: 1px solid #d8c3a1; border-radius: 12px; color: #43547d; background: #fff9eb; font-size: .76rem; }
+.discovery-map-workspace { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); min-height: 0; overflow: hidden; border: 1px solid #dbc6a2; border-radius: 22px; background: radial-gradient(ellipse, #f6e6c8, #e9d6b2); }
+.discovery-map-workspace.has-treasure-open { grid-template-columns: minmax(0, 1fr) minmax(280px, 42%); }
+.treasure-map-viewport { display: grid; place-items: center; min-width: 0; min-height: 0; overflow: hidden; }
+.treasure-terrain { position: relative; flex: none; }
+.treasure-terrain img { display: block; width: 100%; height: 100%; max-width: none; object-fit: fill; user-select: none; }
+.treasure-stop { position: absolute; z-index: 2; left: var(--treasure-x); top: var(--treasure-y); transform: translate(-50%, -50%); }
+.treasure-stop-button { position: relative; display: block; width: 52px; height: 53px; padding: 0; border: 0; border-radius: 12px; background: transparent; cursor: pointer; }
+.treasure-stop-button:focus-visible { outline: 3px solid #354f7d; outline-offset: 2px; background: #fff9e67a; }
+.treasure-chest { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 2px 2px #5c492d3d); }
+.chest-lid { transform-box: fill-box; transform-origin: 15% 90%; transition: transform .28s ease; }
+.chest-inner { opacity: 0; }
+.treasure-chest.is-open .chest-lid { transform: translateY(-11px) rotate(-17deg); }
+.treasure-chest.is-open .chest-inner { opacity: 1; }
+.treasure-stop-number { position: absolute; right: -1px; bottom: -1px; display: grid; place-items: center; min-width: 19px; height: 19px; padding: 0 3px; border: 1px solid #e3d4b3; border-radius: 50%; color: #514d42; background: #fffae8; font-size: .6rem; font-weight: 800; }
+.treasure-stop-preview { position: absolute; z-index: 8; display: none; left: 50%; bottom: calc(100% + 9px); width: 190px; max-width: 52vw; padding: 9px 11px; transform: translateX(-50%); border: 1px solid #d7bd8e; border-radius: 12px; color: #454b59; background: #fff9eaf7; box-shadow: 0 6px 15px #473b2726; pointer-events: none; }
+.treasure-stop:hover, .treasure-stop:focus-within { z-index: 9; }
+.treasure-stop:hover .treasure-stop-preview, .treasure-stop:focus-within .treasure-stop-preview { display: block; }
+.treasure-stop-preview strong { display: block; font-size: .78rem; }
+.treasure-stop-preview small { display: block; margin-top: 4px; color: #8a7050; font-size: .65rem; }
+.treasure-stop-preview p { margin: 5px 0 0; font-size: .73rem; line-height: 1.35; }
+.open-treasure { position: relative; z-index: 10; min-width: 0; min-height: 0; padding: 14px; overflow-y: auto; border-left: 1px solid #ddc7a3; background: #fff9e9; }
+.close-treasure { position: absolute; z-index: 2; top: 8px; right: 8px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #dbc5a1; border-radius: 50%; color: #43547d; background: #fffdf5; font-size: 1.2rem; }
+.open-treasure-heading { padding: 0 28px 7px 0; border-bottom: 1px solid #e5d5b8; }
+.open-treasure-heading > .treasure-chest { width: 65px; height: 65px; }
+.open-treasure-heading .eyebrow { margin: 4px 0; color: #9c7049; font-size: .6rem; }
+.open-treasure-heading h3 { margin: 0 0 5px; color: #354769; font-size: 1.1rem; }
+.treasure-contents { animation: treasure-content-appear .25s ease both; }
+@keyframes treasure-content-appear { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.treasure-contents section { margin: 12px 0; padding: 10px; border: 1px solid #e8d8ba; border-radius: 12px; background: #fffdf5; }
+.treasure-contents h4 { margin: 0 0 8px; color: #8b6643; font-size: .74rem; }
+.treasure-own-words { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #44536c; font-size: .87rem; line-height: 1.5; }
+.treasure-feeling-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 7px; }
+.treasure-feeling-tags span { padding: 4px 8px; border: 1px solid #dfc9bf; border-radius: 99px; color: #855b69; background: #fff0ed; font-size: .7rem; }
+.treasure-drawing-preview { display: block; width: 100%; max-height: 42dvh; object-fit: contain; border: 1px solid #dfd4bd; border-radius: 8px; background: #fffdf7; }
+.treasure-page-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 7px; }
+.treasure-page-tabs button { min-height: 36px; padding: 4px 8px; border: 1px solid #d7c9ae; border-radius: 10px; color: #52618a; background: #fff9eb; font-size: .7rem; }
+.treasure-page-tabs button[aria-pressed="true"] { color: #fff; background: #52618a; }
+.treasure-return { width: 100%; min-height: 43px; padding: 8px 12px; border: 0; border-radius: 99px; color: #fff; background: #41577f; font-size: .75rem; }
+.treasure-list { display: grid; align-content: start; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 10px; padding: 12px; min-height: 0; overflow: auto; }
+.treasure-list > button { display: flex; align-items: center; gap: 9px; min-height: 75px; padding: 10px; border: 1px solid #dfc99f; border-radius: 14px; color: #40516f; background: #fff9e9; text-align: left; }
+.treasure-list .treasure-chest { flex: 0 0 52px; width: 52px; height: 52px; }
+.treasure-list strong { display: block; font-size: .86rem; }
+.treasure-list small { display: block; margin-top: 5px; color: #8d7454; font-size: .69rem; }
+.treasure-map-message { position: absolute; z-index: 3; left: 50%; bottom: 14px; width: min(360px, calc(100% - 28px)); padding: 13px 17px; transform: translateX(-50%); border: 1px solid #d8c29b; border-radius: 15px; color: #5e635b; background: #fff8e9ee; text-align: center; font-size: .85rem; box-shadow: 0 5px 20px #65543814; }
+.treasure-map-message p { margin: 6px 0 0; font-size: .78rem; line-height: 1.4; }
+.treasure-map-message button { min-height: 40px; margin-top: 8px; padding: 6px 12px; border: 1px solid #d7bd8e; border-radius: 12px; background: white; color: #52618a; }
+.discovery-map-hint { margin: 6px 2px 0; color: #85735b; font-size: .67rem; text-align: center; }
+.app:has(.discovery-map-screen) > .companion-dock { display: none; }
+.sensory-calm .chest-lid { transition: none; }
+.sensory-calm .treasure-contents { animation: none; }
+@media (max-width: 699px) {
+  .discovery-map-workspace.has-treasure-open { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 42%) minmax(0, 1fr); }
+  .open-treasure { border-left: 0; border-top: 1px solid #ddc7a3; padding: 10px 12px; }
+  .open-treasure-heading > .treasure-chest { float: left; width: 48px; height: 48px; margin: 2px 9px 5px 0; }
+  .open-treasure-heading { min-height: 63px; }
+  .has-treasure-open .treasure-stop:not(:has([aria-expanded="true"])) { display: none; }
+  .has-treasure-open .treasure-stop-preview { display: none; }
+}
+@media (max-width: 699px) {
+  /* Once a treasure is opened, give its discovery the whole panel on phones. */
+  .discovery-map-workspace.has-treasure-open { grid-template-rows: minmax(0, 1fr); }
+  .discovery-map-workspace.has-treasure-open > .treasure-map-viewport,
+  .discovery-map-workspace.has-treasure-open > .treasure-list { display: none; }
+  .discovery-map-workspace.has-treasure-open > .open-treasure { grid-row: 1; height: 100%; min-height: 0; border-top: 0; padding: 12px; overflow-y: auto; }
+}
+@media (hover: none) { .treasure-stop:hover .treasure-stop-preview { display: none; } }
+@media (prefers-reduced-motion: reduce) { .chest-lid { transition: none; } .treasure-contents { animation: none; } }

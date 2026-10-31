@@ -15,7 +15,7 @@ In SmarterASP, open the `meetingjourney` website and configure the Node.js runti
 | Health check path | `/health` |
 | Build command | `npm run build` |
 
-The application folder is the repository root. The root `package.json`, `server.js` and `railpack.json` force the shared builder to use Node.js even though the repository still contains the legacy C# project.
+The application folder is the repository root. The root `package.json`, `server.js`, `railpack.json` and `.dockerignore` force the shared builder to use Node.js even though the repository still contains the legacy C# project.
 
 ## Deploy from GitHub
 
