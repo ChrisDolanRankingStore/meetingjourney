@@ -7,3 +7,5 @@ node-app/public/
 publish-node/
 *.user
 *.suo
+**/*.csproj
+MeetingJourney.sln

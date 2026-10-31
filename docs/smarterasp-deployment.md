@@ -1,6 +1,6 @@
 # GitHub to SmarterASP deployment
 
-Meeting Journey includes a Node.js deployment target in `node-app/`. Use this target for the SmarterASP Linux/Node.js hosting package. The old ASP.NET Core project remains in the repository for reference and local development, but it is not the runtime for the Linux site.
+Meeting Journey includes a Node.js deployment target in `node-app/`. Use this target for the SmarterASP Linux/Node.js hosting package. Legacy C# source remains for reference, but its project files and solution are excluded from Git to avoid the shared builder selecting .NET. Existing local copies are retained; a fresh clone is intended for the Node runtime, not a .NET build.
 
 ## SmarterASP website settings
 
@@ -15,7 +15,7 @@ In SmarterASP, open the `meetingjourney` website and configure the Node.js runti
 | Health check path | `/health` |
 | Build command | `npm run build` |
 
-The application folder is the repository root. The root `package.json`, `server.js`, `railpack.json` and `.dockerignore` force the shared builder to use Node.js even though the repository still contains the legacy C# project.
+The application folder must be the repository root, not `src/MeetingJourney.Api`. The root `package.json`, `server.js`, `railpack.json` and `.dockerignore` configure the Node.js build. Enter `npm run build` as the build command and `npm start` as the start command in the Git deployment panel. After deploying, confirm the log detects Node, not Dotnet.
 
 ## Deploy from GitHub
 
