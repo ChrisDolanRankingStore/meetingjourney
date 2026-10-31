@@ -14,8 +14,8 @@ html .app.home-screen { display: grid; grid-template-rows: auto minmax(0, 1fr) a
 .app .home-redesign .painted-welcome-copy h2 { margin: 0; font-size: clamp(1.45rem, 5.2vw, 2rem); }
 .app .home-redesign .painted-welcome-copy strong { font-size: .94rem; }
 .app .home-redesign .painted-welcome-copy span { font-size: .74rem; line-height: 1.4; }
-.home-guide-stage { position: relative; container-type: size; min-height: 140px; }
-.app .home-redesign .home-scene .companion-scene { --portrait-height: clamp(105px, calc(100cqh - 50px), 245px); --companion-x: 80%; }
+.home-guide-stage { position: relative; container-type: size; min-height: 220px; }
+.app .home-redesign .home-scene .companion-scene { --portrait-height: clamp(105px, calc(100cqh - 120px), 245px); --companion-x: 80%; }
 .app .home-redesign .home-scene .companion-trigger { left: clamp(calc(var(--portrait-height) * .335 + 8px), var(--companion-x, 80%), calc(100% - var(--portrait-height) * .335 - 8px)); bottom: calc(8px + var(--companion-y, 0) * max(0px, 100% - var(--portrait-height) - 72px)); }
 .app .home-redesign .companion-nameplate { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .home-guide-hint { display: none; position: absolute; right: 75%; top: 45%; width: max-content; max-width: 100px; padding: 6px 9px; border: 1px solid #c8b487; border-radius: 5px; background: #fff8e9; color: #2e4560; font-family: Georgia, serif; font-size: .75rem; line-height: 1.35; pointer-events: none; }
@@ -76,7 +76,7 @@ html .app.home-screen { display: grid; grid-template-rows: auto minmax(0, 1fr) a
   .app .home-redesign .painted-welcome-copy { grid-column: 2 / 4; grid-row: 1; align-self: start; margin-top: 24px; }
   .app .home-redesign .home-guide-stage { grid-column: 3; grid-row: 2; height: clamp(240px, 38dvh, 340px); min-height: 0; margin-bottom: 12px; }
   .app .home-redesign .home-copy { grid-column: 2; grid-row: 2; width: 100%; margin: 0 0 20px; }
-  .app .home-redesign .home-scene .companion-scene { --portrait-height: clamp(105px, calc(100cqh - 50px), 340px); }
+  .app .home-redesign .home-scene .companion-scene { --portrait-height: clamp(105px, calc(100cqh - 120px), 340px); }
   .app .home-redesign.guide-is-open .home-guide-stage { transform: translateY(calc(-1 * clamp(0px, calc(100dvh - 42.5rem), 220px))); }
   .home-guide-dialog { inset: auto 0 74px; width: 560px; max-width: calc(100% - 32px); max-height: calc(100dvh - 98px); margin: 0 auto; border-radius: 16px 12px 18px 13px; }
   .home-guide-actions > button { min-height: 108px; padding: 14px 10px; }
@@ -84,7 +84,7 @@ html .app.home-screen { display: grid; grid-template-rows: auto minmax(0, 1fr) a
 }
 @media (min-width: 1100px) {
   .app .home-redesign .home-guide-stage { height: clamp(360px, 52dvh, 620px); }
-  .app .home-redesign .home-scene .companion-scene { --portrait-height: clamp(105px, calc(100cqh - 24px), 580px); }
+  .app .home-redesign .home-scene .companion-scene { --portrait-height: clamp(105px, calc(100cqh - 120px), 580px); }
   .home-guide-dialog { inset: 100px max(24px, calc((100vw - 1200px) / 2)) auto auto; width: 520px; max-height: calc(100dvh - 190px); margin: 0; padding: 18px; }
   .app .home-redesign.guide-is-open .painted-welcome-copy { grid-column: 2; }
   .app .home-redesign.guide-is-open .home-guide-stage { position: absolute; right: calc(max(24px, (100vw - 1200px) / 2) + 540px); bottom: 230px; width: 320px; height: clamp(160px, calc(100dvh - 540px), 480px); margin: 0; transform: none; }
@@ -222,7 +222,7 @@ html[data-palette] .app:where(:not(.home-screen, .journey-screen)) { background:
   .app.home-screen .home-redesign { grid-template-columns: minmax(24px, 1fr) minmax(0, 1100px) minmax(24px, 1fr); grid-template-rows: auto minmax(160px, 1fr) auto; }
   .app .home-redesign .painted-welcome-copy { grid-column: 2; grid-row: 1; }
   .app .home-redesign.guide-is-open .painted-welcome-copy { justify-self: start; margin-left: 32px; }
-  .app .home-redesign .home-guide-stage { grid-column: 2; grid-row: 2; align-self: end; justify-self: center; width: 420px; height: 100%; max-height: 620px; margin-bottom: 0; }
+  .app .home-redesign .home-guide-stage { grid-column: 2; grid-row: 2; align-self: end; justify-self: center; width: 100%; height: 100%; max-height: 620px; margin-bottom: 0; }
   .app .home-redesign .home-copy { grid-column: 2; grid-row: 3; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.25fr); align-items: stretch; gap: 8px; width: 100%; margin: 0 0 12px; padding: 8px; }
   .app .home-redesign .home-copy > .meeting-content-notice { grid-column: 1 / -1; }
   .app .home-redesign .home-copy > .where-am-i { grid-column: 1; grid-row: 1; margin: 0; min-width: 0; align-self: center; }
