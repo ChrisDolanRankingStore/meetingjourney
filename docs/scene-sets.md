@@ -28,7 +28,7 @@ Draw, Write and Feelings share the activity header height, icon scale and lower 
 
 The discovery mission keeps its reveal-all action and optional scripture links inside a wrapping footer with 12px padding, separate from the activity navigation beneath the panel.
 
-The home avatar stage reserves vertical drag space below the welcome plaque and above the journey controls. Desktop dragging uses the full scene row rather than a narrow character-sized column; tapping still opens the guide and positions remain saved locally.
+The home avatar has a full-scene drag layer behind the welcome plaque and journey controls. Those foreground objects remain clickable and cover the avatar when it passes behind them. The transparent drag layer does not intercept other controls; tapping the visible avatar still opens the guide and positions remain saved locally.
 
 Tapping the home companion opens the Guide Action Panel instead of action bubbles. Its native modal dialog provides Continue, Outline, Doodle notes, Activities and Find my place, with notes, feelings, available official sources and all six movements under More actions. Close, Escape and backdrop dismissal restore focus to the companion. Reduced motion disables its entrance animation. Quiet Mode removes Activities but retains notebooks. Opening a tool carries the current meeting/part into the existing workspace without delayed navigation events or a separate progress record. The small Ask your guide cue appears on initial home use or keyboard focus; it is not a permanent speech bubble.
 

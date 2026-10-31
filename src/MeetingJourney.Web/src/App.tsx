@@ -345,8 +345,9 @@ function AdventureHomeV2({ meeting, profile, partIndex, characterAction, onMoveC
         <span>{meeting.bibleReading}</span>
       </div>
       <div className="scene-message" aria-live="polite">{t(companionMessage(characterAction))}</div>
-      <div className="home-guide-stage"><CompanionActionHub profile={profile} characterAction={characterAction} onMoveCharacter={onMoveCharacter} onQuickAction={onQuickAction} placement="scene" homeGuide={{open:guideOpen, hint:!guideUsed, onOpen:()=>{setGuideUsed(true);setGuideOpen(true);}}} /></div>
+      <div className="home-guide-stage" aria-hidden="true" />
     </div>
+    <div className="home-avatar-layer"><CompanionActionHub profile={profile} characterAction={characterAction} onMoveCharacter={onMoveCharacter} onQuickAction={onQuickAction} placement="scene" homeGuide={{open:guideOpen, hint:!guideUsed, onOpen:()=>{setGuideUsed(true);setGuideOpen(true);}}} /></div>
     <div className="home-copy">
       <p className="eyebrow">{profile.name.trim() ? tt`Welcome back, ${profile.name.trim()}` : t("Welcome to your adventure")}</p>
       <h2>{profile.ageGroup === "teen" ? t("Your meeting, your pace") : t("Let us take the next step")}</h2>
@@ -378,6 +379,7 @@ function MovementMenu({ onMoveCharacter }: { onMoveCharacter: (action: Exclude<C
 }
 
 function CompanionActionHub({ profile, characterAction, onMoveCharacter, onQuickAction, placement, homeGuide }: { profile: CharacterProfile; characterAction: CharacterAction; onMoveCharacter: (action: Exclude<CharacterAction, 'steady'>) => void; onQuickAction: (action: CompanionQuickAction) => void; placement: 'scene' | 'dock'; homeGuide?: {open:boolean; hint:boolean; onOpen:()=>void} }) {
+  const verticalStorageKey = homeGuide ? 'mj-home-companion-y' : 'mj-companion-y';
   const hubRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ startX: number; startY: number; origin: number; originY: number; width: number; height: number; half: number; portraitHeight: number; moved: boolean } | null>(null);
   const suppressTap = useRef(false);
@@ -385,7 +387,7 @@ function CompanionActionHub({ profile, characterAction, onMoveCharacter, onQuick
     try { const saved = localStorage.getItem('mj-companion-x'); return saved !== null && Number.isFinite(Number(saved)) ? Math.max(0, Math.min(100, Number(saved))) : null; } catch { return null; }
   });
   const [verticalPosition, setVerticalPosition] = useState(() => {
-    try { const value = Number(localStorage.getItem('mj-companion-y')); return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0; } catch { return 0; }
+    try { const saved = localStorage.getItem(verticalStorageKey); const value = Number(saved); return saved !== null && Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : homeGuide ? .5 : 0; } catch { return homeGuide ? .5 : 0; }
   });
   const verticalRef = useRef(verticalPosition);
   const positionRef = useRef(position);
@@ -394,7 +396,7 @@ function CompanionActionHub({ profile, characterAction, onMoveCharacter, onQuick
     const next = Math.max(margin, Math.min(100 - margin, value));
     positionRef.current = next; setPosition(next);
   };
-  const savePosition = () => { try { if (positionRef.current !== null) localStorage.setItem('mj-companion-x', String(positionRef.current)); localStorage.setItem('mj-companion-y', String(verticalRef.current)); } catch { /* Optional device preference. */ } };
+  const savePosition = () => { try { if (positionRef.current !== null) localStorage.setItem('mj-companion-x', String(positionRef.current)); localStorage.setItem(verticalStorageKey, String(verticalRef.current)); } catch { /* Optional device preference. */ } };
   const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (placement !== 'scene' || !event.isPrimary) return;
     event.stopPropagation(); suppressTap.current = false;
