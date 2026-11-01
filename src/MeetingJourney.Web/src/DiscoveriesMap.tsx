@@ -11,6 +11,7 @@ import {hasDaySessions, sessionForPart, sessionMapPoint, sessionPartIndices} fro
 import {restoreMeetingPart} from './journeyExperience';
 import {MeetingSessionPicker} from './MeetingSessionPicker';
 import {renderDrawingInk} from './drawingInk';
+import {NotesTimeline} from './NotesTimeline';
 
 function TreasureChest({ open }: { open: boolean }) {
   const shade = `chest-${useId().replace(/:/g, '')}`;
@@ -54,6 +55,7 @@ function TreasureContents({ treasure, onReturn }: { treasure: DiscoveryTreasure;
 }
 
 export function DiscoveriesMap({ meeting, onReturn, teen = false }: { meeting: Meeting; teen?: boolean; onReturn: (index: number) => void }) {
+  const [timeline,setTimeline]=useState(false);
   const scenePack = sceneSetForWeek(meeting.weekOf);
   const split = hasDaySessions(meeting);
   const [session, setSession] = useState(() => sessionForPart(meeting,restoreMeetingPart(meeting,localStorage)));
@@ -105,6 +107,8 @@ export function DiscoveriesMap({ meeting, onReturn, teen = false }: { meeting: M
       <IconAction icon="route" label={t('Map')} aria-pressed={!gallery&&!list} onClick={()=>{setGallery(false);setList(false);}} />
       <IconAction icon="list" label={t('List')} aria-pressed={!gallery&&list} onClick={()=>{setGallery(false);setList(true);}} />
     </div></header>
+    <button className="timeline-toggle" type="button" aria-expanded={timeline} onClick={()=>setTimeline(value=>!value)}>{t('Previous notes')}</button>
+    {timeline&&<NotesTimeline/>}
     <div className="discovery-filters" role="group" aria-label={t('Filter discoveries')}>{(['all','drawings','thoughts','feelings'] as const).map(value=><button type="button" key={value} aria-pressed={filter===value} onClick={()=>{setFilter(value);setSelectedId(null);}}>{t(({all:'All',drawings:'Drawings',thoughts:'Thoughts',feelings:'Feelings'})[value])}</button>)}</div>
     {split && <MeetingSessionPicker value={session} onChange={setSession} />}
     <div className={`discovery-map-workspace ${selected ? 'has-treasure-open' : ''}`}>

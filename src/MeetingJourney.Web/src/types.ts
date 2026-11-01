@@ -44,6 +44,7 @@ export interface EngagementActivity {
 export interface StudyGuide { paragraphCount: number; cues: { from: number; to: number; prompt: string; pointChoices?: string[] }[]; }
 
 export interface MeetingPart {
+  connections?: {reviewedAt: string; en: {title: string; sources: string[]; targets: string[]}; es: {title: string; sources: string[]; targets: string[]}};
   /** Optional original listening words supplied with the weekly outline. */
   listeningWords?: { en?: string[]; es?: string[] };
   /** Song details entered locally for this meeting. */

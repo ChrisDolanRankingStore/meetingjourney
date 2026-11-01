@@ -9,15 +9,15 @@ const activities = [
   {meetingId:'weekend-2026-10-26',partId:'watchtower-study',title:'Connect service with everyday life',sources:['Gratitude','Courage','Encouragement','Sharing'],targets:['Value the opportunity to serve','Take a small step despite feeling afraid','Help someone who feels unworthy','Offer someone a helpful thought']}
 ];
 
-export function connectionActivityFor(meetingId: string, partId: string) {
-  return activities.find(activity => activity.meetingId === meetingId && activity.partId === partId);
+export function connectionActivityFor(meetingId: string, partId: string, part?: MeetingPart) {
+  return part?.connections?.en ?? activities.find(activity => activity.meetingId === meetingId && activity.partId === partId);
 }
 
 export function hasConnectIdeas(meetingId: string, part: MeetingPart) {
-  return Boolean(connectionActivityFor(meetingId, part.id));
+  return part.type !== 'PublicTalk' && Boolean(connectionActivityFor(meetingId, part.id, part));
 }
 
 export function validConnectionChoice(meetingId: string, partId: string, source: string, target: string) {
   const activity = connectionActivityFor(meetingId, partId.replace(/:connections$/, ''));
-  return Boolean(activity && activity.sources.includes(source) && (target === '' || activity.targets.includes(target)));
+  return activity ? activity.sources.includes(source) && (target === '' || activity.targets.includes(target)) : source.trim().length > 0 && source.length <= 300 && target.length <= 300;
 }

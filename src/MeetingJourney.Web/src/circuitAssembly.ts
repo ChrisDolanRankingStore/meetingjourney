@@ -79,6 +79,7 @@ export function resolveJourney(today: string, days: MeetingDays, override: Journ
 }
 
 interface ProgrammeRow {
+  connections?: MeetingPart['connections'];
   id: string; title: string; time?: string; minutes?: number; song?: number; question?: number; reference?: string; prompt?: string; type?: ProgrammePartType;
 }
 const coRows: ProgrammeRow[] = [
@@ -141,7 +142,7 @@ export function assemblyMeeting(record: CircuitAssembly): Meeting {
       id:row.id, title:row.title, durationMinutes:row.minutes ?? 0, programmeTime:row.time,
       section:row.id === 'closing-song' ? 'Closing' : row.id === 'opening-song' || row.id === 'morning-music' ? 'Opening' : 'Programme',
       type:row.type ?? (row.song ? 'Song' : row.id.endsWith('music') ? 'Music' : 'Talk'), songNumber:row.song,
-      summary:row.prompt ?? 'Keep a personal thought, scripture or sketch from this programme part.',
+      summary:row.prompt ?? 'Keep a personal thought, scripture or sketch from this programme part.', connections:row.connections,
       ...(row.question ? {assemblyQuestion:row.question, question:row.prompt, textReference:row.reference, researchUrl:questions} : {}),
       appUrl:url, sourceUrl:url, references:[], activities:[]
     }))

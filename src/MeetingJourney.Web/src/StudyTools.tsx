@@ -4,6 +4,7 @@ import {emptyStudy, readStudy, saveStudy, type StudyProgress} from './studyStora
 import {allowsComments, appendListeningPoint, localRehearsalVoices, pauseBoundary, readListeningPreferences} from './listeningPreferences';
 import {InterestPrompts, QuietFidget} from './ListeningActivities';
 import type {MeetingPart} from './types';
+import {ScriptureLookup} from './ScriptureLookup';
 
 function Rehearsal({text}: {text: string}) {
   const [volume, setVolume] = useState(.25), [speaking, setSpeaking] = useState(false), [status, setStatus] = useState('');
@@ -73,6 +74,7 @@ export function StudyTools({meetingId, part, teen, quiet, onDraw, onWrite}: {mee
       {ready && <p role="status" className="comment-ready">{t('Ready to comment ✓')}</p>}
       <div className="sentence-starters">{['I noticed…', 'The scripture helps me…', 'One thing I could try…'].map(starter => <button type="button" key={starter} disabled={!loaded} onClick={() => update({draft: t(starter).replace(/…$/, ' ')})}>{t(starter)}</button>)}</div>
       <label>{t('Your own words')}<textarea disabled={!loaded} value={value.draft ?? ''} maxLength={10000} onChange={event => update({draft: event.target.value})} placeholder={t('Type, or use your keyboard’s dictation.')} rows={3} /></label>
+      <ScriptureLookup text={value.draft ?? ''}/>
       <button type="button" disabled={!loaded || !value.draft?.trim() || value.comments.length >= 300} onClick={() => update({draft: '', comments: [...current.current.comments, {id: crypto.randomUUID(), paragraph: value.paragraph, text: value.draft!.trim(), ready: false, given: false}]})}>{t('Keep this comment')}</button>
       <Rehearsal text={value.draft ?? ''} />
       {value.comments.map(comment => <div className="prepared-comment" key={comment.id}><small>{tt`Paragraph ${comment.paragraph}`}</small><p>{comment.text}</p><button type="button" disabled={!loaded || comment.given} aria-pressed={comment.ready && !comment.given} onClick={() => update({comments: current.current.comments.map(item => item.id === comment.id ? {...item, ready: !item.ready} : item)})}>{t('Ready to comment')}</button>

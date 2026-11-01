@@ -12,6 +12,14 @@ export function validatePublishedWeek(value){
   if(!/^[a-zA-Z0-9_-]{1,100}$/.test(part.id)||ids.has(part.id)||typeof part.title!=='string'||!part.title.trim()||typeof part.summary!=='string'||!Number.isFinite(part.durationMinutes)||part.durationMinutes<0||!['Opening','Treasures','FieldMinistry','Living','PublicTalk','Watchtower','Closing'].includes(part.section)||!Array.isArray(part.activities)||!Array.isArray(part.references))throw Error('Invalid meeting part.');ids.add(part.id);
   if(part.studyGuide){const guide=part.studyGuide;if(!Number.isInteger(guide.paragraphCount)||guide.paragraphCount<1||guide.paragraphCount>200||!Array.isArray(guide.cues)||guide.cues.some(c=>!Number.isInteger(c.from)||!Number.isInteger(c.to)||c.from<1||c.to<c.from||c.to>guide.paragraphCount||typeof c.prompt!=='string'))throw Error('Invalid reviewed study cues.');}
   if(part.listeningWords!==undefined){const words=part.listeningWords;if(!words||typeof words!=='object'||Array.isArray(words)||Object.keys(words).some(language=>!['en','es'].includes(language))||Object.values(words).some(list=>!Array.isArray(list)||list.length>40||list.some(word=>typeof word!=='string'||!word.trim()||word.length>60)))throw Error('Invalid listening words.');}
+  if(part.connections!==undefined){
+   const content=part.connections;
+   if(part.type==='PublicTalk'||!content||typeof content.reviewedAt!=='string'||!Number.isFinite(Date.parse(content.reviewedAt)))throw Error('Reviewed connection content is required.');
+   for(const language of ['en','es']){
+    const translated=content[language];
+    if(!translated||typeof translated.title!=='string'||!translated.title.trim()||translated.title.length>300||['sources','targets'].some(key=>!Array.isArray(translated[key])||translated[key].length!==4||new Set(translated[key]).size!==4||translated[key].some(text=>typeof text!=='string'||!text.trim()||text.length>300)))throw Error('Four bilingual reviewed connection ideas and examples are required.');
+   }
+  }
  }
  const walk=item=>{if(!item||typeof item!=='object')return;for(const[key,entry]of Object.entries(item)){if(['url','appUrl','sourceUrl'].includes(key)&&entry){const url=new URL(entry);if(url.protocol!=='https:'||!(url.hostname==='jw.org'||url.hostname.endsWith('.jw.org')))throw Error('Use an official HTTPS JW link.');}else if(typeof entry==='object')walk(entry);}};walk(meeting);
  if(JSON.stringify(value).length>1000000)throw Error('Outline too large.');

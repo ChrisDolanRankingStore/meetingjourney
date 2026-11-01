@@ -14,6 +14,7 @@ import {LanguageSelector, useLanguage} from './LanguageSelector';
 import {localizeMeeting} from './meetingLocale';
 import {bibleReferenceLinks, getLanguage, jwLibraryHandoffUrl, jwLibraryUrl, officialUrl} from './i18n';
 import {BibleReferenceLinks, OfficialLinks} from './OfficialLinks';
+import {ScriptureLookup} from './ScriptureLookup';
 import {PartReferenceLinks} from './PartReferenceLinks';
 import {partSources} from './partSources';
 import {IllustratedIcon} from './IllustratedIcon';
@@ -739,14 +740,14 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
         {toolOpen === 'source' && <OfficialPartSourceCard part={part} material={material} confirmations={sourceConfirmations} onToggle={toggleSourceConfirmation} onOpenGuide={()=>setToolOpen('story')} />}
         {toolOpen === 'story' && (engagement === 'quiet' ? <p>{t("Quiet Mode is on. Your notes and drawings are always available.")}</p> : <div className="discovery-mission-pages">
           {discoveryPage!=='connections'&&discoveryPage!=='spot'&&activity?.type!=='ClueCards'&&<p className="mission-introduction">{t('Choose a clue when you need one. Nothing is timed or scored.')}</p>}
-          {discoveryPage==='connections'&&sharingActivity ? <ConnectIdeas meetingId={meetingId} partId={part.id} /> : discoveryPage==='spot' ? null : activity ? <ActivityCard key={activity.id} activity={activity} note={note} onOpenDrawing={() => setToolOpen('doodle')} onSaveThought={updateNote} /> : <p>{t(reflection.prompt)}</p>}
+          {discoveryPage==='connections'&&sharingActivity ? <ConnectIdeas meetingId={meetingId} partId={part.id} part={part} /> : discoveryPage==='spot' ? null : activity ? <ActivityCard key={activity.id} activity={activity} note={note} onOpenDrawing={() => setToolOpen('doodle')} onSaveThought={updateNote} /> : <p>{t(reflection.prompt)}</p>}
           {part.type==='Demonstration'&&<section className="activity-card"><h4>{t('Spot the clue')}</h4><p>{t('Watch how the speaker listens, asks a question or shows kindness.')}</p><div className="part-thought-tiles">{['Listened carefully','Asked a question','Showed empathy','Found a natural topic'].map((choice,index)=><button type="button" key={choice} disabled={!noteLoaded} aria-pressed={feedbackChoices.includes(choice)} onClick={()=>toggleFeedbackChoice(choice)}><NotebookIcon name={(['music','clue','heart','note'] as const)[index]} /><span>{t(choice)}</span></button>)}</div></section>}
           <div className="activity-action-row"><button type="button" className="activity-secondary-action" onClick={()=>setToolOpen('bingo')}><NotebookIcon name="grid" />{t('Word bingo')}</button>
           {!returnToBingo&&<button type="button" className="activity-secondary-action" onClick={()=>{setReturnToActivities(false);setToolOpen('activities');}}><IllustratedIcon name="connect" />{t('Activities for this part')}</button>}
           <button type="button" className="skip-button" onClick={findPlace}>{t("Back to the journey")}</button></div>
         </div>)}
         {toolOpen === 'feelings' && <PartFeedbackCard part={part} value={feedback} choices={feedbackChoices} savedAt={savedAt} onChange={updateFeedback} onToggleChoice={toggleFeedbackChoice} />}
-        {toolOpen === 'note' && <div className="modal-note-editor"><p>{t("A word, question or feeling is enough.")}</p><textarea autoFocus disabled={!noteLoaded} id={`${part.id}-modal-note`} value={note} onChange={event => updateNote(event.target.value)} placeholder={t("Write or dictate a thought...")} rows={5} /><small role="status">{t(savedAt) || (noteLoaded ? t("Saved on this device automatically") : t("Opening your notes…"))}</small></div>}
+        {toolOpen === 'note' && <div className="modal-note-editor"><p>{t("A word, question or feeling is enough.")}</p><textarea autoFocus disabled={!noteLoaded} id={`${part.id}-modal-note`} value={note} onChange={event => updateNote(event.target.value)} placeholder={t("Write or dictate a thought...")} rows={5} /><ScriptureLookup text={note}/><small role="status">{t(savedAt) || (noteLoaded ? t("Saved on this device automatically") : t("Opening your notes…"))}</small></div>}
         {toolOpen === 'doodle' && <Suspense fallback={<p role="status">{t("Opening your drawing page…")}</p>}><DrawingPad meetingId={meetingId} partId={part.id} /></Suspense>}
       </section>
     </div>}
