@@ -23,6 +23,19 @@ test('backup round-trip preserves editable strokes, paper, notes, study comments
 });
 test('restore keeps newer device entries instead of overwriting them',async()=>{await saveNote({meetingId:'week-a',partId:'reading',text:'Old',updatedAt:'2026-10-25'});const backup=await exportJournal(new MemoryStorage());await saveNote({meetingId:'week-a',partId:'reading',text:'Keep this',updatedAt:'2026-10-26'});assert.deepEqual(await importJournal(backup,false,new MemoryStorage()),{added:0,kept:1});assert.equal((await readNote('week-a','reading')).text,'Keep this');});
 
+test('smudge strokes and new prepared connections survive a backup round-trip',async()=>{
+ const strokes=[{points:[10,20,40,50],color:'#163b5c',size:5,mode:'pen'},{points:[20,30,70,80],color:'#163b5c',size:12,mode:'smudge'}];
+ await saveDrawing('weekend-2026-10-26','watchtower-study',strokes,{width:760,height:900});
+ const progress={...emptyStudy('weekend-2026-10-26','watchtower-study:connections'),pointChoices:{Gratitude:'Value the opportunity to serve'}};
+ await saveStudy(progress);
+ const backup=validateBackup(await exportJournal(new MemoryStorage()));
+ globalThis.indexedDB=new IDBFactory();await importJournal(backup,false,new MemoryStorage());
+ assert.deepEqual((await readDrawingPage('weekend-2026-10-26','watchtower-study')).strokes,strokes);
+ assert.deepEqual((await readStudy(progress.meetingId,progress.partId)).pointChoices,progress.pointChoices);
+ backup.engagement[0].value.pointChoices={Gratitude:'Visit someone who is unwell'};
+ assert.throws(()=>validateBackup(backup),/Invalid listening points/);
+});
+
 test('bingo grid size and marked words survive backup without accepting invalid sizes',async()=>{
  const progress={...emptyStudy('week-a','talk:bingo:en'),bingoSize:3,bingoWords:['hope','love']};
  await saveStudy(progress);

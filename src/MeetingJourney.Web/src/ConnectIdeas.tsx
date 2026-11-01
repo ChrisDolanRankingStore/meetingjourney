@@ -2,8 +2,9 @@ import {useEffect, useRef, useState} from 'react';
 import {t} from './i18n';
 import {emptyStudy, readStudy, saveStudy, type StudyProgress} from './studyStorage';
 import {IllustratedIcon} from './IllustratedIcon';
-import {connectionSources as sources, connectionTargets as targets} from './connectionActivity';
+import {connectionActivityFor} from './connectionActivity';
 export function ConnectIdeas({meetingId, partId}: {meetingId: string; partId: string}) {
+  const activity = connectionActivityFor(meetingId, partId);
   const [value,setValue] = useState<StudyProgress>(()=>emptyStudy(meetingId,`${partId}:connections`));
   const [active,setActive] = useState<string | null>(null);
   const [loaded,setLoaded] = useState(false), [status,setStatus] = useState('');
@@ -20,8 +21,10 @@ export function ConnectIdeas({meetingId, partId}: {meetingId: string; partId: st
     current.current=next;setValue(next);
     saves.current=saves.current.catch(()=>undefined).then(()=>saveStudy(next)).then(()=>setStatus('Saved on this device')).catch(()=>setStatus('Could not save'));
   };
+  if (!activity) return <p role="alert">{t('No prepared connections are available for this part.')}</p>;
+  const {sources, targets} = activity;
   return <section className="activity-card connect-activity" aria-label={t('Connect the ideas')}>
-    <h3>{t('How can we share with others?')}</h3>
+    <h3>{t(activity.title)}</h3>
     <p>{t('Choose an idea, then tap a related example. Your connections are not scored.')}</p>
     <div className="idea-connections">
       <div className="idea-column">{sources.map((source,index)=><button type="button" key={source} disabled={!loaded} aria-pressed={active===source} onClick={()=>setActive(source)}><span className="connection-dot" data-colour={index} />{t(source)}</button>)}</div>

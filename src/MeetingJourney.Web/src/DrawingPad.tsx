@@ -1,10 +1,11 @@
 import {t} from './i18n';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Circle, Layer, Line, Rect, Stage } from 'react-konva';
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { Circle, Image, Layer, Line, Rect, Stage } from 'react-konva';
 import type { Stroke } from './types';
 import { readDrawingPage, saveDrawing } from './storage';
-import { createDrawingPaper, drawingSurface, includeDrawingPoint, type DrawingPaperSize } from './drawingViewport';
+import { createDrawingPaper, drawingSurface, includeDrawingPoint, initialDrawingZoom, zoomDrawing, type DrawingPaperSize } from './drawingViewport';
 import { DrawingToolbar, type DrawingPageControls } from './DrawingToolbar';
+import {renderDrawingInk} from './drawingInk';
 
 interface Props { meetingId: string; partId: string; onSaved?: () => void; }
 type Tool = Stroke['mode'];
@@ -31,7 +32,11 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const drawing = useRef(false);
-  const stageRef = useRef<any>(null);
+  const [zoom, setZoom] = useState(initialDrawingZoom);
+  const zoomRef = useRef(zoom);
+  const pointers = useRef(new Map<number, {x:number; y:number}>());
+  const gesture = useRef(false);
+  const strokeStart = useRef<{strokes:Stroke[]; redo:Stroke[]; paper:DrawingPaperSize | null} | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const latestDrawing = useRef({ strokes, loaded, paper });
   latestDrawing.current = { strokes, loaded, paper };
@@ -75,31 +80,72 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   }, [loaded, measured, paper, width, height]);
   const sheet = paper ?? { width: 760, height: 420 };
   const view = drawingSurface(sheet, width, height);
+  const ink = useMemo(() => strokes.some(stroke => stroke.mode === 'smudge') ? renderDrawingInk(strokes, sheet.width, sheet.height, 2048, 2) : null, [strokes, sheet.width, sheet.height]);
+  const changeZoom = (next: typeof zoom) => { zoomRef.current = next; setZoom(next); };
+  useEffect(() => { zoomRef.current = initialDrawingZoom; setZoom(initialDrawingZoom); }, [width, height]);
 
   const activeStroke = useMemo(() => ({ color: tool === 'eraser' ? '#ffffff' : color, size, mode: tool }), [color, size, tool]);
 
-  const pointerPosition = () => {
-    const point = stageRef.current?.getPointerPosition() as { x: number; y: number } | null;
-    return point ? { x: point.x / view.scale, y: point.y / view.scale } : null;
+  const canvasPosition = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    return {x:event.clientX - bounds.left - event.currentTarget.clientLeft, y:event.clientY - bounds.top - event.currentTarget.clientTop};
   };
-  const start = () => {
-    const point = pointerPosition();
+  const pointerPosition = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const point = canvasPosition(event), currentZoom = zoomRef.current;
+    return {x:Math.max(0, (point.x - currentZoom.x) / (view.scale * currentZoom.scale)), y:Math.max(0, (point.y - currentZoom.y) / (view.scale * currentZoom.scale))};
+  };
+  const start = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0 || !loaded || !paper) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    pointers.current.set(event.pointerId, canvasPosition(event));
+    if (pointers.current.size > 1) {
+      gesture.current = true;
+      if (drawing.current && strokeStart.current) {
+        setStrokes(strokeStart.current.strokes); setRedoStack(strokeStart.current.redo); setPaper(strokeStart.current.paper);
+        drawing.current = false;
+      }
+      return;
+    }
+    gesture.current = false;
+    strokeStart.current = {strokes:latestDrawing.current.strokes, redo:redoStack, paper};
+    const point = pointerPosition(event);
     if (!point || !loaded || !paper) return;
     setPaper(current => current ? includeDrawingPoint(current, point) : current);
     drawing.current = true;
     setRedoStack([]);
     setStrokes(current => [...current, { ...activeStroke, points: [point.x, point.y] }]);
   };
-  const move = () => {
+  const move = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!pointers.current.has(event.pointerId)) return;
+    event.preventDefault();
+    const previous = [...pointers.current.values()];
+    pointers.current.set(event.pointerId, canvasPosition(event));
+    const current = [...pointers.current.values()];
+    if (gesture.current) {
+      if (current.length === 2) {
+        const middle = (points: typeof current) => ({x:(points[0].x + points[1].x) / 2, y:(points[0].y + points[1].y) / 2});
+        const distance = (points: typeof current) => Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+        changeZoom(zoomDrawing(zoomRef.current, middle(previous), middle(current), distance(current) / Math.max(1, distance(previous)), width, height));
+      }
+      return;
+    }
     if (!drawing.current) return;
-    const point = pointerPosition();
+    const point = pointerPosition(event);
     if (!point) return;
     setPaper(current => current ? includeDrawingPoint(current, point) : current);
     setStrokes(current => current.map((stroke, index) => index === current.length - 1 ? { ...stroke, points: [...stroke.points, point.x, point.y] } : stroke));
   };
-  const finish = () => {
+  const finish = (event: ReactPointerEvent<HTMLDivElement>) => {
+    pointers.current.delete(event.pointerId);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (gesture.current) { if (!pointers.current.size) gesture.current = false; return; }
     if (!drawing.current) return;
     drawing.current = false;
+    if (event.type === 'pointercancel' && strokeStart.current) {
+      setStrokes(strokeStart.current.strokes); setRedoStack(strokeStart.current.redo); setPaper(strokeStart.current.paper);
+      return;
+    }
     if (latestDrawing.current.paper) void saveDrawing(meetingId, partId, latestDrawing.current.strokes, latestDrawing.current.paper).catch(() => setSaveError(true));
   };
   const undo = () => setStrokes(current => {
@@ -118,21 +164,31 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     if (!strokes.length || window.confirm(t("Clear this drawing page?"))) { setRedoStack([]); setStrokes([]); }
   };
   const exportPng = () => {
-    const data = stageRef.current?.toDataURL({ pixelRatio: 2 });
-    if (!data) return;
+    const exportInk = renderDrawingInk(strokes, sheet.width, sheet.height, 4096, 2);
+    const output = document.createElement('canvas'); output.width = exportInk.width; output.height = exportInk.height;
+    const context = output.getContext('2d');
+    if (!context) { window.alert(t('Could not export this drawing.')); return; }
+    context.fillStyle = '#fffdf7'; context.fillRect(0, 0, output.width, output.height);
+    if (template === 'lined') {
+      const scale = output.width / sheet.width;
+      context.strokeStyle = '#d7dfef'; context.lineWidth = scale;
+      for (let y = 30; y < sheet.height; y += 30) { context.beginPath(); context.moveTo(0, y * scale); context.lineTo(output.width, y * scale); context.stroke(); }
+    }
+    context.drawImage(exportInk, 0, 0);
+    const data = output.toDataURL('image/png');
     const link = document.createElement('a'); link.download = `${partId}-discovery.png`; link.href = data; link.click();
   };
 
   return <section className="drawing-card" aria-labelledby={`${partId}-drawing-title`}>
     <div className="drawing-heading"><div><h3 id={`${partId}-drawing-title`}>{t("Doodle notes")}</h3><p>{t("Draw, write or sketch a thought.")}</p></div></div><span className={`save-state notebook-save-state ${saveError ? 'has-error' : ''}`} aria-live="polite">{saveError ? t("Could not load or save this drawing on this device.") : !loaded ? t("Opening your drawing…") : saving ? t("Saving…") : t("Saved on this device")}</span>
     <div className="drawing-paper-workspace">
-    <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={size} onSize={setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} onUndo={undo} onRedo={redo} onClear={clear} onExport={exportPng} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:view.paperWidth, y:view.paperHeight}) : createDrawingPaper(width, height))} pages={pages} />
-    <div className="canvas-shell" ref={canvasRef} onContextMenu={event => event.preventDefault()}>
-      <Stage ref={stageRef} width={view.width} height={view.height} onMouseDown={start} onMousemove={move} onMouseup={finish} onMouseleave={finish} onTouchstart={start} onTouchmove={move} onTouchend={finish} onTouchcancel={finish}>
-        <Layer scaleX={view.scale} scaleY={view.scale}><Rect width={view.paperWidth} height={view.paperHeight} fill="#fffdf7" />{template === 'lined' && Array.from({ length: Math.ceil(view.paperHeight / 30) }, (_, index) => <Line key={index} points={[0, 30 + index * 30, view.paperWidth, 30 + index * 30]} stroke="#d7dfef" strokeWidth={1} />)}</Layer>
-        <Layer scaleX={view.scale} scaleY={view.scale}>
+    <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={size} onSize={setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} onUndo={undo} onRedo={redo} onClear={clear} onExport={exportPng} zoom={zoom.scale} onZoom={value=>changeZoom(zoomDrawing(zoomRef.current,{x:width/2,y:height/2},{x:width/2,y:height/2},value/zoomRef.current.scale,width,height))} onResetZoom={()=>changeZoom(initialDrawingZoom)} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:view.paperWidth, y:view.paperHeight}) : createDrawingPaper(width, height))} pages={pages} />
+    <div className="canvas-shell" ref={canvasRef} onContextMenu={event => event.preventDefault()} onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} data-zoom={zoom.scale}>
+      <Stage width={view.width} height={view.height}>
+        <Layer x={zoom.x} y={zoom.y} scaleX={view.scale * zoom.scale} scaleY={view.scale * zoom.scale}><Rect width={view.paperWidth} height={view.paperHeight} fill="#fffdf7" />{template === 'lined' && Array.from({ length: Math.ceil(view.paperHeight / 30) }, (_, index) => <Line key={index} points={[0, 30 + index * 30, view.paperWidth, 30 + index * 30]} stroke="#d7dfef" strokeWidth={1} />)}</Layer>
+        <Layer x={zoom.x} y={zoom.y} scaleX={view.scale * zoom.scale} scaleY={view.scale * zoom.scale}>
           <Line points={[]} stroke="#ffffff" />
-          {strokes.map((stroke, index) => <Line key={index} points={stroke.points} stroke={stroke.color} strokeWidth={stroke.mode === 'highlighter' ? stroke.size * 3 : stroke.size} opacity={stroke.mode === 'highlighter' ? 0.35 : 1} lineCap="round" lineJoin="round" globalCompositeOperation={stroke.mode === 'eraser' ? 'destination-out' : 'source-over'} />)}
+          {ink ? <Image image={ink} width={sheet.width} height={sheet.height} /> : strokes.map((stroke, index) => <Line key={index} points={stroke.points} stroke={stroke.color} strokeWidth={stroke.mode === 'highlighter' ? stroke.size * 3 : stroke.size} opacity={stroke.mode === 'highlighter' ? 0.35 : 1} lineCap="round" lineJoin="round" globalCompositeOperation={stroke.mode === 'eraser' ? 'destination-out' : 'source-over'} />)}
           {strokes.length === 0 && <Circle x={0} y={0} radius={0} />}
         </Layer>
       </Stage>

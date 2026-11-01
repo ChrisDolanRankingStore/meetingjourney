@@ -98,5 +98,5 @@ export interface Stroke {
   points: number[];
   color: string;
   size: number;
-  mode: 'pen' | 'highlighter' | 'eraser';
+  mode: 'pen' | 'highlighter' | 'eraser' | 'smudge';
 }

@@ -1,4 +1,13 @@
 export type DrawingPaperSize = { width: number; height: number };
+export type DrawingZoom = {scale: number; x: number; y: number};
+export const initialDrawingZoom: DrawingZoom = {scale:1, x:0, y:0};
+
+export function zoomDrawing(view: DrawingZoom, from: {x:number; y:number}, to: {x:number; y:number}, factor: number, width: number, height: number): DrawingZoom {
+  const scale = Math.max(1, Math.min(4, view.scale * factor));
+  const ratio = scale / view.scale;
+  return {scale, x:Math.max(width * (1 - scale), Math.min(0, to.x - (from.x - view.x) * ratio)),
+    y:Math.max(height * (1 - scale), Math.min(0, to.y - (from.y - view.y) * ratio))};
+}
 
 // Existing strokes use 760 logical units across.  Extend the sheet downwards
 // when adding a large canvas; never stretch or rewrite those stroke points.

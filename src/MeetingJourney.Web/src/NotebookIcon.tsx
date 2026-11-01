@@ -1,4 +1,4 @@
-export type NotebookIconName = 'pen' | 'highlighter' | 'eraser' | 'undo' | 'redo' | 'pages' | 'more' | 'download' | 'trash' | 'plus' | 'close' | 'note' | 'heart' | 'clue' | 'expand' | 'home' | 'route' | 'treasure' | 'settings' | 'book' | 'grid' | 'list' | 'back' | 'next' | 'external' | 'music' | 'check' | 'chevron-down' | 'clock' | 'pin';
+export type NotebookIconName = 'pen' | 'highlighter' | 'eraser' | 'smudge' | 'undo' | 'redo' | 'pages' | 'more' | 'download' | 'trash' | 'plus' | 'close' | 'note' | 'heart' | 'clue' | 'expand' | 'home' | 'route' | 'treasure' | 'settings' | 'book' | 'grid' | 'list' | 'back' | 'next' | 'external' | 'music' | 'check' | 'chevron-down' | 'clock' | 'pin';
 
 export function NotebookIcon({ name }: { name: NotebookIconName }) {
   const shapes = {
@@ -20,6 +20,7 @@ export function NotebookIcon({ name }: { name: NotebookIconName }) {
     pen: <><path d="m4 16-1 5 5-1L20 8l-4-4Z" /><path d="m14 6 4 4M4 16l4 4" /></>,
     highlighter: <><path d="m7 13 7-9 6 5-7 8Z" /><path d="m7 13-3 4 5 4 4-4M3 22h13" /></>,
     eraser: <><path d="m3 14 9-10a2 2 0 0 1 3 0l6 6a2 2 0 0 1 0 3l-8 8H9l-6-4a2 2 0 0 1 0-3Z" /><path d="m8 9 9 8M13 21h9" /></>,
+    smudge: <><path d="M9 18V6a2 2 0 0 1 4 0v7l2-3a2 2 0 0 1 3 2l-3 7H9l-4-5a2 2 0 0 1 3-2l1 1M4 21h13" /></>,
     undo: <><path d="m8 4-5 5 5 5" /><path d="M3 9h10a7 7 0 0 1 0 14" /></>,
     redo: <><path d="m16 4 5 5-5 5" /><path d="M21 9H11a7 7 0 0 0 0 14" /></>,
     pages: <><rect x="7" y="3" width="14" height="17" rx="2" /><path d="M4 7H3v15h13M11 8h6M11 12h6" /></>,

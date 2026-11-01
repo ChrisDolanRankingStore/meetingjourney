@@ -10,6 +10,7 @@ import { sceneSetForWeek } from './sceneSets';
 import {hasDaySessions, sessionForPart, sessionMapPoint, sessionPartIndices} from './meetingSessions';
 import {restoreMeetingPart} from './journeyExperience';
 import {MeetingSessionPicker} from './MeetingSessionPicker';
+import {renderDrawingInk} from './drawingInk';
 
 function TreasureChest({ open }: { open: boolean }) {
   const shade = `chest-${useId().replace(/:/g, '')}`;
@@ -35,20 +36,7 @@ function SavedDrawingPreview({ drawing }: { drawing: DiscoveryDrawing }) {
     canvas.height = Math.max(1, Math.round(paper.height * scale));
     const context = canvas.getContext('2d');
     if (!context) return;
-    context.scale(scale, scale);
-    context.lineCap = 'round'; context.lineJoin = 'round';
-    for (const stroke of drawing.strokes) {
-      if (stroke.points.length < 2) continue;
-      context.globalCompositeOperation = stroke.mode === 'eraser' ? 'destination-out' : 'source-over';
-      context.globalAlpha = stroke.mode === 'highlighter' ? .35 : 1;
-      context.strokeStyle = stroke.color; context.fillStyle = stroke.color;
-      context.lineWidth = stroke.size * (stroke.mode === 'highlighter' ? 3 : 1);
-      context.beginPath();
-      if (stroke.points.length <= 2) { context.arc(stroke.points[0], stroke.points[1], context.lineWidth / 2, 0, Math.PI * 2); context.fill(); continue; }
-      context.moveTo(stroke.points[0], stroke.points[1]);
-      for (let index = 2; index + 1 < stroke.points.length; index += 2) context.lineTo(stroke.points[index], stroke.points[index + 1]);
-      context.stroke();
-    }
+    context.drawImage(renderDrawingInk(drawing.strokes, paper.width, paper.height, 1200), 0, 0, canvas.width, canvas.height);
   }, [drawing]);
   return <canvas className="treasure-drawing-preview" ref={canvasRef} role="img" aria-label={tt`Your saved drawing, page ${drawing.page + 1}`}>{t("Your saved drawing, page ")}{drawing.page + 1}.</canvas>;
 }
