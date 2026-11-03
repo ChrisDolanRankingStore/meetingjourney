@@ -226,6 +226,9 @@ html[data-palette] .app:where(:not(.home-screen, .journey-screen)) { background:
 .app .discovery-map-screen > :is(.discovery-map-heading, .timeline-toggle, .discovery-filters, .meeting-session-picker, .discovery-map-hint) { flex: 0 0 auto; }
 .app .discovery-map-screen > :is(.discovery-map-workspace, .notes-timeline) { flex: 1 1 0; min-height: 0; }
 .app .discovery-map-screen > .notes-timeline { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+@media (max-width: 699px) {
+  .app .discovery-map-screen.reading-discovery > :is(.discovery-map-heading, .timeline-toggle, .discovery-filters, .meeting-session-picker, .discovery-map-hint) { display: none; }
+}
 .notes-timeline { margin-top: 12px; padding: 14px; border: 1px solid #d5c1a0; border-radius: 12px; background: #fff8e9; color: #2e4560; }
 .notes-timeline input { width: 100%; box-sizing: border-box; min-height: 44px; }
 .notes-timeline details { padding: 10px; margin-block: 8px; border: 1px solid #d5c1a0; border-radius: 8px; background: #fffdf7; overflow-wrap: anywhere; }

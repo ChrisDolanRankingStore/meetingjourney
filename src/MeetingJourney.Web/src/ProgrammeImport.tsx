@@ -1,10 +1,23 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {t} from './i18n';
 
 const key='mj-programme-import-choice';
 export const PROGRAMME_IMPORT_CHANGED='mj-programme-import-changed';
 export function programmeImportEnabled(){
   return localStorage.getItem(key)==='personal-v1';
+}
+
+const updatedNotice='Programme titles and references updated from WOL. Listening prompts are general; reviewed activities are added separately.';
+const noticeSeenKey='mj-programme-import-notice-seen';
+
+export function ProgrammeContentNotice({notice,home=false,className='meeting-content-notice'}:{notice?:string;home?:boolean;className?:string}){
+  const [unseen]=useState(()=>localStorage.getItem(noticeSeenKey)!=='true');
+  const imported=notice===updatedNotice||notice===t(updatedNotice,undefined,'es');
+  const visible=Boolean(notice)&&(!imported||(home&&unseen));
+  useEffect(()=>{
+    if(visible&&imported) localStorage.setItem(noticeSeenKey,'true');
+  },[visible,imported]);
+  return visible?<small className={className}>{notice}</small>:null;
 }
 
 export function ProgrammeImport(){

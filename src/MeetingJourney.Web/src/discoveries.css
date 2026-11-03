@@ -29,7 +29,7 @@
 .treasure-stop-preview small { display: block; margin-top: 4px; color: #8a7050; font-size: .65rem; }
 .treasure-stop-preview p { margin: 5px 0 0; font-size: .73rem; line-height: 1.35; }
 .open-treasure { position: relative; z-index: 10; min-width: 0; min-height: 0; padding: 14px; overflow-y: auto; border-left: 1px solid #ddc7a3; background: #fff9e9; }
-.close-treasure { position: absolute; z-index: 2; top: 8px; right: 8px; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #dbc5a1; border-radius: 50%; color: #43547d; background: #fffdf5; font-size: 1.2rem; }
+.close-treasure { position: sticky; z-index: 2; float: right; top: 0; display: grid; place-items: center; width: 44px; height: 44px; margin: -4px -4px 0 0; border: 1px solid #dbc5a1; border-radius: 50%; color: #43547d; background: #fffdf5; font-size: 1.2rem; }
 .open-treasure-heading { padding: 0 28px 7px 0; border-bottom: 1px solid #e5d5b8; }
 .open-treasure-heading > .treasure-chest { width: 65px; height: 65px; }
 .open-treasure-heading .eyebrow { margin: 4px 0; color: #9c7049; font-size: .6rem; }
@@ -70,7 +70,8 @@
   /* Once a treasure is opened, give its discovery the whole panel on phones. */
   .discovery-map-workspace.has-treasure-open { grid-template-rows: minmax(0, 1fr); }
   .discovery-map-workspace.has-treasure-open > .treasure-map-viewport,
-  .discovery-map-workspace.has-treasure-open > .treasure-list { display: none; }
+  .discovery-map-workspace.has-treasure-open > .treasure-list,
+  .discovery-map-workspace.has-treasure-open > .discovery-gallery { display: none; }
   .discovery-map-workspace.has-treasure-open > .open-treasure { grid-row: 1; height: 100%; min-height: 0; border-top: 0; padding: 12px; overflow-y: auto; }
 }
 @media (hover: none) { .treasure-stop:hover .treasure-stop-preview { display: none; } }

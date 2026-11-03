@@ -8,6 +8,7 @@ import { CircuitAssemblySettings } from './CircuitAssemblySettings';
 import { ConventionSettings } from './ConventionSettings';
 import { conventionDates, readConvention } from './convention';
 import type { MeetingSchedule } from './useMeetingSchedule';
+import {ProgrammeContentNotice} from './ProgrammeImport';
 
 export function meetingDateLabel(date: string) {
   return new Date(`${date}T12:00:00`).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'short' });
@@ -56,7 +57,7 @@ export function MeetingPicker({ schedule }: { schedule: MeetingSchedule }) {
       schedule.choose({type:kind, date});
     }}>
       <div className="meeting-picker-heading"><h2 id="meeting-picker-title">{t("Which meeting?")}</h2><button type="button" aria-label={t("Close meeting choice")} onClick={() => schedule.setPickerOpen(false)}>×</button></div>
-      {schedule.meeting.contentNotice && <p className="meeting-picker-hint">{schedule.meeting.contentNotice}</p>}
+      <ProgrammeContentNotice notice={schedule.meeting.contentNotice} className="meeting-picker-hint"/>
       <div className="meeting-kind-choices">{(['midweek', 'weekend', 'assembly', 'convention'] as const).map(type => <button key={type} type="button" aria-pressed={kind === type} onClick={() => setKind(type)}>{t(({midweek:'Midweek', weekend:'Weekend', assembly:'Assembly', convention:'Convention'})[type])}<small>{type === 'assembly' || type === 'convention' ? t('Saved programme') : type === 'midweek' ? t("Life and Ministry") : t("Public talk & study")}</small></button>)}</div>
       <label className="meeting-date-field">{t("Meeting date")}<input required type="date" value={date} onChange={event => setDate(event.target.value)} /></label>
       {convention && <div className="convention-day-choices" aria-label={t('Convention day')}>{conventionDates(convention.date).map((day, index) =>

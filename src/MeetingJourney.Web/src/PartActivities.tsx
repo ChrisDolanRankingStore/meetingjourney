@@ -18,7 +18,7 @@ export function PartActivities({meetingId, part, quiet, onChoose}: {
     </button>;
   return <nav className="part-activities" aria-label={t('Activities for this part')}>
     {!quiet && card('bingo', {kind:'bingo'}, 'question', 'Word bingo', 'Listen for words at your own pace.')}
-    {!quiet && hasConnectIdeas(meetingId, part) && card('connections', {kind:'connections'}, 'connect', 'Connect the ideas', 'Match related ideas with examples.')}
+    {hasConnectIdeas(meetingId, part) && card('connections', {kind:'connections'}, 'connect', 'Connect the ideas', 'Match related ideas with examples.')}
     {!quiet && part.activities.map((activity, index) => card(activity.id, {kind:'supplied', index},
       activity.type === 'DrawYourDiscovery' ? 'notes' : activity.type === 'MyThoughtBubble' ? 'thought' : 'clue',
       activity.title, activity.prompt))}

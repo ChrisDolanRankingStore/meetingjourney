@@ -33,7 +33,7 @@ import {DETAILS_UPDATED, personalizeMeeting} from './localMeetingDetails';
 import {OfficialReturn} from './OfficialReturn';
 import {useOfflinePreparation} from './offlinePreparation';
 import { OfflineMeeting, DisplaySettings } from './OfflineMeeting';
-import {ProgrammeImport} from './ProgrammeImport';
+import {ProgrammeImport, ProgrammeContentNotice} from './ProgrammeImport';
 import { StudyTools } from './StudyTools';
 import { MeetingReview, WelcomeScreen } from './MeetingReview';
 import { sceneImage } from './artwork';
@@ -296,7 +296,7 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
         </div>
       </section>
       <section className="progress-card" aria-label={t("Your place in the meeting")}><div><span className="progress-label">{t("Your place")}</span><strong>{t("Part ")}{partIndex + 1}{t(" of ")}{meeting.parts.length}</strong><small>{t("No rush. You can move, pause or return whenever you need.")}</small></div><div className="progress-meter" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div><span className="progress-percent">{progress}%</span></section>
-      {meeting.contentNotice && <small className="meeting-content-notice">{meeting.contentNotice}</small>}
+      <ProgrammeContentNotice notice={meeting.contentNotice}/>
       <WhereAmIControl meeting={meeting} partIndex={partIndex} onSelect={setPartIndex} />
       <JourneyTrail meeting={meeting} partIndex={partIndex} onSelect={setPartIndex} />
       <section className={`journey-layout ${showMap ? 'with-map' : 'focus-layout'}`}>
@@ -355,7 +355,7 @@ function AdventureHomeV2({ meeting, profile, partIndex, characterAction, onMoveC
       <p className="eyebrow">{profile.name.trim() ? tt`Welcome back, ${profile.name.trim()}` : t("Welcome to your adventure")}</p>
       <h2>{profile.ageGroup === "teen" ? t("Your meeting, your pace") : t("Let us take the next step")}</h2>
       <p className="home-details">{t(({midweek:'Midweek', weekend:'Weekend', assembly:'Assembly', convention:'Convention'})[meeting.kind ?? 'midweek'])} · {meeting.bibleReading} · {new Date(`${meeting.eventDate ?? meeting.weekOf}T12:00:00`).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'short' })}</p>
-      {meeting.contentNotice&&<small className="meeting-content-notice">{meeting.contentNotice}</small>}
+      <ProgrammeContentNotice notice={meeting.contentNotice} home/>
       <WhereAmIControl meeting={meeting} partIndex={partIndex} onSelect={onSelectPart} compact />
       <div className="home-actions"><button className="primary-adventure-button" type="button" onClick={onStart}><NotebookIcon name="route" /><span>{t(resumeLabel)}</span><NotebookIcon name="next" /></button></div>
       <div className="storybook-links">
@@ -701,7 +701,7 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
       <button type="button" aria-label={t('Listen')} title={t('Listen')} onClick={()=>setToolOpen('listen')}><IllustratedIcon name="listen" /><span>{t('Listen')}</span></button>
       {engagement!=='quiet'&&<button type="button" aria-label={t('Discover')} title={t('Discover')} onClick={()=>setToolOpen('story')}><IllustratedIcon name="discover" /><span>{t('Discover')}</span></button>}
       <button type="button" aria-label={t('Notes')} title={t('Notes')} onClick={()=>setToolOpen(profile.ageGroup==='child'?'doodle':'note')}><IllustratedIcon name="notes" /><span>{t('Notes')}</span></button>
-      {engagement!=='quiet'&&<button type="button" aria-label={t('Activities')} title={t('Activities')} onClick={()=>{setReturnToActivities(false);setToolOpen('activities');}}><IllustratedIcon name="connect" /><span>{t('Activities')}</span></button>}
+      <button type="button" aria-label={t('Activities')} title={t('Activities')} onClick={()=>{setReturnToActivities(false);setToolOpen('activities');}}><IllustratedIcon name="connect" /><span>{t('Activities')}</span></button>
       <button type="button" aria-label={t('References')} title={t('References')} onClick={()=>setToolOpen('source')}><IllustratedIcon name="references" /><span>{t('References')}</span></button>
     </nav>
     <section className="part-focus-panel" style={{'--focus-landscape':`url("${sceneImage(storyMoment(part).image,480)}")`} as CSSProperties}><h3>{focusQuestion}</h3><p className="part-summary">{part.summary}</p></section>
@@ -740,11 +740,11 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
         {toolOpen === 'bingo' && engagement !== 'quiet' && <WordBingo key={`${meetingId}:${part.id}:${getLanguage()}`} meetingId={meetingId} part={part} older={detailedPrompts(profile.ageGroup)} onClue={()=>{setDiscoveryPage('0');setToolOpen('story');setReturnToBingo(true);}} onWrite={()=>{setToolOpen('note');setReturnToBingo(true);}} onDraw={()=>{setToolOpen('doodle');setReturnToBingo(true);}} />}
         {toolOpen === 'listen' && (isStudy ? <StudyTools meetingId={meetingId} part={part} teen={detailedPrompts(profile.ageGroup)} quiet={engagement === 'quiet'} onDraw={() => setToolOpen('doodle')} onWrite={() => setToolOpen('note')} /> : <><p>{part.summary}</p><ListeningActivities key={`${meetingId}:${part.id}`} meetingId={meetingId} part={part} /></>)}
         {toolOpen === 'source' && <OfficialPartSourceCard part={part} material={material} confirmations={sourceConfirmations} onToggle={toggleSourceConfirmation} onOpenGuide={()=>setToolOpen('story')} />}
-        {toolOpen === 'story' && (engagement === 'quiet' ? <p>{t("Quiet Mode is on. Your notes and drawings are always available.")}</p> : <div className="discovery-mission-pages">
+        {toolOpen === 'story' && (engagement === 'quiet' && discoveryPage!=='connections' ? <p>{t("Quiet Mode is on. Your notes and drawings are always available.")}</p> : <div className="discovery-mission-pages">
           {discoveryPage!=='connections'&&discoveryPage!=='spot'&&activity?.type!=='ClueCards'&&<p className="mission-introduction">{t('Choose a clue when you need one. Nothing is timed or scored.')}</p>}
           {discoveryPage==='connections'&&sharingActivity ? <ConnectIdeas meetingId={meetingId} partId={part.id} part={part} /> : discoveryPage==='spot' ? null : activity ? <ActivityCard key={activity.id} activity={activity} note={note} onOpenDrawing={() => setToolOpen('doodle')} onSaveThought={updateNote} /> : <p>{t(reflection.prompt)}</p>}
-          {part.type==='Demonstration'&&<section className="activity-card"><h4>{t('Spot the clue')}</h4><p>{t('Watch how the speaker listens, asks a question or shows kindness.')}</p><div className="part-thought-tiles">{['Listened carefully','Asked a question','Showed empathy','Found a natural topic'].map((choice,index)=><button type="button" key={choice} disabled={!noteLoaded} aria-pressed={feedbackChoices.includes(choice)} onClick={()=>toggleFeedbackChoice(choice)}><NotebookIcon name={(['music','clue','heart','note'] as const)[index]} /><span>{t(choice)}</span></button>)}</div></section>}
-          <div className="activity-action-row"><button type="button" className="activity-secondary-action" onClick={()=>setToolOpen('bingo')}><NotebookIcon name="grid" />{t('Word bingo')}</button>
+          {part.type==='Demonstration'&&discoveryPage!=='connections'&&<section className="activity-card"><h4>{t('Spot the clue')}</h4><p>{t('Watch how the speaker listens, asks a question or shows kindness.')}</p><div className="part-thought-tiles">{['Listened carefully','Asked a question','Showed empathy','Found a natural topic'].map((choice,index)=><button type="button" key={choice} disabled={!noteLoaded} aria-pressed={feedbackChoices.includes(choice)} onClick={()=>toggleFeedbackChoice(choice)}><NotebookIcon name={(['music','clue','heart','note'] as const)[index]} /><span>{t(choice)}</span></button>)}</div></section>}
+          <div className="activity-action-row">{engagement!=='quiet'&&<button type="button" className="activity-secondary-action" onClick={()=>setToolOpen('bingo')}><NotebookIcon name="grid" />{t('Word bingo')}</button>}
           {!returnToBingo&&<button type="button" className="activity-secondary-action" onClick={()=>{setReturnToActivities(false);setToolOpen('activities');}}><IllustratedIcon name="connect" />{t('Activities for this part')}</button>}
           <button type="button" className="skip-button" onClick={findPlace}>{t("Back to the journey")}</button></div>
         </div>)}

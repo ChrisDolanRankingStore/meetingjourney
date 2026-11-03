@@ -13,6 +13,18 @@ test('import requires an explicit current-device confirmation and requests carry
  const server=await createServer({root:fileURLToPath(new URL('../',import.meta.url)),configFile:false,server:{middlewareMode:true,hmr:false},logLevel:'error'});
  try{
   const {ProgrammeImport,programmeImportEnabled}=await server.ssrLoadModule('/src/ProgrammeImport.tsx');
+  const {ProgrammeContentNotice}=await server.ssrLoadModule('/src/ProgrammeImport.tsx');
+  const notice='Programme titles and references updated from WOL. Listening prompts are general; reviewed activities are added separately.';
+  const renderNotice=props=>renderToStaticMarkup(React.createElement(ProgrammeContentNotice,props));
+  assert.match(renderNotice({notice,home:true}),/Programme titles/);
+  assert.equal(renderNotice({notice}),'');
+  data.set('mj-programme-import-notice-seen','true');
+  assert.equal(renderNotice({notice,home:true}),'');
+  const {t:translate}=await server.ssrLoadModule('/src/i18n.ts');
+  assert.equal(renderNotice({notice:translate(notice,undefined,'es'),home:true}),'');
+  assert.match(renderNotice({notice:'The programme could not be refreshed. Showing the last saved programme.'}),/could not be refreshed/);
+  assert.match(renderNotice({notice:'This assembly replaces both congregation meetings this week.'}),/This assembly/);
+  assert.equal(renderNotice({}),'');
   const {loadMeeting,loadMeetingMonth}=await server.ssrLoadModule('/src/api.ts');
   assert.equal(programmeImportEnabled(),false);
   let html=renderToStaticMarkup(React.createElement(ProgrammeImport));

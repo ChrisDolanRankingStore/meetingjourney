@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {t, getLanguage} from './i18n';
 import {emptyStudy, readStudy, saveStudy, type StudyProgress} from './studyStorage';
 import {IllustratedIcon} from './IllustratedIcon';
-import {connectionActivityFor} from './connectionActivity';
+import {connectionActivityFor, generalConnections} from './connectionActivity';
 import type {MeetingPart} from './types';
 export function ConnectIdeas({meetingId, partId, part}: {meetingId: string; partId: string; part?: MeetingPart}) {
   const activity = connectionActivityFor(meetingId, partId, part);
@@ -22,7 +22,6 @@ export function ConnectIdeas({meetingId, partId, part}: {meetingId: string; part
     current.current=next;setValue(next);
     saves.current=saves.current.catch(()=>undefined).then(()=>saveStudy(next)).then(()=>setStatus('Saved on this device')).catch(()=>setStatus('Could not save'));
   };
-  if (!activity) return <p role="alert">{t('No prepared connections are available for this part.')}</p>;
   const {sources, targets} = activity;
   const display = (text: string) => {
     if (getLanguage() !== 'es' || !part?.connections) return t(text);
@@ -32,7 +31,7 @@ export function ConnectIdeas({meetingId, partId, part}: {meetingId: string; part
   };
   return <section className="activity-card connect-activity" aria-label={t('Connect the ideas')}>
     <h3>{display(activity.title)}</h3>
-    <p>{t('Choose an idea, then tap a related example. Your connections are not scored.')}</p>
+    <p>{t(activity===generalConnections?'General listening prompts. Choose an idea, then tap a related example. Your connections are not scored.':'Choose an idea, then tap a related example. Your connections are not scored.')}</p>
     <div className="idea-connections">
       <div className="idea-column">{sources.map((source,index)=><button type="button" key={source} disabled={!loaded} aria-pressed={active===source} onClick={()=>setActive(source)}><span className="connection-dot" data-colour={index} />{display(source)}</button>)}</div>
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">{sources.map((source,index)=>{

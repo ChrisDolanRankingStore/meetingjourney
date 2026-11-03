@@ -14,6 +14,10 @@ Notes, editable drawings, preparation and position remain keyed by meeting ID. T
 
 ## JW Library and Bible links
 
+The successful WOL programme-import notice appears only on the first Home view on a device. It is not repeated in the journey or meeting picker, or after returning/reloading. Refresh-failure notices and other programme information remain visible. On phones, opening a saved discovery replaces its gallery, map or list and browsing controls with a full-height scrollable detail view and a persistent close button; closing restores the previous view and keyboard focus.
+
+**Connect the ideas** is available through Activities for every meeting part, including public talks and Quiet mode. Reviewed bilingual connections take priority; otherwise clearly labelled general listening prompts connect an idea, scripture, quality or action to something familiar, new, applicable or worth thinking about. There is no scoring or expected audience response. Each part keeps its own connections and personal example on the device.
+
 Each source has a single **Open in JW Library** link using the official HTTPS `/finder` app-link route, retaining publication/document IDs, paragraphs, media IDs and the meeting language (`E` / `S`). Supported devices can hand it to JW Library; without the app it remains a working web link. There is no separate web button or installation-detection timer. Pages without a known Library identifier remain web-only instead of presenting a misleading app button.
 
 Bible links preserve the requested verse or complete verse range, including passages crossing chapter boundaries. Comma-separated verses have separate links; whole-chapter ranges expose each chapter rather than silently dropping later chapters. Full English and Spanish Bible book names are recognised. A chapter uses verse `000`; verses use the eight-digit book/chapter/verse finder identifier.

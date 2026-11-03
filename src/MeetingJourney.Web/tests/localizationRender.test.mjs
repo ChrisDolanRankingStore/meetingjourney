@@ -208,13 +208,16 @@ test('welcome, character choice and home render in Spanish and still render in E
    assert.match(chooser,language==='es'?/Conecta las ideas/:/Connect the ideas/);
    assert.match(chooser,language==='es'?/Bingo de palabras/:/Word bingo/);
    const otherWeek=renderToStaticMarkup(React.createElement(PartActivities,{meetingId:'meeting-2026-10-26',part:sharingPart,quiet:false,onChoose:()=>{}}));
-   assert.doesNotMatch(otherWeek,language==='es'?/Conecta las ideas/:/Connect the ideas/);
+   assert.match(otherWeek,language==='es'?/Conecta las ideas/:/Connect the ideas/);
    const noSupplied=renderToStaticMarkup(React.createElement(PartActivities,{meetingId:linkedMeeting.id,part:{...linkedPart,activities:[]},quiet:false,onChoose:()=>{}}));
-   assert.equal((noSupplied.match(/<button/g)??[]).length,2);
-   assert.doesNotMatch(noSupplied,/Connect the ideas|Conecta las ideas|Spot the clue|Encuentra la pista/);
+   assert.equal((noSupplied.match(/<button/g)??[]).length,3);
+   assert.doesNotMatch(noSupplied,/Spot the clue|Encuentra la pista/);
    const quietChooser=renderToStaticMarkup(React.createElement(PartActivities,{meetingId:linkedMeeting.id,part:sharingPart,quiet:true,onChoose:()=>{}}));
-   assert.equal((quietChooser.match(/<button/g)??[]).length,1);
-   assert.doesNotMatch(quietChooser,/Connect the ideas|Conecta las ideas|Word bingo|Bingo de palabras/);
+   assert.equal((quietChooser.match(/<button/g)??[]).length,2);
+   assert.match(quietChooser,language==='es'?/Conecta las ideas/:/Connect the ideas/);
+   assert.doesNotMatch(quietChooser,/Word bingo|Bingo de palabras/);
+   const quietTalk=renderToStaticMarkup(React.createElement(PartActivities,{meetingId:'weekend-2026-11-02',part:{...sharingPart,type:'PublicTalk'},quiet:true,onChoose:()=>{}}));
+   assert.match(quietTalk,language==='es'?/Conecta las ideas/:/Connect the ideas/);
    const detailedMeeting=localizeMeeting(readPublishedMeeting('midweek','2026-10-26'),language);
    for(const id of ['part-1','part-2','part-4','part-5','part-6','part-8']){
     const item=detailedMeeting.parts.find(part=>part.id===id);
@@ -285,6 +288,10 @@ test('welcome, character choice and home render in Spanish and still render in E
    const connections=renderToStaticMarkup(React.createElement(ConnectIdeas,{meetingId:'meeting-2026-10-19',partId:'part-8'}));
    assert.match(connections,language==='es'?/Conecta las ideas/:/Connect the ideas/);
    assert.equal((connections.match(/<button/g)??[]).length,8);
+   const generalConnections=renderToStaticMarkup(React.createElement(ConnectIdeas,{meetingId:'weekend-2026-11-02',partId:'public-talk'}));
+   assert.match(generalConnections,language==='es'?/Ayudas generales para escuchar/:/General listening prompts/);
+   assert.match(generalConnections,language==='es'?/no se puntúan/:/not scored/);
+   assert.equal((generalConnections.match(/<button/g)??[]).length,8);
    for(const kind of ['midweek','weekend']){
     const visitProgramme=applyCircuitVisit(getMeeting(kind,'2026-10-26'),globalThis.localStorage,language);
     for(const part of visitProgramme.parts.filter(part=>part.id.startsWith('co-'))){
