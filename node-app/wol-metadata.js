@@ -82,7 +82,21 @@ export function parseStudyMetadata(html,language){
  const header=article.slice(0,article.indexOf('</header>')+9);
  const song=text(header).match(/(?:SONG|CANCIÓN)\s+(\d+)/i);
  if(!title||title.length>300||!song)throw Error('WOL study metadata is incomplete.');
- return {title,songNumber:Number(song[1]),references:references(header,language)};
+ const count=studyParagraphCount(html);
+ return {title,songNumber:Number(song[1]),references:references(article,language),...(count?{paragraphCount:count}:{})};
+}
+
+export function studyParagraphCount(html) {
+ const article=documentHtml(html);
+ const bodyStart=article.indexOf('</header>');
+ const paragraphs=[...(bodyStart<0?article:article.slice(bodyStart+9)).matchAll(/<p\b[^>]*data-pid="\d+"[^>]*>([\s\S]*?)<\/p>/g)];
+ const numbers=paragraphs.map(match=>text(match[1]).match(/^(\d{1,3})(?:\s*[,–-]\s*(\d{1,3}))?[.)]?\s/)).filter(Boolean).flatMap(match=>[Number(match[1]),Number(match[2]??match[1])]);
+ // Unnumbered wcg chapters put the prose in tt4, before the first question heading.
+ const prose=article.match(/<div id="tt4">([\s\S]*?)(?=<h[23]\b)/)?.[1];
+ if(!prose)return numbers.includes(1)&&numbers.every(number=>number<=200)?Math.max(...numbers):undefined;
+ const body=prose.replace(/<div\b[^>]*class="[^"]*stdPullQuote[^"]*"[^>]*>[\s\S]*?<\/div>/g,'').replace(/<figure\b[\s\S]*?<\/figure>/g,'');
+ const count=[...body.matchAll(/<p\b[^>]*data-pid="\d+"[^>]*>/g)].length;
+ return count>0&&count<=200?count:undefined;
 }
 
 async function fetchHtml(url,fetcher,redirects=0){
@@ -114,12 +128,20 @@ async function retrieve(kind,date,fetcher){
     if(source){
      const chapter=await documentFor(source.url);
      citations.push(...references(documentHtml(chapter),language).filter(link=>link.url.includes('/bc/')));
+     const count=studyParagraphCount(chapter);
+     if(count)part.paragraphCount=count;
     }
    }
    const passages=[];
    for(const citation of citations.slice(0,16))passages.push(passageText(await documentFor(citation.url),citation.label));
    const nouns=extractPassageWords(passages.join(' '),language);
    if(nouns.length)part.bingoWords=nouns.map(({word})=>({word,source:'passage'}));
+   const lensCues={};
+   for(const category of ['maps','animals','numbers','people','buildings']){
+    const words=nouns.filter(noun=>noun.category===category).slice(0,3).map(noun=>noun.word);
+    if(words.length)lensCues[category]=`${language==='es'?'Escucha estas palabras':'Listen for these words'}: ${words.join(', ')}.`;
+   }
+   if(Object.keys(lensCues).length)part.lensCues=lensCues;
   }catch(error){
    console.error('Could not prepare passage listening words.',{partId:part.id,language,error:error.message});
    part.activityNotice=language==='es'?'No se pudieron preparar las palabras de esta semana. Se muestran palabras conocidas.':'This week’s words could not be prepared. Familiar words are available.';
@@ -149,7 +171,7 @@ async function retrieve(kind,date,fetcher){
   }else{
    const metadata=parseStudyMetadata(html,language);
    const parts=structuredClone(base.parts);
-   Object.assign(parts.find(part=>part.id==='watchtower-study'),{title:metadata.title,references:metadata.references,appUrl:sourceUrl,sourceUrl});
+   Object.assign(parts.find(part=>part.id==='watchtower-study'),{title:metadata.title,references:metadata.references,paragraphCount:metadata.paragraphCount,appUrl:sourceUrl,sourceUrl});
    Object.assign(parts.find(part=>part.id==='study-song'),{title:`${language==='es'?'Canción':'Song'} ${metadata.songNumber}`,songNumber:metadata.songNumber});
    results[language]={bibleReading:metadata.title,parts,sourceUrl};
   }

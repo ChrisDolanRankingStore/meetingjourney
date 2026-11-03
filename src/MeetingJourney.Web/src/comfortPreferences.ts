@@ -2,12 +2,13 @@ export interface ComfortPreferences {
   neutral: boolean;
   hideCounts: boolean;
   iconLabels: boolean;
+  showMinutes: boolean;
   textSize: 'standard' | 'large' | 'larger';
 }
 export const COMFORT_CHANGED = 'mj-comfort-change';
 export function normalizeComfort(value: unknown): ComfortPreferences {
   const source = value && typeof value === 'object' ? value as Partial<ComfortPreferences> : {};
-  return {neutral: source.neutral === true, hideCounts: source.hideCounts === true, iconLabels: source.iconLabels === true,
+  return {neutral: source.neutral === true, hideCounts: source.hideCounts === true, iconLabels: source.iconLabels === true, showMinutes: source.showMinutes === true,
     textSize: source.textSize === 'large' || source.textSize === 'larger' ? source.textSize : 'standard'};
 }
 export function readComfort(storage?: Pick<Storage, 'getItem'>): ComfortPreferences {

@@ -8,7 +8,7 @@ export function localizeMeeting(meeting: Meeting, language: Language): Meeting {
     const translated=meeting.programmeMetadata.es;
     meeting={...meeting,bibleReading:translated.bibleReading,parts:meeting.parts.map(part=>{
       const item=translated.parts.find(item=>item.id===part.id);
-      return item?{...part,title:item.title,references:item.references,appUrl:item.appUrl??part.appUrl,sourceUrl:item.sourceUrl??part.sourceUrl,songNumber:item.songNumber??part.songNumber,bingoWords:item.bingoWords,activityNotice:item.activityNotice}:part;
+      return item?{...part,title:item.title,references:item.references,appUrl:item.appUrl??part.appUrl,sourceUrl:item.sourceUrl??part.sourceUrl,songNumber:item.songNumber??part.songNumber,bingoWords:item.bingoWords,activityNotice:item.activityNotice,paragraphCount:item.paragraphCount,lensCues:item.lensCues}:part;
     })};
   }
   const text = (value: string) => t(value, undefined, language);

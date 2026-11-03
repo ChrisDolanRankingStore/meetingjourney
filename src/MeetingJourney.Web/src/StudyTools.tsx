@@ -42,7 +42,7 @@ export function StudyTools({meetingId, part, teen, quiet, onDraw, onWrite}: {mee
   const draftField = useRef<HTMLTextAreaElement>(null);
   const [starterUndo, setStarterUndo] = useState<{before:string; after:string}|null>(null);
   const comfort = useComfort();
-  const study = allowsComments(part.type), total = part.studyGuide?.paragraphCount ?? value.total;
+  const study = allowsComments(part.type), total = value.total ?? part.paragraphCount ?? part.studyGuide?.paragraphCount;
   useEffect(() => {
     let active = true;
     void readStudy(meetingId, part.id).then(saved => { if (active) { current.current = saved ?? emptyStudy(meetingId, part.id); setValue(current.current); setLoaded(true); } }).catch(() => { if (active) setStatus('Study notes could not be opened. Try reopening this part.'); });
@@ -64,19 +64,19 @@ export function StudyTools({meetingId, part, teen, quiet, onDraw, onWrite}: {mee
   if (pause) return <div className="study-tools pause-card"><h4>{t('A quiet pause')}</h4><p>{t('Rest your hands. Look away from the screen, or let your companion move. Come back whenever you are ready.')}</p><QuietFidget /><button type="button" onClick={() => setPause(false)}>{t('Return to my place')}</button><button type="button" onClick={onDraw}>{t('Draw quietly')}</button></div>;
   return <div className="study-tools" aria-busy={!loaded}>
     <p className="tool-introduction">{study ? teen ? t('Follow the discussion in the way that helps you.') : t('One small step at a time. You can just listen, too.') : part.type === 'PublicTalk' ? t('Listen to the talk. Keep a thought or sketch for yourself; there are no audience comments.') : t('Follow this programme part. Keep a thought or sketch for yourself; these are personal notes, not audience comments.')}</p>
-    {!quiet && <InterestPrompts />}
+    {!quiet && <InterestPrompts part={part}/>}
     {study && <section className="paragraph-tracker"><div className="paragraph-controls">
       <button type="button" disabled={!loaded || value.paragraph <= 1} aria-label={t('Previous paragraph')} onClick={() => paragraph(value.paragraph - 1)}>−</button>
       <label>{t('Paragraph')}{total && <small>{t(' of ')}{total}</small>}<input aria-label={t('Current paragraph')} type="number" min="1" max={total ?? 200} value={value.paragraph} disabled={!loaded} onChange={event => paragraph(Number(event.target.value))} /></label>
       <button type="button" disabled={!loaded || value.paragraph >= (total ?? 200)} aria-label={t('Next paragraph')} onClick={() => paragraph(value.paragraph + 1)}>+</button>
     </div>{total && <progress aria-label={t('Your paragraph position')} value={value.paragraph} max={total} />}
       {!quiet && <p>{cue?.prompt ?? t('Listen for one idea you would like to keep from this paragraph.')}</p>}
-      {!part.studyGuide?.paragraphCount && <details><summary>{t('Set the number of paragraphs')}</summary><label>{t('Total')}<input type="number" min={value.paragraph} max="200" value={value.total ?? ''} disabled={!loaded} onChange={event => { const next = Number(event.target.value); if (Number.isInteger(next) && next >= value.paragraph && next <= 200) update({total: next}); }} /></label></details>}
+      <details><summary>{t(part.paragraphCount||part.studyGuide?.paragraphCount?'More …':'Set the number of paragraphs')}</summary><label>{t('Total')}<input type="number" min={value.paragraph} max="200" value={total ?? ''} disabled={!loaded} onChange={event => { const next = Number(event.target.value); if (Number.isInteger(next) && next >= value.paragraph && next <= 200) update({total: next}); }} /></label></details>
     </section>}
     {!quiet && study && pauseOffered && <aside className="pause-offer"><p>{t('Would a quiet pause help? Your place is saved.')}</p><button type="button" onClick={() => { setPauseOffered(false); setPause(true); }}>{t('Take a quiet pause')}</button><button type="button" onClick={() => setPauseOffered(false)}>{t('Keep listening')}</button></aside>}
     {!quiet && study && <section className="pick-the-point"><h4>{t('Pick a point to keep')}</h4><p>{cue?.pointChoices ? t('Which idea fits what you noticed? Any choice is fine.') : t('Choose a listening lens. These are prompts, not a quiz about the paragraph.')}</p><div className="listening-chips">{choices.map(choice => <button type="button" key={choice} disabled={!loaded} aria-pressed={value.pointChoices?.[pointKey] === choice} onClick={() => update({pointChoices: {...current.current.pointChoices, [pointKey]: choice}, draft: appendListeningPoint(current.current.draft, t(choice))})}>{t(choice)}</button>)}</div></section>}
     {study ? <section className="comment-builder"><h4>{teen ? t('Prepare a comment') : t('Something I could say')}</h4>
-      {ready && <p role="status" className="comment-ready">{t('Ready to comment ✓')}</p>}
+      {ready && <p role="status" className="comment-ready ready-to-share">{t('Ready to share')}</p>}
       <div className="sentence-starters">{['I noticed…', 'The scripture helps me…', 'One thing I could try…'].map(starter => <button type="button" key={starter} disabled={!loaded} onClick={() => {
         const before=current.current.draft??'', field=draftField.current;
         try {
@@ -90,8 +90,9 @@ export function StudyTools({meetingId, part, teen, quiet, onDraw, onWrite}: {mee
       <ScriptureLookup text={value.draft ?? ''}/>
       <button type="button" disabled={!loaded || !value.draft?.trim() || value.comments.length >= 300} onClick={() => update({draft: '', comments: [...current.current.comments, {id: crypto.randomUUID(), paragraph: value.paragraph, text: value.draft!.trim(), ready: false, given: false}]})}>{t('Keep this comment')}</button>
       <Rehearsal text={value.draft ?? ''} />
-      {value.comments.map(comment => <div className="prepared-comment" key={comment.id}><small>{tt`Paragraph ${comment.paragraph}`}</small><p>{comment.text}</p><button type="button" disabled={!loaded || comment.given} aria-pressed={comment.ready && !comment.given} onClick={() => update({comments: current.current.comments.map(item => item.id === comment.id ? {...item, ready: !item.ready} : item)})}>{t('Ready to comment')}</button>
-        <label><input type="checkbox" checked={comment.given} onChange={event => update({comments: current.current.comments.map(item => item.id === comment.id ? {...item, given: event.target.checked, ready: false} : item)})} />{t('I chose to share this comment')}</label><Rehearsal text={comment.text} /></div>)}
+      {value.comments.map(comment => <div className="prepared-comment" key={comment.id}><small>{tt`Paragraph ${comment.paragraph}`}</small><p>{comment.text}</p><button type="button" disabled={!loaded || comment.given} aria-pressed={comment.ready && !comment.given} onClick={() => {if(!comment.ready&&preferences.haptics&&typeof navigator.vibrate==='function')navigator.vibrate(15);update({comments: current.current.comments.map(item => item.id === comment.id ? {...item, ready: !item.ready} : item)});}}>{t('Ready to comment')}</button>
+        {comment.ready&&!comment.given&&<button type="button" onClick={()=>update({comments:current.current.comments.map(item=>item.id===comment.id?{...item,given:true,ready:false}:item)})}>{t('I said it')}</button>}
+        <label><input type="checkbox" checked={comment.given} onChange={event => update({comments: current.current.comments.map(item => item.id === comment.id ? {...item, given: event.target.checked, ready: false} : item)})} />{t(comment.given?'Shared ✓':'I chose to share this comment')}</label><Rehearsal text={comment.text} /></div>)}
     </section> : <section className="talk-listening-kit"><h4>{t('Keep a listening note')}</h4><button type="button" onClick={onWrite}>{t('The speaker’s main question')}</button><button type="button" onClick={onDraw}>{t('Sketch an example or illustration')}</button>
       {value.draft?.trim() && <details><summary>{t('Previously saved draft')}</summary><p>{value.draft}</p></details>}
       {value.comments.length > 0 && <details><summary>{t('Previously saved thoughts')}</summary>{value.comments.map(comment => <p key={comment.id}>{comment.text}</p>)}</details>}

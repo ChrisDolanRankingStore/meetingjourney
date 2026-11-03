@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {wolWeekUrl,parseWorkbookMetadata,parseStudyMetadata,loadWolMeeting} from '../../../node-app/wol-metadata.js';
+import {wolWeekUrl,parseWorkbookMetadata,parseStudyMetadata,studyParagraphCount,loadWolMeeting} from '../../../node-app/wol-metadata.js';
 import {localizeMeeting} from '../src/meetingLocale.ts';
 
 const workbook=language=>`<article id="article"><header><h2><a href="/${language}/wol/bc/r1/lp-e/555/0/0">Test reading 1-2</a></h2></header>
@@ -39,6 +39,11 @@ test('workbook import retains only headings, timings and official reference meta
 test('study import excludes paragraphs and requires a real song and title',()=>{
  assert.deepEqual(parseStudyMetadata(study,'en'),{title:'A test study title',songNumber:4,references:[{label:'Test 2:3',url:'https://wol.jw.org/en/wol/bc/r1/lp-e/556/0/0'}]});
  assert.throws(()=>parseStudyMetadata(study.replace('SONG 4','No song'),'en'));
+});
+test('study paragraph totals use numbered prose or wcg prose, not review question counts',()=>{
+ assert.equal(studyParagraphCount('<article id="article"><p data-pid="1">1 First</p><p data-pid="2">2 Second</p></article>'),2);
+ assert.equal(studyParagraphCount('<article id="article"><div id="tt4"><p data-pid="3">Prose</p><p data-pid="4">More prose</p><h3>Questions</h3><p data-pid="8">1. Question</p></div></article>'),2);
+ assert.equal(studyParagraphCount('<article id="article"><p>Not a known structure</p></article>'),undefined);
 });
 test('automatic metadata preserves notebook IDs, translates titles and caches bilingual requests',async()=>{
  const seen=[],fetcher=source('2026-11-02',seen);

@@ -18,6 +18,18 @@ html[data-neutral="true"] .app .home-sources-card { margin: 24px auto; max-width
 .bingo-legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: .875rem; }
 .bingo-legend span { border-bottom: 4px solid #446e86; }
 .bingo-legend span:last-child { border-color: #a68b62; }
+.app .ready-to-share { min-height: 56px; padding: 16px; display: flex; align-items: center; justify-content: center; background: #e2eee4; color: #23472c; font-size: 1.5rem; border: 1px solid #728d78; }
+.app .elapsed-part button { width: 100%; min-height: 44px; border: 0; background: transparent; padding: 12px 0; }
+.elapsed-track { display: block; height: 4px; background: #d3dce2; }
+.elapsed-track > span { display: block; height: 100%; background: #466c83; }
+.meeting-stamps { grid-column: 1 / -1; min-width: 0; }
+.meeting-stamps h3 { margin: 4px 0; font-size: 1rem; }
+.meeting-stamp-row { display: flex; gap: 8px; overflow-x: auto; padding: 4px; }
+.meeting-stamp { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 30px; height: 30px; border: 1px dashed #aaadb0; color: #304d63; border-radius: 6px; background: transparent; }
+.meeting-stamp.is-kept { background: #e2eee4; border: 1px solid #42694b; }
+.meeting-stamps > details { font-size: .875rem; }
+.app .discovery-map-heading:has(.meeting-stamps) { display: flex; flex-wrap: wrap; max-height: 38dvh; overflow-y: auto; }
+.app .discovery-map-heading > .meeting-stamps { flex: 1 0 100%; }
 :root[data-text-size="larger"] { font-size: 20px; }
 .app :is(p, small, label, summary, legend, .settings-help, .illustrated-stop-caption strong, .icon-action-label) {
   overflow-wrap: anywhere;
@@ -114,6 +126,7 @@ html[data-palette="high-contrast"] .app :is(.settings-card,.notes-timeline,.hist
 html[data-palette="high-contrast"] .app :is(p,small,label,legend,summary,h2,h3,h4) { color: #172b45; }
 html[data-palette="high-contrast"] .app :is(button,a)[aria-pressed="true"] { color: #fff; background: #123f8c; }
 html[data-palette="high-contrast"] .app :is(button,a)[aria-pressed="true"] :is(small,strong,span) { color: inherit; }
+html[data-palette="high-contrast"] .app .elapsed-part button[aria-pressed] { background: transparent; color: #172b45; }
 html[data-palette="high-contrast"] .app .part-kicker :is(span,small) { color: #fff; }
 html[data-icon-labels="true"] .app .part-workspace-tabs button > span { display: inline; }
 html[data-icon-labels="true"] .app .drawing-paper-workspace { flex-direction: column; }

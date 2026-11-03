@@ -5,10 +5,10 @@ import {emptyStudy, readStudy, saveStudy, type StudyProgress} from './studyStora
 import type {MeetingPart} from './types';
 import './listening.css';
 
-export function InterestPrompts() {
+export function InterestPrompts({part}:{part?:MeetingPart}) {
   const [preferences] = useState(readListeningPreferences);
   if (!preferences.lenses.length) return null;
-  return <section className="interest-prompts" aria-label={t('Your listening interests')}>{preferences.lenses.map(lens => <p key={lens}><strong>{t(lens)}: </strong>{t(lensPrompts[lens])}</p>)}</section>;
+  return <section className="interest-prompts" aria-label={t('Your listening interests')}>{preferences.lenses.map(lens => <p key={lens}><strong>{t(lens)}: </strong>{part?.lensCues?.[lens.toLowerCase()]??t(lensPrompts[lens])}</p>)}</section>;
 }
 
 export function ListeningActivities({meetingId, part}: {meetingId: string; part: MeetingPart}) {
@@ -24,7 +24,7 @@ export function ListeningActivities({meetingId, part}: {meetingId: string; part:
     const next = {...current.current, ...patch, updatedAt: new Date().toISOString()}; current.current = next; setValue(next);
     saves.current = saves.current.catch(() => undefined).then(() => saveStudy(next)).then(() => setStatus('Saved on this device')).catch(() => setStatus('Could not save'));
   };
-  return <div className="listening-activities"><InterestPrompts />{part.type === 'BibleReading' && <section><h4>{t('Before the reading')}</h4><p>{t('What do you think you might notice? Choose one, or just listen.')}</p>
+  return <div className="listening-activities"><InterestPrompts part={part}/>{part.type === 'BibleReading' && <section><h4>{t('Before the reading')}</h4><p>{t('What do you think you might notice? Choose one, or just listen.')}</p>
     {part.textReference && <p>{part.textReference}</p>}
     <div className="listening-chips">{['A person', 'A place', 'A helpful choice'].map(choice => <button type="button" key={choice} disabled={!loaded} aria-pressed={value.prediction === choice} onClick={() => update({prediction: choice, predictionChecked: undefined})}>{t(choice)}</button>)}</div>
     {value.prediction && <><h4>{t('After the reading')}</h4><p>{t('Did you notice what you expected? There is no wrong answer.')}</p><div className="listening-chips">{['I noticed that', 'Something different', 'I am not sure'].map(choice => <button type="button" key={choice} disabled={!loaded} aria-pressed={value.predictionChecked === choice} onClick={() => update({predictionChecked: choice})}>{t(choice)}</button>)}</div></>}

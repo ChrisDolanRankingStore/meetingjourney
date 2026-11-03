@@ -48,6 +48,7 @@ import { NotebookIcon } from './NotebookIcon';
 import { restoreMeetingPart, storyMoment } from './journeyExperience';
 import { readNote, saveNote, waitForJournalSaves } from './storage';
 import {primaryPartAction, isNavigationKey} from './partFlow';
+import {ElapsedPart} from './ElapsedPart';
 import type { EngagementActivity, Meeting, MeetingPart } from './types';
 
 type Presentation = 'simple' | 'standard' | 'reflective';
@@ -770,6 +771,7 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
   const focusQuestion = part.id==='part-1' && meetingId==='meeting-2026-10-19' ? t('What helped Baruch regain his hope?') : t(reflection.title);
   const primary=primaryPartAction(part);
   return <article className="part-card" data-section={part.section}><div className="part-kicker"><span>{programmePart ? t(programmePartLabel(part.type)) : sectionLabel(part.section)}</span><span>{tt`Part ${partIndex + 1} of ${totalParts}`}</span></div><h2 id={`${part.id}-heading`} tabIndex={-1} aria-live="polite">{part.number ? part.number + '. ' : ''}{part.title}</h2><div className="part-place-row"><p className="part-duration"><NotebookIcon name="clock" />{partTiming(part)}</p><button type="button" className="find-my-place" onClick={findPlace}><NotebookIcon name="pin" /><span>{t('Find my place')}</span></button></div>
+    <ElapsedPart minutes={part.durationMinutes}/>
     {part.speakerName && <p className="part-speaker">{t('Speaker: {name}', {name:part.speakerName})}</p>}
     {presentation!=='reflective'&&<section className="part-single-focus">
       <p>{t(part.summary.split(/(?<=[.!?])\s/)[0])}</p>
@@ -827,6 +829,7 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
           <button type="button" onClick={()=>setToolOpen('activities')}>{t('Activities')}</button>
           <button type="button" onClick={()=>setToolOpen('source')}>{t('References')}</button>
           <button type="button" onClick={()=>setToolOpen('listen')}>{t('Listen for one thing (optional)')}</button>
+          <label><input type="checkbox" disabled={!noteLoaded} checked={sourceConfirmations.includes('I followed this part')} onChange={()=>toggleSourceConfirmation('I followed this part')}/>{t('I followed this part')}</label>
           <p>{t('You can just listen, draw or keep a thought.')}</p>
         </nav>}
         {toolOpen === 'activities' && <PartActivities meetingId={meetingId} part={part} quiet={engagement==='quiet'} onChoose={chooseActivity} />}

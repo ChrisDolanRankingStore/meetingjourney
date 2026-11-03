@@ -8,6 +8,8 @@ import {sceneSetForWeek} from './sceneSets';
 import {sceneImage} from './artwork';
 import {hasDaySessions, sessionForPart, sessionMapPoint, sessionPartIndices} from './meetingSessions';
 import {MeetingSessionPicker} from './MeetingSessionPicker';
+import {useComfort} from './ComfortSettings';
+import {minutesToSong} from './ElapsedPart';
 
 export function StoryJourneyMap({ meeting, current, onSelect, onBack, listView, initialList = false }: {
   meeting: Meeting; current: number; onSelect: (index: number) => void; onBack: () => void;
@@ -15,6 +17,7 @@ export function StoryJourneyMap({ meeting, current, onSelect, onBack, listView, 
   initialList?: boolean;
 }) {
   const [list, setList] = useState(initialList);
+  const comfort=useComfort();
   const [session, setSession] = useState(() => sessionForPart(meeting,current));
   const split = hasDaySessions(meeting);
   const indices = sessionPartIndices(meeting,session);
@@ -29,7 +32,7 @@ export function StoryJourneyMap({ meeting, current, onSelect, onBack, listView, 
     {split && <MeetingSessionPicker value={session} onChange={setSession} />}
     {list ? <div className="story-map-list" ref={scrollRef}>{listView(indices)}</div> : <div className="journey-map-scroll" ref={scrollRef}><div className="illustrated-journey-map" style={{'--map-image':`url("${sceneImage(pack.discoveryImage)}")`, minHeight:split?Math.max(520,rows*220):Math.max(520,rows*150)} as CSSProperties} aria-label={split ? t(session === 'morning' ? 'Morning programme map' : 'Afternoon programme map') : t("Meeting stops on the journey path")}>
       {indices.map((index, localIndex) => {const part=meeting.parts[index]; return <button type="button" key={part.id} className={`illustrated-stop section-${part.section.toLowerCase()} ${current === index ? 'is-current' : ''}`} style={{ '--stop-x': `${points[localIndex].x}%`, '--stop-y': `${points[localIndex].y}%` } as CSSProperties} onClick={() => onSelect(index)} aria-label={tt`Stop ${index + 1}: ${part.title}${current === index ? t(", your current place") : ''}`} aria-current={current === index ? 'step' : undefined}>
-        <span className="illustrated-stop-marker" aria-hidden="true">{index + 1}</span><span className="illustrated-stop-caption"><NotebookIcon name={part.type==='Song' || part.type==='Music'?'music':part.section==='Treasures'?'treasure':part.section==='FieldMinistry'?'heart':'book'} /><strong>{part.title}</strong><small>{current === index ? t("You are here · ") : ''}{partTiming(part)}</small>{part.speakerName && <small>{t('Speaker: {name}', {name:part.speakerName})}</small>}</span>
+        <span className="illustrated-stop-marker" aria-hidden="true">{index + 1}</span><span className="illustrated-stop-caption"><NotebookIcon name={part.type==='Song' || part.type==='Music'?'music':part.section==='Treasures'?'treasure':part.section==='FieldMinistry'?'heart':'book'} /><strong>{part.title}</strong><small>{current === index ? t("You are here · ") : ''}{partTiming(part)}</small>{!comfort.hideCounts&&part.type==='Song'&&index>=current&&<small>{t('≈ {minutes} min from your place',{minutes:minutesToSong(meeting.parts,current,index)})}</small>}{part.speakerName && <small>{t('Speaker: {name}', {name:part.speakerName})}</small>}</span>
       </button>;})}
     </div></div>}
     <footer className="story-map-footer"><p>{t("Pick any stop.")}<br /><small>{split ? t('Scroll to explore this session.') : t("Scroll to explore the journey.")}</small></p><button className="map-continue" type="button" onClick={() => onSelect(next)}>{t("Continue")}<NotebookIcon name="next" /></button></footer>

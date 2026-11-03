@@ -4,8 +4,8 @@ import {insertStarter,normalizeComfort,readComfort,saveComfort} from '../src/com
 import {notebookContext,notebookSearch} from '../src/notebookLabels.ts';
 
 test('comfort is opt-in and accepts only supported text sizes',()=>{
- assert.deepEqual(normalizeComfort(null),{neutral:false,hideCounts:false,iconLabels:false,textSize:'standard'});
- assert.deepEqual(normalizeComfort({neutral:true,hideCounts:true,iconLabels:true,textSize:'larger'}),{neutral:true,hideCounts:true,iconLabels:true,textSize:'larger'});
+ assert.deepEqual(normalizeComfort(null),{neutral:false,hideCounts:false,iconLabels:false,showMinutes:false,textSize:'standard'});
+ assert.deepEqual(normalizeComfort({neutral:true,hideCounts:true,iconLabels:true,textSize:'larger'}),{neutral:true,hideCounts:true,iconLabels:true,showMinutes:false,textSize:'larger'});
  assert.equal(normalizeComfort({textSize:'huge',neutral:'yes'}).textSize,'standard');
  assert.equal(normalizeComfort({neutral:'yes'}).neutral,false);
  const data=new Map(),storage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value)};

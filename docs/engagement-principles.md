@@ -4,6 +4,24 @@ Meeting Journey is designed to support attention, processing and participation. 
 
 ## Product decisions
 
+### Optional attention supports (0.5.5)
+
+Discovery and Review stamps represent kept thoughts, drawings, feelings,
+comments or an explicit "I followed this part"; skipped parts are unlabelled
+outlines, not negative results. Hide activity counts removes the entire strip.
+Readiness remains an explicit choice after keeping a comment. "I said it"
+updates that comment; the meeting's shared total is derived from these flags
+so repeat taps, reopening and undo cannot double-count a contribution.
+
+The optional elapsed bar measures foreground time, not attention or actual
+speaker timing. It pauses when hidden or tapped, has no countdown, and is
+removed by Hide activity counts. Show minutes is a separate opt-in. Reduced
+motion uses 30-second steps. Song estimates are planned durations only.
+
+Study imports retain paragraph totals, not paragraph text. The wcg chapter for
+2 November yields eight prose paragraphs; review questions and pull quotes are
+excluded. Content-specific lenses use extracted nouns with generic fallbacks.
+
 ### Calm part views (0.5.4)
 
 Simple and Standard show one cue, one part-specific primary action and More.
