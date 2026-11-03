@@ -18,6 +18,12 @@ The successful WOL programme-import notice appears only on the first Home view o
 
 **Connect the ideas** is available through Activities for every meeting part, including public talks and Quiet mode. Reviewed bilingual connections take priority; otherwise clearly labelled general listening prompts connect an idea, scripture, quality or action to something familiar, new, applicable or worth thinking about. There is no scoring or expected audience response. Each part keeps its own connections and personal example on the device.
 
+Discovery browsing uses a consistent 12px gap between its heading, filters and content. Previous notes is a calendar icon alongside Gallery, Map and List, with a translated accessible label and tooltip, rather than a separate full-width button. History-panel padding is symmetric without the heading's default extra top margin.
+
+Gallery, Map and List leave Previous notes and show the selected discovery view. History includes saved drawing pages as well as text. Expanded records offer editing of the original note/reflection, study draft/comments or drawing page, even when the old programme is not downloaded. Text edits use Save changes and preserve other record fields; drawing edits use the existing autosaving notebook. Saved discovery previews also offer Edit note/Edit drawing.
+
+New drawing strokes retain coalesced pointer samples where supported, include the pen-up position and use the same smoothed curve for the live canvas, saved preview and PNG export. Existing strokes retain their original rendering; undo/redo and backup preserve the optional smoothing flag.
+
 Each source has a single **Open in JW Library** link using the official HTTPS `/finder` app-link route, retaining publication/document IDs, paragraphs, media IDs and the meeting language (`E` / `S`). Supported devices can hand it to JW Library; without the app it remains a working web link. There is no separate web button or installation-detection timer. Pages without a known Library identifier remain web-only instead of presenting a misleading app button.
 
 Bible links preserve the requested verse or complete verse range, including passages crossing chapter boundaries. Comma-separated verses have separate links; whole-chapter ranges expose each chapter rather than silently dropping later chapters. Full English and Spanish Bible book names are recognised. A chapter uses verse `000`; verses use the eight-digit book/chapter/verse finder identifier.

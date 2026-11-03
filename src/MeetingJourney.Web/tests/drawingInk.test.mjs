@@ -1,6 +1,21 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {blendSmudgePixels} from '../src/drawingInk.ts';
+import {blendSmudgePixels,pointerSamples,smoothStrokePoints} from '../src/drawingInk.ts';
+
+test('fast strokes keep coalesced curve samples and the final pointer position',()=>{
+ const samples=[{clientX:10,clientY:20},{clientX:20,clientY:60},{clientX:40,clientY:20}];
+ const event={clientX:50,clientY:10,getCoalescedEvents:()=>samples};
+ assert.deepEqual(pointerSamples(event),[...samples,event]);
+ assert.deepEqual(pointerSamples({...event,clientX:40,clientY:20}),samples);
+ assert.deepEqual(pointerSamples({clientX:5,clientY:6}),[{clientX:5,clientY:6}]);
+ assert.equal(smoothStrokePoints([0,0,20,60,40,0]).length,12);
+ const curve=smoothStrokePoints([0,0,20,60,40,0]);
+ assert.deepEqual(curve.slice(0,2),[0,0]);assert.deepEqual(curve.slice(-2),[40,0]);
+ assert.ok(curve.some((value,index)=>index%2&&value>20));
+ assert.ok(curve.every(Number.isFinite));
+ assert.deepEqual(smoothStrokePoints([0,0,10,10]),[0,0,10,10]);
+ assert.deepEqual(smoothStrokePoints([5,6]),[5,6]);
+});
 
 test('smudge blends existing colours rather than painting an opaque trail',()=>{
  const pixels=new Uint8ClampedArray(4*4*4),brush=new Uint8ClampedArray(pixels.length);

@@ -1,5 +1,28 @@
 import type {Stroke} from './types';
 
+export function pointerSamples<T extends {clientX:number;clientY:number;getCoalescedEvents?:()=>T[]}>(event:T):T[]{
+  const samples=event.getCoalescedEvents?.()??[];
+  const last=samples[samples.length-1];
+  return last&&last.clientX===event.clientX&&last.clientY===event.clientY?samples:[...samples,event];
+}
+
+export function smoothStrokePoints(points:number[]):number[]{
+  if(points.length<6)return points;
+  const result=points.slice(0,2);
+  let x=points[0],y=points[1];
+  for(let index=2;index+3<points.length;index+=2){
+    const controlX=points[index],controlY=points[index+1];
+    const endX=(controlX+points[index+2])/2,endY=(controlY+points[index+3])/2;
+    for(let step=1;step<=4;step++){
+      const t=step/4,u=1-t;
+      result.push(u*u*x+2*u*t*controlX+t*t*endX,u*u*y+2*u*t*controlY+t*t*endY);
+    }
+    x=endX;y=endY;
+  }
+  result.push(...points.slice(-2));
+  return result;
+}
+
 export function renderDrawingInk(strokes: Stroke[], width: number, height: number, limit = 2048, pixelRatio = 1) {
   const canvas = document.createElement('canvas');
   const scale = Math.min(pixelRatio, limit / Math.max(width, height));
@@ -10,8 +33,9 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
   context.lineCap = 'round'; context.lineJoin = 'round';
   for (const stroke of strokes) {
     if (stroke.points.length < 2) continue;
+    const points=stroke.smooth?smoothStrokePoints(stroke.points):stroke.points;
     if (stroke.mode === 'smudge') {
-      smudgeInk(context, stroke.points.map(point => point * scale), stroke.size * 3 * scale);
+      smudgeInk(context, points.map(point => point * scale), stroke.size * 3 * scale);
       continue;
     }
     context.globalCompositeOperation = stroke.mode === 'eraser' ? 'destination-out' : 'source-over';
@@ -19,12 +43,12 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
     context.strokeStyle = stroke.color; context.fillStyle = stroke.color;
     context.lineWidth = stroke.size * scale * (stroke.mode === 'highlighter' ? 3 : 1);
     context.beginPath();
-    if (stroke.points.length === 2) {
-      context.arc(stroke.points[0] * scale, stroke.points[1] * scale, context.lineWidth / 2, 0, Math.PI * 2);
+    if (points.length === 2) {
+      context.arc(points[0] * scale, points[1] * scale, context.lineWidth / 2, 0, Math.PI * 2);
       context.fill();
     } else {
-      context.moveTo(stroke.points[0] * scale, stroke.points[1] * scale);
-      for (let index = 2; index + 1 < stroke.points.length; index += 2) context.lineTo(stroke.points[index] * scale, stroke.points[index + 1] * scale);
+      context.moveTo(points[0] * scale, points[1] * scale);
+      for (let index = 2; index + 1 < points.length; index += 2) context.lineTo(points[index] * scale, points[index + 1] * scale);
       context.stroke();
     }
   }

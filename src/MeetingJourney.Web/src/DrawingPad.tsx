@@ -5,15 +5,15 @@ import type { Stroke } from './types';
 import { readDrawingPage, saveDrawing } from './storage';
 import { createDrawingPaper, drawingSurface, includeDrawingPoint, initialDrawingZoom, zoomDrawing, type DrawingPaperSize } from './drawingViewport';
 import { DrawingToolbar, type DrawingPageControls } from './DrawingToolbar';
-import {renderDrawingInk} from './drawingInk';
+import {renderDrawingInk, pointerSamples, smoothStrokePoints} from './drawingInk';
 
-interface Props { meetingId: string; partId: string; onSaved?: () => void; }
+interface Props { meetingId: string; partId: string; onSaved?: () => void; initialPage?: number; }
 type Tool = Stroke['mode'];
 
-export function DrawingPad({ meetingId, partId, onSaved }: Props) {
+export function DrawingPad({ meetingId, partId, onSaved, initialPage=0 }: Props) {
   const pageKey = `mj-drawing-pages:${meetingId}:${partId}`;
-  const [pageCount, setPageCount] = useState(() => Math.max(1, Math.min(50, Number(localStorage.getItem(pageKey)) || 1)));
-  const [page, setPage] = useState(0);
+  const [pageCount, setPageCount] = useState(() => Math.max(initialPage+1, Math.max(1, Math.min(50, Number(localStorage.getItem(pageKey)) || 1))));
+  const [page, setPage] = useState(initialPage);
   const [template, setTemplate] = useState<'blank' | 'lined'>('blank');
   return <div className="drawing-notebook"><DrawingPage key={`${meetingId}:${partId}:${page}`} meetingId={meetingId} partId={page === 0 ? partId : `${partId}::page::${page}`} onSaved={onSaved} template={template} pages={{ page, count: pageCount, onSelect: setPage, onAdd: () => { localStorage.setItem(pageKey, String(pageCount + 1)); setPage(pageCount); setPageCount(count => count + 1); }, template, onTemplate: setTemplate }} /></div>;
 }
@@ -88,11 +88,11 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   const brushSize = tool === 'smudge' ? smudgeSize : size;
   const activeStroke = useMemo(() => ({ color: tool === 'eraser' ? '#ffffff' : color, size:brushSize, mode: tool }), [color, brushSize, tool]);
 
-  const canvasPosition = (event: ReactPointerEvent<HTMLDivElement>) => {
+  const canvasPosition = (event: {clientX:number;clientY:number;currentTarget:HTMLDivElement}) => {
     const bounds = event.currentTarget.getBoundingClientRect();
     return {x:event.clientX - bounds.left - event.currentTarget.clientLeft, y:event.clientY - bounds.top - event.currentTarget.clientTop};
   };
-  const pointerPosition = (event: ReactPointerEvent<HTMLDivElement>) => {
+  const pointerPosition = (event: {clientX:number;clientY:number;currentTarget:HTMLDivElement}) => {
     const point = canvasPosition(event), currentZoom = zoomRef.current;
     return {x:Math.max(0, (point.x - currentZoom.x) / (view.scale * currentZoom.scale)), y:Math.max(0, (point.y - currentZoom.y) / (view.scale * currentZoom.scale))};
   };
@@ -113,10 +113,13 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     strokeStart.current = {strokes:latestDrawing.current.strokes, redo:redoStack, paper};
     const point = pointerPosition(event);
     if (!point || !loaded || !paper) return;
-    setPaper(current => current ? includeDrawingPoint(current, point) : current);
+    const nextPaper=includeDrawingPoint(paper,point);
+    const nextStrokes=[...latestDrawing.current.strokes,{...activeStroke,smooth:true,points:[point.x,point.y]}];
+    latestDrawing.current={strokes:nextStrokes,loaded:true,paper:nextPaper};
+    setPaper(nextPaper);
     drawing.current = true;
     setRedoStack([]);
-    setStrokes(current => [...current, { ...activeStroke, points: [point.x, point.y] }]);
+    setStrokes(nextStrokes);
   };
   const move = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!pointers.current.has(event.pointerId)) return;
@@ -133,12 +136,15 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
       return;
     }
     if (!drawing.current) return;
-    const point = pointerPosition(event);
-    if (!point) return;
-    setPaper(current => current ? includeDrawingPoint(current, point) : current);
-    setStrokes(current => current.map((stroke, index) => index === current.length - 1 ? { ...stroke, points: [...stroke.points, point.x, point.y] } : stroke));
+    const samples=pointerSamples(event.nativeEvent).map(sample=>pointerPosition({clientX:sample.clientX,clientY:sample.clientY,currentTarget:event.currentTarget}));
+    const latest=latestDrawing.current;
+    const nextPaper=latest.paper?samples.reduce((paper,point)=>includeDrawingPoint(paper,point),latest.paper):null;
+    const nextStrokes=latest.strokes.map((stroke,index)=>index===latest.strokes.length-1?{...stroke,points:[...stroke.points,...samples.flatMap(point=>[point.x,point.y])]}:stroke);
+    latestDrawing.current={strokes:nextStrokes,loaded:latest.loaded,paper:nextPaper};
+    setPaper(nextPaper);setStrokes(nextStrokes);
   };
   const finish = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if(event.type==='pointerup'&&drawing.current&&!gesture.current)move(event);
     pointers.current.delete(event.pointerId);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     if (gesture.current) { if (!pointers.current.size) gesture.current = false; return; }
@@ -190,7 +196,7 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
         <Layer x={zoom.x} y={zoom.y} scaleX={view.scale * zoom.scale} scaleY={view.scale * zoom.scale}><Rect width={view.paperWidth} height={view.paperHeight} fill="#fffdf7" />{template === 'lined' && Array.from({ length: Math.ceil(view.paperHeight / 30) }, (_, index) => <Line key={index} points={[0, 30 + index * 30, view.paperWidth, 30 + index * 30]} stroke="#d7dfef" strokeWidth={1} />)}</Layer>
         <Layer x={zoom.x} y={zoom.y} scaleX={view.scale * zoom.scale} scaleY={view.scale * zoom.scale}>
           <Line points={[]} stroke="#ffffff" />
-          {ink ? <Image image={ink} width={sheet.width} height={sheet.height} /> : strokes.map((stroke, index) => <Line key={index} points={stroke.points} stroke={stroke.color} strokeWidth={stroke.mode === 'highlighter' ? stroke.size * 3 : stroke.size} opacity={stroke.mode === 'highlighter' ? 0.35 : 1} lineCap="round" lineJoin="round" globalCompositeOperation={stroke.mode === 'eraser' ? 'destination-out' : 'source-over'} />)}
+          {ink ? <Image image={ink} width={sheet.width} height={sheet.height} /> : strokes.map((stroke, index) => <Line key={index} points={stroke.smooth?smoothStrokePoints(stroke.points):stroke.points} stroke={stroke.color} strokeWidth={stroke.mode === 'highlighter' ? stroke.size * 3 : stroke.size} opacity={stroke.mode === 'highlighter' ? 0.35 : 1} lineCap="round" lineJoin="round" globalCompositeOperation={stroke.mode === 'eraser' ? 'destination-out' : 'source-over'} />)}
           {strokes.length === 0 && <Circle x={0} y={0} radius={0} />}
         </Layer>
       </Stage>

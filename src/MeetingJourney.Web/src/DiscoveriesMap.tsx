@@ -12,6 +12,7 @@ import {restoreMeetingPart} from './journeyExperience';
 import {MeetingSessionPicker} from './MeetingSessionPicker';
 import {renderDrawingInk} from './drawingInk';
 import {NotesTimeline} from './NotesTimeline';
+import {HistoricalNotebook, type HistoricalTarget} from './HistoricalNotebook';
 
 function TreasureChest({ open }: { open: boolean }) {
   const shade = `chest-${useId().replace(/:/g, '')}`;
@@ -42,7 +43,7 @@ function SavedDrawingPreview({ drawing }: { drawing: DiscoveryDrawing }) {
   return <canvas className="treasure-drawing-preview" ref={canvasRef} role="img" aria-label={tt`Your saved drawing, page ${drawing.page + 1}`}>{t("Your saved drawing, page ")}{drawing.page + 1}.</canvas>;
 }
 
-function TreasureContents({ treasure, onReturn }: { treasure: DiscoveryTreasure; onReturn: (index: number) => void }) {
+function TreasureContents({ treasure, onReturn, onEdit }: { treasure: DiscoveryTreasure; onReturn: (index: number) => void; onEdit:(kind:'note'|'drawing',page?:number)=>void }) {
   const [page, setPage] = useState(0);
   const note = treasure.note;
   const drawing = treasure.drawings[page];
@@ -50,12 +51,15 @@ function TreasureContents({ treasure, onReturn }: { treasure: DiscoveryTreasure;
     {note?.text?.trim() && <section><h4>{t("My thought")}</h4><p className="treasure-own-words">{note.text}</p></section>}
     {(note?.feedback?.trim() || Boolean(note?.feedbackChoices?.length)) && <section><h4>{t("What I noticed")}</h4>{Boolean(note?.feedbackChoices?.length) && <div className="treasure-feeling-tags">{note!.feedbackChoices!.map(choice => <span key={choice}>{t(choice)}</span>)}</div>}{note?.feedback?.trim() && <p className="treasure-own-words">{note.feedback}</p>}</section>}
     {drawing && <section><h4>{t("My drawing")}</h4>{treasure.drawings.length > 1 && <div className="treasure-page-tabs" aria-label={t("Saved drawing pages")}>{treasure.drawings.map((item, index) => <button type="button" key={item.page} aria-pressed={index === page} onClick={() => setPage(index)}>{t("Page ")}{item.page + 1}</button>)}</div>}<SavedDrawingPreview drawing={drawing} /></section>}
+    {note&&<button type="button" className="treasure-return" onClick={()=>onEdit('note')}>{t('Edit note')}</button>}
+    {drawing&&<button type="button" className="treasure-return" onClick={()=>onEdit('drawing',drawing.page)}>{t('Edit drawing')}</button>}
     <button type="button" className="treasure-return" onClick={() => onReturn(treasure.partIndex)}>{t("Return to this meeting part →")}</button>
   </div>;
 }
 
 export function DiscoveriesMap({ meeting, onReturn, teen = false }: { meeting: Meeting; teen?: boolean; onReturn: (index: number) => void }) {
   const [timeline,setTimeline]=useState(false);
+  const [editing,setEditing]=useState<HistoricalTarget|null>(null);
   const scenePack = sceneSetForWeek(meeting.weekOf);
   const split = hasDaySessions(meeting);
   const [session, setSession] = useState(() => sessionForPart(meeting,restoreMeetingPart(meeting,localStorage)));
@@ -101,13 +105,14 @@ export function DiscoveriesMap({ meeting, onReturn, teen = false }: { meeting: M
     return () => { cancelAnimationFrame(frame); document.removeEventListener('keydown', escape); previous?.focus(); };
   }, [selectedId]);
   const selectTreasure = (id: string) => setSelectedId(current => current === id ? null : id);
+  if(editing)return <section className="discovery-map-screen"><HistoricalNotebook target={editing} onClose={()=>{setEditing(null);setRetry(value=>value+1);requestAnimationFrame(()=>closeRef.current?.focus());}}/></section>;
   return <section className={`discovery-map-screen ${split ? 'has-day-sessions' : ''} ${timeline ? 'showing-timeline' : ''} ${selected&&!timeline ? 'reading-discovery' : ''}`}>
     <header className="discovery-map-heading"><div><p className="eyebrow">{teen ? t("Your meeting journal") : t("Your adventure journal")}</p><h2>{t("My discoveries")}</h2><p>{t("The things you chose to keep along the way.")}</p></div><div className="discovery-view-picker" role="group" aria-label={t('Discovery view')}>
-      <IconAction icon="grid" label={t('Gallery')} aria-pressed={gallery} onClick={()=>setGallery(true)} />
-      <IconAction icon="route" label={t('Map')} aria-pressed={!gallery&&!list} onClick={()=>{setGallery(false);setList(false);}} />
-      <IconAction icon="list" label={t('List')} aria-pressed={!gallery&&list} onClick={()=>{setGallery(false);setList(true);}} />
+      <IconAction icon="grid" label={t('Gallery')} aria-pressed={!timeline&&gallery} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(true);}} />
+      <IconAction icon="route" label={t('Map')} aria-pressed={!timeline&&!gallery&&!list} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(false);setList(false);}} />
+      <IconAction icon="list" label={t('List')} aria-pressed={!timeline&&!gallery&&list} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(false);setList(true);}} />
+      <IconAction icon="calendar" label={t('Previous notes')} aria-pressed={timeline} onClick={()=>{setTimeline(true);setSelectedId(null);}} />
     </div></header>
-    <button className="timeline-toggle" type="button" aria-expanded={timeline} onClick={()=>setTimeline(value=>!value)}>{t('Previous notes')}</button>
     {timeline?<NotesTimeline/>:<><div className="discovery-filters" role="group" aria-label={t('Filter discoveries')}>{(['all','drawings','thoughts','feelings'] as const).map(value=><button type="button" key={value} aria-pressed={filter===value} onClick={()=>{setFilter(value);setSelectedId(null);}}>{t(({all:'All',drawings:'Drawings',thoughts:'Thoughts',feelings:'Feelings'})[value])}</button>)}</div>
     {split && <MeetingSessionPicker value={session} onChange={setSession} />}
     <div className={`discovery-map-workspace ${selected ? 'has-treasure-open' : ''}`}>
@@ -121,7 +126,7 @@ export function DiscoveriesMap({ meeting, onReturn, teen = false }: { meeting: M
           <div className="treasure-stop-preview" id={`${panelId}-${treasure.part.id}-preview`} role="tooltip"><strong>{treasure.part.title}</strong><small>{discoverySummary(treasure)}</small>{treasure.note?.text?.trim() && <p>{treasure.note.text.slice(0, 90)}{treasure.note.text.length > 90 ? '…' : ''}</p>}</div>
         </div>;})}
       </div></div>}
-      {selected && <aside className="open-treasure" id={panelId} aria-labelledby={`${panelId}-title`}><button ref={closeRef} className="close-treasure" type="button" onClick={() => setSelectedId(null)} aria-label={t("Close this discovery")}>×</button><div className="open-treasure-heading"><TreasureChest open /><p className="eyebrow">{t("Your saved treasure · Stop ")}{selected.partIndex + 1}</p><h3 id={`${panelId}-title`}>{selected.part.title}</h3></div><TreasureContents key={selected.part.id} treasure={selected} onReturn={onReturn} /></aside>}
+      {selected && <aside className="open-treasure" id={panelId} aria-labelledby={`${panelId}-title`}><button ref={closeRef} className="close-treasure" type="button" onClick={() => setSelectedId(null)} aria-label={t("Close this discovery")}>×</button><div className="open-treasure-heading"><TreasureChest open /><p className="eyebrow">{t("Your saved treasure · Stop ")}{selected.partIndex + 1}</p><h3 id={`${panelId}-title`}>{selected.part.title}</h3></div><TreasureContents key={selected.part.id} treasure={selected} onReturn={onReturn} onEdit={(kind,page)=>setEditing({meetingId:meeting.id,partId:`${selected.part.id}${page?`::page::${page}`:''}`,kind})} /></aside>}
       {(loading || failed || (!visibleTreasures.length && !selected)) && <div className="treasure-map-message" role="status">{loading ? t("Opening your discovery map…") : failed ? <><p>{t("Your discoveries could not be loaded from this device.")}</p><button type="button" onClick={() => setRetry(value => value + 1)}>{t("Try again")}</button></> : <><strong>{t("Your map is ready")}</strong><p>{t("When you save a thought, feeling or drawing, its treasure chest will appear here.")}</p></>}</div>}
     </div>
     <p className="discovery-map-hint">{treasures.length ? gallery || list ? t('Choose a card to open your saved discovery.') : t("Tap a chest to open it. Hover or focus for a preview.") : t("Your notes and drawings stay on this device.")}</p></>}
