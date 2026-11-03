@@ -33,25 +33,35 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
 
 function smudgeInk(context: CanvasRenderingContext2D, points: number[], diameter: number) {
   const radius = Math.max(1, Math.ceil(diameter / 2));
-  const brush = document.createElement('canvas');
-  brush.width = brush.height = radius * 2;
-  const pickup = brush.getContext('2d');
-  if (!pickup) throw new Error('Smudge canvas is unavailable.');
-  const sample = (x: number, y: number, opacity: number) => {
-    pickup.globalCompositeOperation = 'source-over'; pickup.globalAlpha = opacity;
-    pickup.drawImage(context.canvas, x - radius, y - radius, radius * 2, radius * 2, 0, 0, radius * 2, radius * 2);
-    pickup.globalCompositeOperation = 'destination-in'; pickup.globalAlpha = 1;
-    pickup.beginPath(); pickup.arc(radius, radius, radius, 0, Math.PI * 2); pickup.fill();
-  };
-  context.globalCompositeOperation = 'source-over'; context.globalAlpha = .5;
-  sample(points[0], points[1], 1);
+  const width = radius * 2;
+  const brush = context.getImageData(Math.round(points[0]) - radius, Math.round(points[1]) - radius, width, width).data;
   for (let index = 2; index + 1 < points.length; index += 2) {
     const dx = points[index] - points[index - 2], dy = points[index + 1] - points[index - 1];
-    const steps = Math.ceil(Math.hypot(dx, dy) / Math.max(1, radius / 4));
+    const steps = Math.ceil(Math.hypot(dx, dy) / Math.max(1, radius / 3));
     for (let step = 1; step <= steps; step++) {
-      const x = points[index - 2] + dx * step / steps, y = points[index - 1] + dy * step / steps;
-      context.drawImage(brush, x - radius, y - radius);
-      sample(x, y, .25);
+      const x = Math.round(points[index - 2] + dx * step / steps) - radius, y = Math.round(points[index - 1] + dy * step / steps) - radius;
+      const patch = context.getImageData(x, y, width, width);
+      blendSmudgePixels(patch.data, brush, width);
+      context.putImageData(patch, x, y);
     }
+  }
+}
+
+export function blendSmudgePixels(pixels: Uint8ClampedArray, brush: Uint8ClampedArray, width: number) {
+  const radius = width / 2;
+  for (let y = 0; y < width; y++) for (let x = 0; x < width; x++) {
+    const weight = .7 * Math.max(0, 1 - Math.hypot(x + .5 - radius, y + .5 - radius) / radius);
+    if (!weight) continue;
+    const index = (y * width + x) * 4;
+    const destinationAlpha = pixels[index + 3] / 255, carriedAlpha = brush[index + 3] / 255;
+    const alpha = destinationAlpha * (1 - weight) + carriedAlpha * weight;
+    const pickupAlpha = carriedAlpha * .75 + destinationAlpha * .25;
+    for (let channel = 0; channel < 3; channel++) {
+      const destination = pixels[index + channel] * destinationAlpha, carried = brush[index + channel] * carriedAlpha;
+      pixels[index + channel] = alpha ? (destination * (1 - weight) + carried * weight) / alpha : 0;
+      brush[index + channel] = pickupAlpha ? (carried * .75 + destination * .25) / pickupAlpha : 0;
+    }
+    pixels[index + 3] = alpha * 255;
+    brush[index + 3] = pickupAlpha * 255;
   }
 }

@@ -1,4 +1,7 @@
 {
+  "Programme titles and references updated from WOL. Listening prompts are general; reviewed activities are added separately.": "Títulos y referencias del programa actualizados desde WOL. Las ayudas para escuchar son generales; las actividades revisadas se añaden por separado.",
+  "The programme could not be refreshed. Showing the last saved programme.": "No se pudo actualizar el programa. Se muestra el último programa guardado.",
+  "The online programme could not be loaded. General notebooks are available; open the official programme for this week.": "No se pudo cargar el programa en línea. Puedes usar los cuadernos generales; abre el programa oficial de esta semana.",
   "Scriptures in your note": "Textos bíblicos en tu nota",
   "Open a scripture from your note in JW Library or on JW.org.": "Abre un texto de tu nota en JW Library o en JW.org.",
   "Previous notes": "Notas anteriores",
@@ -10,6 +13,7 @@
   "Smudge": "Difuminar",
   "Smudge options": "Opciones para difuminar",
   "Smudge size": "Tamaño para difuminar",
+  "Drag across existing ink to blend it. Smudge does not add a new colour.": "Arrastra sobre la tinta para mezclarla. Difuminar no añade un color nuevo.",
   "Zoom": "Zoom",
   "Reset zoom": "Restablecer zoom",
   "Pinch to zoom; move two fingers to pan.": "Pellizca para ampliar; mueve dos dedos para desplazar.",

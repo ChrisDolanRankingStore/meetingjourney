@@ -51,6 +51,8 @@ export function useMeetingSchedule() {
             if (next.kind !== 'midweek' && next.kind !== 'weekend') continue;
             const expected = getMeeting(next.kind, next.weekOf);
             if (next.id !== expected.id || next.weekOf !== expected.weekOf || !next.parts?.length) continue;
+            const existing=readSaved<Meeting>(`mj-meeting-cache:${next.id}`);
+            if(existing?.contentStatus==='dated'&&next.contentStatus!=='dated')continue;
             save(`mj-meeting-cache:${next.id}`, next);
             setDownloaded(previous => previous?.id === next.id ? next : previous);
           }
@@ -81,6 +83,11 @@ export function useMeetingSchedule() {
     const refresh = () => loadMeeting(controller.signal, kind, selection.date).then(next => {
       // An older server may ignore the query. Never relabel its fixed meeting.
       if (controller.signal.aborted || next.id !== fallback.id || next.kind !== selection.type || next.weekOf !== fallback.weekOf || !next.parts?.length) return;
+      const existing=readSaved<Meeting>(`mj-meeting-cache:${next.id}`);
+      if(existing?.contentStatus==='dated'&&next.contentStatus!=='dated'){
+        const retained={...existing,contentNotice:'The programme could not be refreshed. Showing the last saved programme.'};
+        setDownloaded(retained);save(`mj-meeting-cache:${next.id}`,retained);return;
+      }
       setDownloaded(next);
       save(`mj-meeting-cache:${next.id}`, next);
     }).catch(() => undefined);

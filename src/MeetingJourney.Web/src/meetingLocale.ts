@@ -4,6 +4,13 @@ import type {Meeting} from './types';
 
 /** Only public programme fields are translated. Personal journal records never pass through here. */
 export function localizeMeeting(meeting: Meeting, language: Language): Meeting {
+  if(language==='es'&&meeting.programmeMetadata){
+    const translated=meeting.programmeMetadata.es;
+    meeting={...meeting,bibleReading:translated.bibleReading,parts:meeting.parts.map(part=>{
+      const item=translated.parts.find(item=>item.id===part.id);
+      return item?{...part,title:item.title,references:item.references,appUrl:item.appUrl??part.appUrl,sourceUrl:item.sourceUrl??part.sourceUrl,songNumber:item.songNumber??part.songNumber}:part;
+    })};
+  }
   const text = (value: string) => t(value, undefined, language);
   const reference = (value: string) => text(value).replace(/Jeremiah/g, language === 'es' ? 'Jeremías' : 'Jeremiah').replace(/Hebrews/g, language === 'es' ? 'Hebreos' : 'Hebrews').replace(/Corinthians/g, language === 'es' ? 'Corintios' : 'Corinthians');
   const appUrl = officialUrl(meeting.material.appUrl, language);

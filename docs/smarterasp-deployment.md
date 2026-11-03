@@ -27,6 +27,8 @@ The application folder must be the repository root, not `src/MeetingJourney.Api`
 
 The build script installs and builds `src/MeetingJourney.Web`, then copies its Vite output into `node-app/public/`. The Node server serves that frontend and the same-origin `/api/...` routes.
 
+Automatic programme metadata for authorized WOL access requires outbound HTTPS to `wol.jw.org`. Check `/api/meetings/current?type=midweek&date=2026-11-02` after deployment: a successful import has `programmeMetadata` and individual item titles. If outbound access or parsing fails, the API returns an explicit general-programme notice and logs the cause; existing local notebooks are not cleared.
+
 GitHub Actions now validates and packages the Node target in `.github/workflows/build-node.yml`. SmarterASP's native GitHub deployment remains the deployment path for the Linux site; uploading .NET DLLs with FTP does not start a Node application.
 
 ## Verify the deployment

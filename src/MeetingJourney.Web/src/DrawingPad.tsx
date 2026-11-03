@@ -25,6 +25,7 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   const [tool, setTool] = useState<Tool>('pen');
   const [color, setColor] = useState('#163b5c');
   const [size, setSize] = useState(5);
+  const [smudgeSize, setSmudgeSize] = useState(18);
   const [width, setWidth] = useState(760);
   const [height, setHeight] = useState(420);
   const [paper, setPaper] = useState<DrawingPaperSize | null>(null);
@@ -84,7 +85,8 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   const changeZoom = (next: typeof zoom) => { zoomRef.current = next; setZoom(next); };
   useEffect(() => { zoomRef.current = initialDrawingZoom; setZoom(initialDrawingZoom); }, [width, height]);
 
-  const activeStroke = useMemo(() => ({ color: tool === 'eraser' ? '#ffffff' : color, size, mode: tool }), [color, size, tool]);
+  const brushSize = tool === 'smudge' ? smudgeSize : size;
+  const activeStroke = useMemo(() => ({ color: tool === 'eraser' ? '#ffffff' : color, size:brushSize, mode: tool }), [color, brushSize, tool]);
 
   const canvasPosition = (event: ReactPointerEvent<HTMLDivElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -182,7 +184,7 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   return <section className="drawing-card" aria-labelledby={`${partId}-drawing-title`}>
     <div className="drawing-heading"><div><h3 id={`${partId}-drawing-title`}>{t("Doodle notes")}</h3><p>{t("Draw, write or sketch a thought.")}</p></div></div><span className={`save-state notebook-save-state ${saveError ? 'has-error' : ''}`} aria-live="polite">{saveError ? t("Could not load or save this drawing on this device.") : !loaded ? t("Opening your drawing…") : saving ? t("Saving…") : t("Saved on this device")}</span>
     <div className="drawing-paper-workspace">
-    <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={size} onSize={setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} onUndo={undo} onRedo={redo} onClear={clear} onExport={exportPng} zoom={zoom.scale} onZoom={value=>changeZoom(zoomDrawing(zoomRef.current,{x:width/2,y:height/2},{x:width/2,y:height/2},value/zoomRef.current.scale,width,height))} onResetZoom={()=>changeZoom(initialDrawingZoom)} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:view.paperWidth, y:view.paperHeight}) : createDrawingPaper(width, height))} pages={pages} />
+    <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={brushSize} onSize={tool === 'smudge' ? setSmudgeSize : setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} onUndo={undo} onRedo={redo} onClear={clear} onExport={exportPng} zoom={zoom.scale} onZoom={value=>changeZoom(zoomDrawing(zoomRef.current,{x:width/2,y:height/2},{x:width/2,y:height/2},value/zoomRef.current.scale,width,height))} onResetZoom={()=>changeZoom(initialDrawingZoom)} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:view.paperWidth, y:view.paperHeight}) : createDrawingPaper(width, height))} pages={pages} />
     <div className="canvas-shell" ref={canvasRef} onContextMenu={event => event.preventDefault()} onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} data-zoom={zoom.scale}>
       <Stage width={view.width} height={view.height}>
         <Layer x={zoom.x} y={zoom.y} scaleX={view.scale * zoom.scale} scaleY={view.scale * zoom.scale}><Rect width={view.paperWidth} height={view.paperHeight} fill="#fffdf7" />{template === 'lined' && Array.from({ length: Math.ceil(view.paperHeight / 30) }, (_, index) => <Line key={index} points={[0, 30 + index * 30, view.paperWidth, 30 + index * 30]} stroke="#d7dfef" strokeWidth={1} />)}</Layer>

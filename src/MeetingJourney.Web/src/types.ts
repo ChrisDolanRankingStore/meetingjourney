@@ -73,6 +73,11 @@ export interface MeetingPart {
 }
 
 export interface Meeting {
+  programmeMetadata?: {
+    retrievedAt: string;
+    sourceUrl: string;
+    es: {bibleReading: string; parts: (Pick<MeetingPart, 'id' | 'title' | 'references'> & Partial<Pick<MeetingPart, 'appUrl' | 'sourceUrl' | 'songNumber'>>)[]};
+  };
   id: string;
   kind?: 'midweek' | 'weekend' | 'assembly' | 'convention';
   eventDate?: string;
