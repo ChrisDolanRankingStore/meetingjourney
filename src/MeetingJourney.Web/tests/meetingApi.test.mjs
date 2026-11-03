@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import {readFileSync} from 'node:fs';
 
 test('Node API serves the selected type/week and rejects bad calendar inputs', async () => {
   const process = spawn(globalThis.process.execPath, [new URL('../../../node-app/server.js', import.meta.url).pathname.replace(/^\/(?:([A-Za-z]):)/, '$1:')], {
@@ -46,7 +47,7 @@ test('Node API serves the selected type/week and rejects bad calendar inputs', a
     assert.ok(parts.some(part => part.type === 'WatchtowerStudy'));
     assert.equal((await fetch(`${base}/api/meetings/current?type=weekend&date=2026-02-30`)).status, 400);
     assert.equal((await fetch(`${base}/api/meetings/current?type=other&date=2026-10-25`)).status, 400);
-    const health = await fetch(base + '/health'); assert.equal(health.status, 200); assert.equal((await health.json()).version, '0.5.3');
+    const health = await fetch(base + '/health'); assert.equal(health.status, 200); assert.equal((await health.json()).version, JSON.parse(readFileSync(new URL('../../../node-app/package.json',import.meta.url),'utf8')).version);
     const privacy = await fetch(base + '/privacy'); assert.equal(privacy.status, 200); assert.match(await privacy.text(), /Your drawings stay with you/);
     assert.match(privacy.headers.get('content-security-policy'), /frame-ancestors 'none'/); assert.equal(privacy.headers.get('x-frame-options'), 'DENY'); assert.equal(privacy.headers.get('referrer-policy'), 'no-referrer');
     assert.equal((await fetch(base + '/assets/does-not-exist.webp')).status, 404);

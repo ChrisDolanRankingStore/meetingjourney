@@ -4,7 +4,7 @@ try{
  const port=await new Promise((resolvePort,reject)=>{const timer=setTimeout(()=>reject(Error('Startup timeout')),10000);let buffer='';server.on('error',reject);server.stdout.on('data',data=>{buffer+=data;for(const line of buffer.split('\n'))try{const event=JSON.parse(line);if(event.port){clearTimeout(timer);resolvePort(event.port);return;}}catch{}});server.on('exit',code=>{clearTimeout(timer);reject(Error('Server exit '+code));});});
  const base='http://127.0.0.1:'+port;
  const health=await fetch(base+'/health').then(r=>r.json());
- if(health.version!=='0.5.3')throw Error('Wrong runtime version');
+ if(health.version!==info.version)throw Error('Wrong runtime version');
  const html=await fetch(base+'/').then(r=>r.text());
  if(!html.includes(info.client))throw Error('Wrong client build');
  const study=await fetch(base+'/api/meetings/current?type=weekend&date=2026-10-25').then(r=>r.json());

@@ -1,5 +1,6 @@
 import {getMeeting} from './meeting-catalog.js';
 import {weekOfDate} from './meeting-schedule.js';
+import {extractPassageWords,passageText} from './passage-words.js';
 
 const languages={en:'r1/lp-e',es:'r4/lp-s'};
 const cache=new Map();
@@ -29,9 +30,12 @@ function references(html,language){
   const url=new URL(text(match[1]),'https://wol.jw.org');
   if(url.hostname!=='wol.jw.org'||url.protocol!=='https:'||!url.pathname.startsWith(`/${language}/wol/`)||!/\/(?:bc|pc)\//.test(url.pathname))continue;
   const label=text(match[2]);
-  if(label&&label.length<=160&&!links.some(link=>link.url===url.href))links.push({label,url:url.href});
+  const previous=links.at(-1);
+  if(previous&&/\/bc\//.test(url.pathname)&&/,\s*$/.test(previous.label)&&/^\d/.test(label)){
+   previous.label=`${previous.label} ${label}`;
+  }else if(label&&label.length<=160&&!links.some(link=>link.url===url.href))links.push({label,url:url.href});
  }
- return links.slice(0,40);
+ return links.slice(0,40).map(link=>({...link,label:link.label.replace(/,\s*$/,'')}));
 }
 
 export function parseWorkbookMetadata(html,language){
@@ -81,8 +85,14 @@ export function parseStudyMetadata(html,language){
  return {title,songNumber:Number(song[1]),references:references(header,language)};
 }
 
-async function fetchHtml(url,fetcher){
- const response=await fetcher(url,{signal:AbortSignal.timeout(12000),redirect:'error',headers:{'User-Agent':'MeetingJourney/0.5.3 (programme metadata only)'}});
+async function fetchHtml(url,fetcher,redirects=0){
+ const parsed=new URL(url);
+ if(parsed.protocol!=='https:'||parsed.hostname!=='wol.jw.org')throw Error('Unsupported metadata source.');
+ const response=await fetcher(url,{signal:AbortSignal.timeout(12000),redirect:'manual',headers:{'User-Agent':'MeetingJourney/0.5.4 (programme and listening metadata)'}});
+ if([301,302,303,307,308].includes(response.status)){
+  if(redirects>=4)throw Error('Too many metadata redirects.');
+  return fetchHtml(new URL(response.headers.get('location'),url).href,fetcher,redirects+1);
+ }
  if(!response.ok)throw Error(`WOL returned HTTP ${response.status}.`);
  const reader=response.body.getReader(),chunks=[];
  let size=0;
@@ -94,6 +104,27 @@ async function fetchHtml(url,fetcher){
 
 async function retrieve(kind,date,fetcher){
  const base=getMeeting(kind,date),results={};
+ const documents=new Map();
+ const documentFor=url=>{if(!documents.has(url))documents.set(url,fetchHtml(url,fetcher));return documents.get(url);};
+ const activityMetadata=async(part,language)=>{
+  const citations=part.references.filter(link=>link.url.includes('/bc/'));
+  try{
+   if(['CongregationBibleStudy','WatchtowerStudy'].includes(part.type)){
+    const source=part.references.find(link=>link.url.includes('/pc/'));
+    if(source){
+     const chapter=await documentFor(source.url);
+     citations.push(...references(documentHtml(chapter),language).filter(link=>link.url.includes('/bc/')));
+    }
+   }
+   const passages=[];
+   for(const citation of citations.slice(0,16))passages.push(passageText(await documentFor(citation.url),citation.label));
+   const nouns=extractPassageWords(passages.join(' '),language);
+   if(nouns.length)part.bingoWords=nouns.map(({word})=>({word,source:'passage'}));
+  }catch(error){
+   console.error('Could not prepare passage listening words.',{partId:part.id,language,error:error.message});
+   part.activityNotice=language==='es'?'No se pudieron preparar las palabras de esta semana. Se muestran palabras conocidas.':'This week’s words could not be prepared. Familiar words are available.';
+  }
+ };
  for(const language of ['en','es']){
   const index=await fetchHtml(wolWeekUrl(date,language),fetcher);
   const shownDate=index.match(/id="todayDate"[^>]*value="([\d/]+)"/)?.[1]?.replaceAll('/','-');
@@ -122,6 +153,7 @@ async function retrieve(kind,date,fetcher){
    Object.assign(parts.find(part=>part.id==='study-song'),{title:`${language==='es'?'Canción':'Song'} ${metadata.songNumber}`,songNumber:metadata.songNumber});
    results[language]={bibleReading:metadata.title,parts,sourceUrl};
   }
+  for(const part of results[language].parts)await activityMetadata(part,language);
  }
  const english=results.en,spanish=results.es;
  if(english.parts.length!==spanish.parts.length||english.parts.some((part,index)=>part.id!==spanish.parts[index].id))throw Error('WOL programme translations do not match.');

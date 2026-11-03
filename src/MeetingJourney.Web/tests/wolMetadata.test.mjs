@@ -44,7 +44,7 @@ test('automatic metadata preserves notebook IDs, translates titles and caches bi
  const seen=[],fetcher=source('2026-11-02',seen);
  const [meeting,duplicate]=await Promise.all([loadWolMeeting('midweek','2026-11-02',{fetcher}),loadWolMeeting('midweek','2026-11-02',{fetcher})]);
  assert.strictEqual(meeting,duplicate);
- assert.equal(seen.length,4);
+ assert.equal(seen.length,10);
  assert.equal(meeting.contentStatus,'dated');
  for(const id of ['ministry','study','part-1','opening-song','closing-song'])assert.ok(meeting.parts.some(part=>part.id===id));
  assert.equal(new Set(meeting.parts.map(part=>part.id)).size,meeting.parts.length);
@@ -53,7 +53,7 @@ test('automatic metadata preserves notebook IDs, translates titles and caches bi
  assert.ok(meeting.parts.every(part=>!part.connections&&!part.studyGuide));
  assert.doesNotMatch(JSON.stringify(meeting),/NEVER COPY THIS PARAGRAPH/);
  await loadWolMeeting('midweek','2026-11-02',{fetcher});
- assert.equal(seen.length,4);
+ assert.equal(seen.length,10);
 });
 test('weekend metadata leaves the local public talk and opening/closing songs untouched',async()=>{
  const meeting=await loadWolMeeting('weekend','2026-11-09',{fetcher:source('2026-11-09',[])});

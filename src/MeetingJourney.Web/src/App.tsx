@@ -46,7 +46,8 @@ import { CompanionPortrait } from './CompanionPortrait';
 import { DiscoveriesMap } from './DiscoveriesMap';
 import { NotebookIcon } from './NotebookIcon';
 import { restoreMeetingPart, storyMoment } from './journeyExperience';
-import { readNote, saveNote } from './storage';
+import { readNote, saveNote, waitForJournalSaves } from './storage';
+import {primaryPartAction, isNavigationKey} from './partFlow';
 import type { EngagementActivity, Meeting, MeetingPart } from './types';
 
 type Presentation = 'simple' | 'standard' | 'reflective';
@@ -226,6 +227,11 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
   const [screen, setScreen] = useState<AppScreen>('home');
   const [pendingTool, setPendingTool] = useState<CompanionQuickAction | null>(null);
   useEffect(()=>{
+    const open=()=>setShowCharacterChooser(true);
+    window.addEventListener('mj-open-profile',open);
+    return()=>window.removeEventListener('mj-open-profile',open);
+  },[]);
+  useEffect(()=>{
     const open=()=>setScreen('settings');
     window.addEventListener('mj-open-comfort',open);
     return()=>window.removeEventListener('mj-open-comfort',open);
@@ -258,11 +264,37 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
   const appClass = `app presentation-${presentation} engagement-${engagement} ${calmView ? 'sensory-calm' : ''} ${sceneSeasonClass(meeting.weekOf)} scene-pack-${scenePack.id}`;
   const sceneStyle = {'--scene-home-image': `url("${sceneImage(scenePack.homeImage, 960)}")`, '--scene-home-wide': `url("${sceneImage(scenePack.homeImage, 1600)}")`} as CSSProperties;
   useEffect(() => {
-    try { if (part) localStorage.setItem(`mj-place:${meeting.id}`, part.id); } catch { /* Local notes remain independent of journey preferences. */ }
+    try { if (part) localStorage.setItem(`mj-place:${meeting.id}`, part.id); } catch { setNavigationError('Could not save your place on this device. Please try again.'); }
   }, [meeting.id, part]);
   const progress = Math.round(((partIndex + 1) / meeting.parts.length) * 100);
   const sectionParts = useMemo(() => meeting.parts.reduce<Record<string, MeetingPart[]>>((groups, item) => { (groups[item.section] ??= []).push(item); return groups; }, {}), [meeting]);
-  const move = (delta: number) => { if (delta > 0 && partIndex === meeting.parts.length - 1) setScreen('review'); else setPartIndex(current => Math.max(0, Math.min(meeting.parts.length - 1, current + delta))); };
+  const [navigationError,setNavigationError]=useState('');
+  const navigating=useRef(false);
+  const move = async (delta: number) => {
+    if(navigating.current)return;
+    navigating.current=true;
+    try {
+      await waitForJournalSaves();
+      setNavigationError('');
+      if (delta > 0 && partIndex === meeting.parts.length - 1) setScreen('review');
+      else setPartIndex(current => Math.max(0, Math.min(meeting.parts.length - 1, current + delta)));
+    } catch {setNavigationError('Could not save. Keep this view open and try again.');}
+    finally {navigating.current=false;}
+  };
+  useEffect(()=>{
+    if(screen!=='journey')return;
+    const key=(event:KeyboardEvent)=>{
+      if(event.defaultPrevented||document.querySelector('dialog[open]')||!isNavigationKey(event,event.target instanceof Element?event.target:null))return;
+      event.preventDefault();void move(event.key==='ArrowRight'?1:-1);
+    };
+    document.addEventListener('keydown',key);
+    return()=>document.removeEventListener('keydown',key);
+  },[screen,partIndex,meeting.parts.length]);
+  useEffect(()=>{
+    if(screen!=='journey')return;
+    document.querySelector('.journey-stage-page')?.scrollTo({top:0});
+    document.getElementById(`${part.id}-heading`)?.focus({preventScroll:true});
+  },[screen,part.id]);
   const chooseCharacter = (profile: CharacterProfile) => { localStorage.setItem('mj-character', JSON.stringify(profile));saveComfort({...readComfort(),neutral:false});window.dispatchEvent(new Event(COMFORT_CHANGED));setCharacter(profile);setShowCharacterChooser(false); };
   const moveCharacter = (action: Exclude<CharacterAction, 'steady'>) => {
     setCharacterAction(action);
@@ -324,6 +356,13 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
         {showMap && <aside className="journey-map" aria-label={t("Meeting journey")}><div className="map-header"><div><p className="eyebrow">{t("Your journey")}</p><h2>{t("Meeting map")}</h2></div><button className="icon-button" type="button" aria-label={t("Hide journey map")} onClick={() => setShowMap(false)}>×</button></div><p className="map-help">{t("Choose any part, or use Next when you are ready.")}</p><div className="map-list">{Object.entries(sectionParts).map(([section, items]) => <div className="map-section" key={section}><h3>{sectionLabel(section as MeetingPart['section'])}</h3>{items.map(item => { const index = meeting.parts.indexOf(item); return <button key={item.id} type="button" className={`map-stop ${index === partIndex ? 'selected' : ''} ${index < partIndex ? t("visited") : ''}`} onClick={() => setPartIndex(index)}><span className="stop-number">{item.number ?? '•'}</span><span><strong>{item.title}</strong><small>{partTiming(item)}</small></span>{index < partIndex && <span aria-label={t("visited")}>✓</span>}</button>; })}</div>)}</div></aside>}
         <section className="part-column">
           <PartScreen key={part.id} part={part} weekOf={meeting.weekOf} quiet={engagement === 'quiet'} profile={character} characterAction={characterAction} partIndex={partIndex} totalParts={meeting.parts.length} onMoveCharacter={moveCharacter} onQuickAction={runQuickAction} onSwipe={move}><MeetingPartView key={part.id} requestedTool={pendingTool} onToolOpened={() => setPendingTool(null)} songPart={meeting.kind === 'weekend' && part.type === 'Song' ? schedule.meeting.parts.find(item => item.id === part.id) : undefined} meetingId={meeting.id} part={part} partIndex={partIndex} material={meeting.material} profile={character} characterAction={characterAction} totalParts={meeting.parts.length} engagement={engagement} presentation={presentation} onOpenMaterial={openMaterial} /></PartScreen>
+          <nav className="part-step-footer" aria-label={t('Move between parts')}>
+            <button type="button" disabled={partIndex===0} onClick={()=>void move(-1)}>{t('← Previous')}</button>
+            <span>{tt`Part ${partIndex+1} of ${meeting.parts.length}`}</span>
+            <button type="button" onClick={()=>void move(1)}>{meeting.parts[partIndex+1]?t('Next: {title} · {minutes} min →',{title:meeting.parts[partIndex+1].title,minutes:meeting.parts[partIndex+1].durationMinutes}):t('Review →')}</button>
+          </nav>
+          <p className="visually-hidden" role="status">{tt`Part ${partIndex+1} of ${meeting.parts.length}`}, {part.title}</p>
+          {navigationError&&<p role="alert">{t(navigationError)}</p>}
         </section>
       </section>
     </main>
@@ -360,7 +399,7 @@ function AdventureHomeV2({ meeting, profile, partIndex, characterAction, onMoveC
     else onQuickAction(action);
   };
   const resumeLabel = partIndex > 0 ? 'Continue journey' : 'Start journey';
-  return <section className={`adventure-home storybook-home artwork-painted home-redesign${guideOpen ? ' guide-is-open' : ''}`}>
+  return <><section className={`adventure-home storybook-home artwork-painted home-redesign${guideOpen ? ' guide-is-open' : ''}`}>
     <div className="home-scene storybook-scene">
       <div className="painted-welcome-copy">
         <p>{t('Welcome to')}</p><h2>Meeting Journey</h2>
@@ -380,19 +419,21 @@ function AdventureHomeV2({ meeting, profile, partIndex, characterAction, onMoveC
       <WhereAmIControl meeting={meeting} partIndex={partIndex} onSelect={onSelectPart} compact />
       <div className="home-actions"><button className="primary-adventure-button" type="button" onClick={onStart}><NotebookIcon name="route" /><span>{t(resumeLabel)}</span><NotebookIcon name="next" /></button></div>
       <button className="text-button comfort-shortcut" type="button" onClick={()=>window.dispatchEvent(new Event('mj-open-comfort'))}>{t('Reading comfort')}</button>
+      <button className="text-button" type="button" onClick={()=>window.dispatchEvent(new Event('mj-open-profile'))}>{t('Customise companion')}</button>
       {comfort.neutral&&<div className="neutral-notebook-actions"><button type="button" onClick={()=>onQuickAction('note')}>{t('Write a note')}</button><button type="button" onClick={()=>onQuickAction('doodle')}>{t('Draw')}</button><button type="button" onClick={()=>onQuickAction('activities')}>{t('Activities')}</button></div>}
       <div className="storybook-links">
         <button type="button" onClick={onOverview}><NotebookIcon name="route" /><span>{t('Preview the journey')}</span></button>
         <button type="button" onClick={onOpenMaterial}><NotebookIcon name="list" /><span>{t('Meeting outline')}</span></button>
       </div>
-      <ProgrammeImport home />
+    </div>
+    <HomeGuidePanel open={guideOpen} onClose={()=>setGuideOpen(false)} onAction={guideAction} onMove={onMoveCharacter} quiet={quiet} hasSource={Boolean(officialPartUrl(meeting.parts[partIndex],meeting.material))} />
+  </section>
+      <section className="home-sources-card" aria-label={t('Meeting sources')}><ProgrammeImport home />
       <details className="home-source-details"><summary><NotebookIcon name="book" />{t('Meeting sources')}</summary>
         {bibleReferenceLinks(meeting.bibleReading).length>0&&<BibleReferenceLinks reference={meeting.bibleReading} />}
         <OfficialLinks url={meeting.material.appUrl} webUrl={meeting.material.sourceUrl} />
-      </details>
-    </div>
-    <HomeGuidePanel open={guideOpen} onClose={()=>setGuideOpen(false)} onAction={guideAction} onMove={onMoveCharacter} quiet={quiet} hasSource={Boolean(officialPartUrl(meeting.parts[partIndex],meeting.material))} />
-  </section>;
+      </details></section>
+  </>;
 }
 
 function WhereAmIControl({ meeting, partIndex, onSelect, compact = false }: { meeting: Meeting; partIndex: number; onSelect: (index: number) => void; compact?: boolean }) {
@@ -600,19 +641,19 @@ function CharacterChooserV2({current,onChoose,onCancel,onSkip}:{current:Characte
     {error&&<p role="alert">{t(error)}</p>}
     <div className="companion-choice-fields"><label>{t('Age')}<select value={draft.ageGroup} onChange={event=>setDraft(profile=>withCompanionAge(profile,event.target.value as AgeGroup))}>{ageOptions.map(option=><option key={option.id} value={option.id}>{option.label}</option>)}</select></label>
     <label>{t('Name (optional)')}<input value={draft.name} maxLength={24} onChange={event=>setDraft(profile=>({...profile,name:event.target.value}))} placeholder={t('Add a name (optional)')} /></label></div>
-    <div className="companion-look-preview"><button type="button" aria-label={t('Previous appearance')} onClick={()=>choose(index-1)}>‹</button><div><CharacterAvatar profile={draft} size="hero" /><p>{t('Option {number}',{number:index+1})}</p></div><button type="button" aria-label={t('Next appearance')} onClick={()=>choose(index+1)}>›</button></div>
-    <div className="companion-look-strip" role="group" aria-label={t('Choose an appearance')}>{looks.map((look,lookIndex)=><button key={look.id+look.portrait} type="button" aria-pressed={lookIndex===index} aria-label={t('Option {number}',{number:lookIndex+1})} onClick={()=>choose(lookIndex)}><CharacterAvatar profile={{...draft,style:look.id,gender:look.gender,portrait:look.portrait}} size="medium" /><span>{lookIndex+1}</span></button>)}</div>
+    <div className="companion-look-preview"><button type="button" aria-label={t('Previous appearance')} onClick={()=>choose(index-1)}>‹</button><div><CharacterAvatar profile={draft} size="hero" description={t('Option {number}: {appearance}',{number:index+1,appearance:t(draft.style.replaceAll('-',' '))})} /><p>{t('Option {number}',{number:index+1})}</p></div><button type="button" aria-label={t('Next appearance')} onClick={()=>choose(index+1)}>›</button></div>
+    <div className="companion-look-strip" role="radiogroup" aria-label={t('Choose an appearance')}>{looks.map((look,lookIndex)=><button key={look.id+look.portrait} type="button" role="radio" tabIndex={lookIndex===index?0:-1} aria-checked={lookIndex===index} aria-label={t('Option {number}: {appearance}',{number:lookIndex+1,appearance:t(look.id.replaceAll('-',' '))})} onKeyDown={event=>{if(['ArrowRight','ArrowLeft','Home','End'].includes(event.key)){event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?looks.length-1:(lookIndex+(event.key==='ArrowRight'?1:-1)+looks.length)%looks.length;choose(next);event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('button')[next]?.focus();}}} onClick={()=>choose(lookIndex)}><CharacterAvatar profile={{...draft,style:look.id,gender:look.gender,portrait:look.portrait}} size="medium" description={t('Option {number}: {appearance}',{number:lookIndex+1,appearance:t(look.id.replaceAll('-',' '))})} /><span>{lookIndex+1}</span></button>)}</div>
     <p className="complete-look-note">{t('Glasses and carried items are part of each complete illustration. Choose the picture you prefer.')}</p>
     <button className="start-journey-button" type="button" onClick={()=>{try{onChoose(draft);}catch{setError('Could not save your preference. Please try again.');}}}>{t('Use this companion')} →</button>
     {onCancel&&<button className="text-button chooser-back" type="button" onClick={onCancel}>{t('Back to my journey')}</button>}
   </section></main>;
 }
 
-function CharacterAvatar({ profile, size, action = 'steady' }: { profile: CharacterProfile; size: 'small' | 'medium' | 'large' | 'hero'; action?: CharacterAction }) {
+function CharacterAvatar({ profile, size, action = 'steady', description }: { profile: CharacterProfile; size: 'small' | 'medium' | 'large' | 'hero'; action?: CharacterAction; description?: string }) {
   const colour = genderColour(profile.gender);
   const hair = hairColourOptions.find(option => option.id === profile.hairColour)?.value ?? hairColourOptions[0].value;
   const eyes = eyeColourOptions.find(option => option.id === profile.eyeColour)?.value ?? eyeColourOptions[0].value;
-  return <span className={`character-avatar avatar-${size} character-${profile.gender} age-${profile.ageGroup} variant-${profile.variant} character-style-${profile.style} character-action-${action}`} style={{ '--character-colour': colour, '--hair-colour': hair, '--eye-colour': eyes } as CSSProperties} aria-hidden="true"><span className="character-body"><span className="character-layer-stage"><CompanionPortrait asset={characterAsset(profile)} resolution={size === 'small' ? 180 : size === 'medium' ? 360 : 720} /></span></span></span>;
+  return <span className={`character-avatar avatar-${size} character-${profile.gender} age-${profile.ageGroup} variant-${profile.variant} character-style-${profile.style} character-action-${action}`} style={{ '--character-colour': colour, '--hair-colour': hair, '--eye-colour': eyes } as CSSProperties} aria-hidden={description?undefined:true}><span className="character-body"><span className="character-layer-stage"><CompanionPortrait asset={characterAsset(profile)} description={description} resolution={size === 'small' ? 180 : size === 'medium' ? 360 : 720} /></span></span></span>;
 }
 
 function JourneyTrail({ meeting, partIndex, onSelect }: { meeting: Meeting; partIndex: number; onSelect: (index: number) => void }) {
@@ -662,7 +703,7 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
   const [feedbackChoices, setFeedbackChoices] = useState<string[]>([]);
   const [sourceConfirmations, setSourceConfirmations] = useState<string[]>([]);
   const [drawingOpen, setDrawingOpen] = useState(false);
-  const [toolOpen, setToolOpen] = useState<CompanionQuickAction | 'listen' | 'bingo' | null>(null);
+  const [toolOpen, setToolOpen] = useState<CompanionQuickAction | 'listen' | 'bingo' | 'more' | null>(null);
   useEffect(()=>{if(requestedTool){setToolOpen(requestedTool);onToolOpened?.();}},[requestedTool,onToolOpened]);
   const [returnToBingo, setReturnToBingo] = useState(false);
   const [returnToActivities, setReturnToActivities] = useState(false);
@@ -727,10 +768,15 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
     });
   };
   const focusQuestion = part.id==='part-1' && meetingId==='meeting-2026-10-19' ? t('What helped Baruch regain his hope?') : t(reflection.title);
+  const primary=primaryPartAction(part);
   return <article className="part-card" data-section={part.section}><div className="part-kicker"><span>{programmePart ? t(programmePartLabel(part.type)) : sectionLabel(part.section)}</span><span>{tt`Part ${partIndex + 1} of ${totalParts}`}</span></div><h2 id={`${part.id}-heading`} tabIndex={-1} aria-live="polite">{part.number ? part.number + '. ' : ''}{part.title}</h2><div className="part-place-row"><p className="part-duration"><NotebookIcon name="clock" />{partTiming(part)}</p><button type="button" className="find-my-place" onClick={findPlace}><NotebookIcon name="pin" /><span>{t('Find my place')}</span></button></div>
     {part.speakerName && <p className="part-speaker">{t('Speaker: {name}', {name:part.speakerName})}</p>}
-    <div className="part-inline-sources"><PartReferenceLinks part={part} material={material} /></div>
-    <div className="part-guided-content">
+    {presentation!=='reflective'&&<section className="part-single-focus">
+      <p>{t(part.summary.split(/(?<=[.!?])\s/)[0])}</p>
+      {primary?<button className="part-primary-action" type="button" onClick={()=>setToolOpen(primary.tool)}>{t(primary.label)}</button>:<p>{t('Just listen')}</p>}
+      <button type="button" aria-haspopup="dialog" onClick={()=>setToolOpen('more')}>{t('More …')}</button>
+    </section>}
+    <div className="part-guided-content" hidden={presentation!=='reflective'}>
     <nav className="part-workspace-tabs" aria-label={t('Tools for this part')}>
       <button type="button" aria-label={t('Listen')} title={t('Listen')} onClick={()=>setToolOpen('listen')}><IllustratedIcon name="listen" /><span>{t('Listen')}</span></button>
       {engagement!=='quiet'&&<button type="button" aria-label={t('Discover')} title={t('Discover')} onClick={()=>setToolOpen('story')}><IllustratedIcon name="discover" /><span>{t('Discover')}</span></button>}
@@ -775,11 +821,19 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
           <IllustratedIcon name={toolOpen==='activities'?'connect':toolOpen==='listen'?'listen':toolOpen==='source'?'references':toolOpen==='story'&&discoveryPage==='connections'?'connect':toolOpen==='story'||toolOpen==='bingo'?'discover':toolOpen==='feelings'?'heart':'notes'} />
           <div><h3 id={`${part.id}-tool-title`}>{toolOpen==='activities'?t('Activities for this part'):toolOpen === 'listen' ? isStudy ? followLabel : t('Listen') : toolOpen==='source' ? t('References') : toolOpen === 'bingo' ? t('Word bingo') : toolOpen === 'story' ? t(discoveryPage==='connections'&&sharingActivity?'Connect the ideas':discoveryPage==='spot'?'Spot the clue':'Discovery mission') : toolOpen === 'feelings' ? t("How did this part feel?") : toolOpen === 'note' ? t("Keep a thought") : t("Doodle notes")}</h3><p>{part.title}</p>{part.speakerName && <p>{t('Speaker: {name}', {name:part.speakerName})}</p>}</div>
         </header>
+        {toolOpen==='more'&&<nav className="part-more-menu" aria-label={t('Tools for this part')}>
+          <button type="button" onClick={()=>setToolOpen('story')}>{t('Discover')}</button>
+          <button type="button" onClick={()=>setToolOpen('note')}>{t('Notes')}</button>
+          <button type="button" onClick={()=>setToolOpen('activities')}>{t('Activities')}</button>
+          <button type="button" onClick={()=>setToolOpen('source')}>{t('References')}</button>
+          <button type="button" onClick={()=>setToolOpen('listen')}>{t('Listen for one thing (optional)')}</button>
+          <p>{t('You can just listen, draw or keep a thought.')}</p>
+        </nav>}
         {toolOpen === 'activities' && <PartActivities meetingId={meetingId} part={part} quiet={engagement==='quiet'} onChoose={chooseActivity} />}
         {toolOpen !== 'activities' && <button type="button" className="tool-find-place" onClick={findPlace}><NotebookIcon name="pin" />{t('Find my place')}</button>}
         {['doodle','note','feelings'].includes(toolOpen)&&<nav className="notebook-tabs" aria-label={t("Your notebook")}><button type="button" aria-label={t("Draw")} title={t("Draw")} aria-pressed={toolOpen === 'doodle'} onClick={() => setToolOpen('doodle')}><NotebookIcon name="pen" /><span className="notebook-tab-label">{t("Draw")}</span></button><button type="button" aria-label={t("Write a note")} title={t("Write a note")} aria-pressed={toolOpen === 'note'} onClick={() => setToolOpen('note')}><NotebookIcon name="note" /><span className="notebook-tab-label">{t("Write")}</span></button><button type="button" aria-label={t("Feelings")} title={t("Feelings")} aria-pressed={toolOpen === 'feelings'} onClick={() => setToolOpen('feelings')}><NotebookIcon name="heart" /><span className="notebook-tab-label">{t("Feelings")}</span></button></nav>}
-        {toolOpen === 'bingo' && engagement !== 'quiet' && <WordBingo key={`${meetingId}:${part.id}:${getLanguage()}`} meetingId={meetingId} part={part} older={detailedPrompts(profile.ageGroup)} onClue={()=>{setDiscoveryPage('0');setToolOpen('story');setReturnToBingo(true);}} onWrite={()=>{setToolOpen('note');setReturnToBingo(true);}} onDraw={()=>{setToolOpen('doodle');setReturnToBingo(true);}} />}
-        {toolOpen === 'listen' && (isStudy ? <StudyTools meetingId={meetingId} part={part} teen={detailedPrompts(profile.ageGroup)} quiet={engagement === 'quiet'} onDraw={() => setToolOpen('doodle')} onWrite={() => setToolOpen('note')} /> : <><p>{part.summary}</p><ListeningActivities key={`${meetingId}:${part.id}`} meetingId={meetingId} part={part} /></>)}
+        {toolOpen === 'bingo' && <WordBingo key={`${meetingId}:${part.id}:${getLanguage()}`} meetingId={meetingId} part={part} older={detailedPrompts(profile.ageGroup)} onClue={()=>{setDiscoveryPage('0');setToolOpen('story');setReturnToBingo(true);}} onWrite={()=>{setToolOpen('note');setReturnToBingo(true);}} onDraw={()=>{setToolOpen('doodle');setReturnToBingo(true);}} />}
+        {toolOpen === 'listen' && (isStudy ? <StudyTools meetingId={meetingId} part={part} teen={detailedPrompts(profile.ageGroup)} quiet={engagement === 'quiet'} onDraw={() => setToolOpen('doodle')} onWrite={() => setToolOpen('note')} /> : <><p>{part.summary}</p><ListeningActivities key={`${meetingId}:${part.id}`} meetingId={meetingId} part={part} /><button type="button" onClick={()=>setToolOpen('doodle')}>{t('Draw')}</button></>)}
         {toolOpen === 'source' && <OfficialPartSourceCard part={part} material={material} confirmations={sourceConfirmations} onToggle={toggleSourceConfirmation} onOpenGuide={()=>setToolOpen('story')} />}
         {toolOpen === 'story' && (engagement === 'quiet' && discoveryPage!=='connections' ? <p>{t("Quiet Mode is on. Your notes and drawings are always available.")}</p> : <div className="discovery-mission-pages">
           {discoveryPage!=='connections'&&discoveryPage!=='spot'&&activity?.type!=='ClueCards'&&<p className="mission-introduction">{t('Choose a clue when you need one. Nothing is timed or scored.')}</p>}

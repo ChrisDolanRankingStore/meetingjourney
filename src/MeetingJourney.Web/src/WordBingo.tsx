@@ -43,9 +43,11 @@ export function WordBingo({meetingId, part, older, onClue, onWrite, onDraw}: {me
   return <section className="word-bingo" aria-label={t('Word bingo')} aria-busy={!loaded}>
     <div className="bingo-size-picker" role="group" aria-label={t('Bingo grid size')}>{([3,4] as const).map(option=><button type="button" key={option} disabled={!loaded} aria-pressed={size===option} onClick={()=>persist({...current.current,bingoSize:option,updatedAt:new Date().toISOString()})}>{option} × {option}</button>)}</div>
     <p className="bingo-instruction">{t('Tap a word when you hear it. Tap again to undo.')}</p>
+    <div className="bingo-legend"><span>{t('From this week')}</span><span>{t('Familiar')}</span></div>
+    {part.activityNotice&&<p role="status">{t(part.activityNotice)}</p>}
     <div className="bingo-workspace">
     <div className="word-bingo-board" style={{'--bingo-size': size} as CSSProperties}>
-      {board.map(word => <button type="button" key={word} disabled={!loaded} aria-pressed={selected.includes(word)} className={!comfort.hideCounts&&line.has(word) ? 'is-line' : ''} onClick={() => toggle(word)}><span>{word}</span>{selected.includes(word) && <span className="bingo-check" aria-hidden="true">✓</span>}</button>)}
+      {board.map(word => <button type="button" key={word} disabled={!loaded} data-source={part.bingoWords?.some(item=>item.word===word&&item.source==='passage')?'passage':'familiar'} aria-label={`${word} · ${t(part.bingoWords?.some(item=>item.word===word&&item.source==='passage')?'From this week':'Familiar')}`} aria-pressed={selected.includes(word)} className={!comfort.hideCounts&&line.has(word) ? 'is-line' : ''} onClick={() => toggle(word)}><span>{word}</span>{selected.includes(word) && <span className="bingo-check" aria-hidden="true">✓</span>}</button>)}
     </div>
     <aside className="bingo-listening-card">
       <h4><IllustratedIcon name="clue" />{t('Listen for…')}</h4>

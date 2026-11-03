@@ -1,4 +1,4 @@
-import { createReadStream, existsSync, statSync } from 'node:fs';
+import { createReadStream, existsSync, statSync, readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,6 +15,7 @@ async function onlineMeetingFor(kind,date,personalImport=false){
 import { localDateKey, suggestedMeeting, monthWeeks } from './meeting-schedule.js';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
+const appVersion=JSON.parse(readFileSync(join(root,'package.json'),'utf8')).version;
 const publicDir = join(root, 'public');
 const port = Number(process.env.PORT || 3000);
 const host = '0.0.0.0';
@@ -72,7 +73,7 @@ async function handle(request, response) {
   }
 
   if (pathname === '/health') {
-    return json(response, 200, { service: 'meeting-journey-node', version: '0.5.3', status: 'ok' });
+    return json(response, 200, { service: 'meeting-journey-node', version: appVersion, status: 'ok' });
   }
 
   if (pathname === '/api/v1') {

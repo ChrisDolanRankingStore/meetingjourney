@@ -44,6 +44,8 @@ export interface EngagementActivity {
 export interface StudyGuide { paragraphCount: number; cues: { from: number; to: number; prompt: string; pointChoices?: string[] }[]; }
 
 export interface MeetingPart {
+  bingoWords?: {word:string;source:'passage'|'familiar'}[];
+  activityNotice?: string;
   connections?: {reviewedAt: string; en: {title: string; sources: string[]; targets: string[]}; es: {title: string; sources: string[]; targets: string[]}};
   /** Optional original listening words supplied with the weekly outline. */
   listeningWords?: { en?: string[]; es?: string[] };
@@ -76,7 +78,7 @@ export interface Meeting {
   programmeMetadata?: {
     retrievedAt: string;
     sourceUrl: string;
-    es: {bibleReading: string; parts: (Pick<MeetingPart, 'id' | 'title' | 'references'> & Partial<Pick<MeetingPart, 'appUrl' | 'sourceUrl' | 'songNumber'>>)[]};
+    es: {bibleReading: string; parts: (Pick<MeetingPart, 'id' | 'title' | 'references'> & Partial<Pick<MeetingPart, 'appUrl' | 'sourceUrl' | 'songNumber' | 'bingoWords' | 'activityNotice'>>)[]};
   };
   id: string;
   kind?: 'midweek' | 'weekend' | 'assembly' | 'convention';

@@ -4,6 +4,24 @@ Meeting Journey is designed to support attention, processing and participation. 
 
 ## Product decisions
 
+### Calm part views (0.5.4)
+
+Simple and Standard show one cue, one part-specific primary action and More.
+Reflective retains the toolbox. References live in the References tool rather
+than above the cue. Previous/Next and arrow keys complement swipe; navigation
+waits for journal writes and announces the new place.
+
+Opt-in imports extract a bounded bilingual noun vocabulary from cited passages
+on the server. Only words and programme metadata reach the device; article and
+verse text do not. Passage and familiar bingo words have distinct labelled
+styles. Failed extraction is reported; familiar words remain available.
+
+Release acceptance: 134 tests, production build and packaged runtime; 768px,
+Simple/Standard/Reflective, neutral on/off, high contrast, 13 Next taps to Review.
+Simple/Standard had at most two visible controls inside the part card. Entry JS
+was 184.57 KB gzip; drawing is a separate 104.88 KB gzip chunk.
+These are browser checks, not physical-device or screen-reader certification.
+
 ### Make the next step obvious
 
 Every screen has one current meeting part, a short summary and a clear next action. The journey map is available when someone needs to understand the whole meeting, but the default view stays focused on the current part.

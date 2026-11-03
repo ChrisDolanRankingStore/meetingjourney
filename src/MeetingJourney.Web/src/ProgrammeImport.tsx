@@ -41,7 +41,7 @@ export function ProgrammeImport({home=false}:{home?:boolean}){
     <details open={expanded} onToggle={event=>setExpanded(event.currentTarget.open)}>
       <summary>{t(enabled?'Personal programme import is on':'Personal programme import')}</summary>
       <p>{t('Meeting Journey is an independent focus aid designed to help neurodivergent users follow meetings. It is not affiliated with or endorsed by Jehovah’s Witnesses, and does not replace JW.org, JW Library or Watchtower ONLINE LIBRARY (wol.jw.org).')}</p>
-      <p>{t('With your confirmation, the app requests meeting item names, timings and scripture/publication references from WOL through our server, and saves the programme on this device. Article text, answers, images and your personal notes are not imported or sent to WOL.')}</p>
+      <p>{t('With your confirmation, the server retrieves programme details and reads cited scriptures temporarily to extract listening words. Only titles, timings, references and word lists are saved on this device. Article and verse text are not saved or sent to the app. Your personal notes are never sent to WOL.')}</p>
       <p>{t('Your confirmation records your personal-use preference; it does not grant publisher permission or change the source’s terms of use.')}</p>
       {enabled?<button type="button" onClick={()=>choose(false)}>{t('Stop future programme imports')}</button>:<>
         <label><input type="checkbox" checked={confirmed} onChange={event=>setConfirmed(event.target.checked)}/>{t('I want to import meeting schedules for my own personal use and understand that official material remains in JW.org, JW Library and WOL.')}</label>

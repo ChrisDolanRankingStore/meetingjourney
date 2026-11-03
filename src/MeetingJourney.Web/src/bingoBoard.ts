@@ -8,7 +8,11 @@ export function bingoSize(older: boolean): 3 | 4 { return older ? 4 : 3; }
 export function bingoWords(part: MeetingPart, size: number, language: 'en' | 'es'): string[] {
   const text = [part.title, part.summary, part.question, part.textReference, ...part.activities.flatMap(activity => [activity.prompt, activity.mission?.listeningObjective, ...(activity.mission?.clues ?? [])])].join(' ').toLocaleLowerCase(language);
   const related = words[language].filter(word => new RegExp(`(?:^|[^\\p{L}])${word.toLocaleLowerCase(language)}(?:$|[^\\p{L}])`, 'u').test(text));
-  const candidates = [...(part.listeningWords?.[language] ?? []), ...related, ...words[language]];
+  const passage=(part.bingoWords??[]).filter(item=>item.source==='passage').map(item=>item.word);
+  const limit=size===3?6:11;
+  const familiar=[...related,...words[language]];
+  const offset=[...part.id].reduce((sum,letter)=>sum+letter.charCodeAt(0),0)%familiar.length;
+  const candidates = [...passage.slice(0,limit), ...(part.listeningWords?.[language] ?? []), ...familiar.slice(offset),...familiar.slice(0,offset),...passage.slice(limit)];
   const unique = new Map<string, string>();
   for (const word of candidates) {
     if (typeof word !== 'string' || !word.trim() || word.length > 60) continue;

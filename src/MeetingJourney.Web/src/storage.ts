@@ -5,6 +5,13 @@ const DB_NAME = 'meeting-journey-local';
 const DB_VERSION = 2;
 const NOTE_STORE = 'notes';
 const DRAWING_STORE = 'drawings';
+const pendingSaves = new Map<string,Promise<void>>();
+export function trackJournalSave(save: Promise<void>, key: string): Promise<void> {
+  pendingSaves.set(key,save);
+  void save.then(() => {if(pendingSaves.get(key)===save)pendingSaves.delete(key);}, () => undefined);
+  return save;
+}
+export async function waitForJournalSaves() { await Promise.all([...pendingSaves.values()]); }
 
 export function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -32,7 +39,8 @@ export async function readNote(meetingId: string, partId: string): Promise<Saved
   });
 }
 
-export async function saveNote(note: SavedNote): Promise<void> {
+export function saveNote(note: SavedNote) { return trackJournalSave(writeNote(note),`notes:${keyFor(note.meetingId,note.partId)}`); }
+async function writeNote(note: SavedNote): Promise<void> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(NOTE_STORE, 'readwrite');
@@ -60,7 +68,8 @@ export async function readDrawingPage(meetingId: string, partId: string): Promis
   });
 }
 
-export async function saveDrawing(meetingId: string, partId: string, strokes: Stroke[], paper?: DrawingPaperSize): Promise<void> {
+export function saveDrawing(meetingId: string, partId: string, strokes: Stroke[], paper?: DrawingPaperSize) { return trackJournalSave(writeDrawing(meetingId, partId, strokes, paper),`drawings:${keyFor(meetingId,partId)}`); }
+async function writeDrawing(meetingId: string, partId: string, strokes: Stroke[], paper?: DrawingPaperSize): Promise<void> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(DRAWING_STORE, 'readwrite');

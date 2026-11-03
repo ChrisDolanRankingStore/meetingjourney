@@ -197,13 +197,11 @@ test('welcome, character choice and home render in Spanish and still render in E
     meetingId:linkedMeeting.id,part:linkedPart,partIndex:4,material:linkedMeeting.material,
     profile:testProfile,totalParts:linkedMeeting.parts.length,engagement:'quiet',presentation:'standard',onOpenMaterial:()=>{}
    }));
-   const inlineSources=panel.slice(panel.indexOf('class="part-inline-sources"'),panel.indexOf('<nav class="part-workspace-tabs"'));
-   assert.match(inlineSources,/href="https:\/\/www.jw.org\/finder\?[^"]*bible=24046013-24046024/);
-   assert.match(inlineSources,/docid=202026258/);
-   assert.doesNotMatch(inlineSources,/<details|<button/);
+   assert.doesNotMatch(panel,/class="part-inline-sources"/);
+   assert.match(panel,/class="part-single-focus"/);
    const reflectionPanel=renderToStaticMarkup(React.createElement(MeetingPartView,{
     meetingId:linkedMeeting.id,part:linkedPart,partIndex:4,material:linkedMeeting.material,
-    profile:testProfile,totalParts:linkedMeeting.parts.length,engagement:'guided',presentation:'standard',onOpenMaterial:()=>{}
+    profile:testProfile,totalParts:linkedMeeting.parts.length,engagement:'guided',presentation:'reflective',onOpenMaterial:()=>{}
    }));
    const checks=reflectionPanel.match(/<fieldset class="part-reflection-choices">[\s\S]*?<\/fieldset>/)?.[0];
    assert.ok(checks);
@@ -257,8 +255,9 @@ test('welcome, character choice and home render in Spanish and still render in E
      assert.match(detailPanel,/bible=24048006/);
      assert.match(detailPanel,/docid=1200002555&amp;par=4/);
     }
-    if(item.type==='Demonstration')for(const reference of item.references)assert.ok(detailPanel.includes(reference.url.replace(/wtlocale=E/,`wtlocale=${language==='es'?'S':'E'}`).replace(/&/g,'&amp;')));
-    if(item.type==='CongregationBibleStudy')assert.match(detailPanel,/docid=1102025914/);
+    const referencePanel=renderToStaticMarkup(React.createElement(PartReferenceLinks,{part:item,material:detailedMeeting.material}));
+    if(item.type==='Demonstration')for(const reference of item.references)assert.ok(referencePanel.includes(reference.url.replace(/wtlocale=E/,`wtlocale=${language==='es'?'S':'E'}`).replace(/&/g,'&amp;')));
+    if(item.type==='CongregationBibleStudy')assert.match(referencePanel,/docid=1102025914/);
    }
    for(const compact of [false,true]){
     const sources=renderToStaticMarkup(React.createElement(PartReferenceLinks,{part:linkedPart,material:linkedMeeting.material,compact}));
