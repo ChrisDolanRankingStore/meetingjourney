@@ -66,6 +66,22 @@ const bibleBookNumbers: Record<string, number> = {
   tito: 56, filemón: 57, hebreos: 58, santiago: 59, '1 pedro': 60, '2 pedro': 61,
   '1 juan': 62, '2 juan': 63, '3 juan': 64, judas: 65, apocalipsis: 66
 };
+const bibleAbbreviations = [
+  'gen ge gn gén', 'ex exo éx', 'lev le lv', 'num nu nm núm', 'deut de dt', 'josh jos', 'judg jdg jue', 'ru rt',
+  '1 sam sa', '2 sam sa', '1 ki kgs re', '2 ki kgs re', '1 chr ch cr', '2 chr ch cr', 'ezr esd', 'neh ne', 'est es', 'jb',
+  'ps psa sal', 'prov pr pro', 'eccl ecc ec', 'song sos cant can', 'isa is', 'jer je', 'lam la', 'ezek eze ez', 'dan da dn',
+  'hos ho os', 'jl', 'am', 'obad ob abd ab', 'jon jnh jonás', 'mic mi', 'nah na', 'hab', 'zeph zep sof', 'hag hág ag', 'zech zec zac', 'mal',
+  'matt mt mat', 'mark mk mr mar', 'luke lk lu lc', 'jn joh jn juan', 'ac act hch hech', 'rom ro rm',
+  '1 cor co', '2 cor co', 'gal ga gál', 'eph ep ef', 'phil php flp', 'col', '1 thess th tes', '2 thess th tes',
+  '1 tim ti', '2 tim ti', 'tit', 'philem phm flm', 'heb he', 'jas jam sant stg', '1 pet pe ped', '2 pet pe ped',
+  '1 jn joh', '2 jn joh', '3 jn joh', 'jud jd', 'rev re ap apoc'
+];
+for(const [index,entry] of bibleAbbreviations.entries()){
+  const [prefix,...aliases]=entry.split(' ');
+  for(const alias of /^\d$/.test(prefix)?aliases:entry.split(' ')){
+    bibleBookNumbers[/^\d$/.test(prefix)?`${prefix} ${alias}`:alias]=index+1;
+  }
+}
 
 function bibleBookKey(value: string) {
   return value.normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase();
@@ -77,20 +93,20 @@ function biblePassageUrl(bible: string, language: Language) {
 
 const bookChapters = [50,40,27,36,34,24,21,4,31,24,22,25,29,36,10,13,10,42,150,31,12,8,66,52,5,48,12,14,3,9,1,4,7,3,3,3,2,14,4,28,16,24,21,28,16,16,13,6,6,4,4,5,3,6,4,3,1,13,5,5,3,5,1,1,1,22];
 const scriptureCode = (book: number, chapter: number, verse: number) => `${String(book).padStart(2,'0')}${String(chapter).padStart(3,'0')}${String(verse).padStart(3,'0')}`;
-const bookPattern = Object.keys(bibleBookNumbers).sort((a,b) => b.length-a.length).join('|');
+const bookPattern = Object.keys(bibleBookNumbers).sort((a,b) => b.length-a.length).map(name=>name.replace(/ /g,'\\s*')).join('|');
 
 export function bibleReferenceLinks(reference?: string, language = getLanguage()): { label: string; url: string }[] {
   if (!reference?.trim()) return [];
   const links: { label: string; url: string }[] = [];
   const text = reference.normalize('NFC').replace(/\s+/g,' ');
-  const pattern = new RegExp(`(?<![\\p{L}\\d])(${bookPattern})\\s+(?=\\d)`, 'giu');
+  const pattern = new RegExp(`(?<![\\p{L}\\d])(${bookPattern})\\.?\\s*(?=\\d)`, 'giu');
   const matches = [...text.matchAll(pattern)];
   for (const [position, match] of matches.entries()) {
     const bookName = match[1];
-    const book = bibleBookNumbers[bibleBookKey(bookName)];
+    const book = bibleBookNumbers[bibleBookKey(bookName).replace(/^([1-3])(?=\p{L})/u,'$1 ')];
     let chapter = 0, verses = false;
-    const numeric = text.slice(match.index+match[0].length,matches[position+1]?.index).match(/^\d[\d\s:,;\-–—]*/)?.[0] ?? '';
-    const clauses = numeric.replace(/[–—]/g,'-').split(/([,;])/);
+    const numeric = text.slice(match.index+match[0].length,matches[position+1]?.index).match(/^\d[\d\s:.,;\-–—]*/)?.[0] ?? '';
+    const clauses = numeric.trim().replace(/\.+$/,'').replace(/\./g,':').replace(/\s*:\s*/g,':').replace(/[–—]/g,'-').split(/([,;])/);
     for (const [index, clause] of clauses.entries()) {
       if (index % 2) continue;
       const separator = index ? clauses[index-1] : '';

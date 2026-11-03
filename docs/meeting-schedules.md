@@ -18,6 +18,8 @@ Each source has a single **Open in JW Library** link using the official HTTPS `/
 
 Bible links preserve the requested verse or complete verse range, including passages crossing chapter boundaries. Comma-separated verses have separate links; whole-chapter ranges expose each chapter rather than silently dropping later chapters. Full English and Spanish Bible book names are recognised. A chapter uses verse `000`; verses use the eight-digit book/chapter/verse finder identifier.
 
+Notebook writing and study drafts detect references immediately as the text changes; no save, space or Enter is required. Common English/Spanish abbreviations, optional spaces and abbreviation periods, and colon or dot chapter/verse separators are accepted: `Jn3.16`, `Jn. 3:16`, `John 3:16`, `1Jn4.8`, `2Cor8.2-4` and `Sal37.4`. Saved-note scripture links use the same parser. Equivalent references are deduplicated; links appear below the editor rather than replacing the user's text. Scripture text is not downloaded or displayed inline.
+
 Song metadata includes verified document IDs for all 164 songs in both languages, alongside the original web pages. Regenerate titles and identifiers using `node node-app/scripts/refresh-song-catalog.mjs`; it validates each official song page before replacing the bundled catalogue. No publication text is copied. Notes, drawings and source return check-ins retain their existing notebook IDs.
 
 App handoff requires JW Library to be installed and the device/browser to permit supported app links. Automated checks verify exact link targets and bilingual rendering, not successful opening of a native app; physical iOS/Android testing is still required.

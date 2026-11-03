@@ -5,6 +5,18 @@ import {lookupSong} from '../src/songs.ts';
 
 const codes = (reference,language='en') => bibleReferenceLinks(reference,language).map(link=>new URL(link.url).searchParams.get('bible'));
 
+test('typed scriptures accept common abbreviations, compact spacing and dot separators',()=>{
+  for(const input of ['Jn3.16','Jn 3:16','Jn. 3:16','John3:16','John 3:16','jn3.16.','JOHN 3 : 16']){
+    assert.deepEqual(codes(input),['43003016'],input);
+  }
+  assert.deepEqual(codes('Remember Jn3.16 and Ps37.4.'),['43003016','19037004']);
+  assert.deepEqual(codes('1Jn4.8; 2Cor8.2-4'),['62004008','47008002-47008004']);
+  assert.deepEqual(codes('Jn3.36-4.2, 5'),['43003036-43004002','43004005']);
+  assert.deepEqual(codes('Juan3.16; Sal.37:4; 1Co13.4','es'),['43003016','19037004','46013004']);
+  assert.deepEqual(codes('Jn3.16 and John 3:16'),['43003016']);
+  assert.deepEqual(codes('projectJn3.16; Jn0.1; Jn99.16; Jn3.0'),[]);
+});
+
 test('Bible links preserve single verses, ranges, separate verses and cross-chapter passages',()=>{
   assert.deepEqual(codes('John 3:16'),['43003016']);
   assert.deepEqual(codes('Jeremiah 45:3, 5'),['24045003','24045005']);

@@ -221,6 +221,11 @@ html[data-palette] .app:where(:not(.home-screen, .journey-screen)) { background:
 .clue-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px; }
 .clue-actions > .skip-button { max-width: 100%; min-height: 44px; margin: 0; }
 .app :is(.screen-heading, .overview-heading, .discovery-map-heading, .story-map-heading) { padding: 14px; border: 1px solid #d5c1a0; border-radius: 12px; background: #fff8e9; color: #2e4560; }
+.app .meeting-content-notice { box-sizing: border-box; padding: 10px 12px; border: 1px solid #d5c1a0; border-radius: 8px; background: #fff8e9; color: #2e4560; font-size: .875rem; line-height: 1.5; overflow-wrap: anywhere; }
+.app .discovery-map-screen { display: flex; flex-direction: column; min-height: 0; }
+.app .discovery-map-screen > :is(.discovery-map-heading, .timeline-toggle, .discovery-filters, .meeting-session-picker, .discovery-map-hint) { flex: 0 0 auto; }
+.app .discovery-map-screen > :is(.discovery-map-workspace, .notes-timeline) { flex: 1 1 0; min-height: 0; }
+.app .discovery-map-screen > .notes-timeline { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .notes-timeline { margin-top: 12px; padding: 14px; border: 1px solid #d5c1a0; border-radius: 12px; background: #fff8e9; color: #2e4560; }
 .notes-timeline input { width: 100%; box-sizing: border-box; min-height: 44px; }
 .notes-timeline details { padding: 10px; margin-block: 8px; border: 1px solid #d5c1a0; border-radius: 8px; background: #fffdf7; overflow-wrap: anywhere; }
