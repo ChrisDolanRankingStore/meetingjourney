@@ -3,7 +3,7 @@ import {validConnectionChoice} from './connectionActivity.ts';
 type Entry = { key: string; value: any; paper?: { width: number; height: number } };
 export interface JournalBackup { format: 'meeting-journey'; version: 1; exportedAt: string; notes: Entry[]; drawings: Entry[]; engagement: Entry[]; preferences: Record<string, string> }
 const stores = ['notes', 'drawings', 'engagement'] as const;
-const personalKey = (key: string) => key.startsWith('mj-') && !key.startsWith('mj-meeting-cache:');
+const personalKey = (key: string) => key.startsWith('mj-') && !key.startsWith('mj-meeting-cache:') && key!=='mj-programme-import-choice';
 export function validateBackup(value: any): JournalBackup {
   if (!value || value.format !== 'meeting-journey' || value.version !== 1 || typeof value.exportedAt !== 'string' || !value.preferences || typeof value.preferences !== 'object' || Array.isArray(value.preferences)) throw new Error('Not a supported Meeting Journey backup.');
   for (const name of stores) {

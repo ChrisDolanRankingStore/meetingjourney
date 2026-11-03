@@ -13,11 +13,11 @@ import {conventionDates,conventionMeeting,readConvention,saveConvention} from '.
 class MemoryStorage{data=new Map();get length(){return this.data.size;}key(i){return [...this.data.keys()][i]??null;}getItem(k){return this.data.get(k)??null;}setItem(k,v){this.data.set(k,String(v));}removeItem(k){this.data.delete(k);}}
 beforeEach(()=>{globalThis.indexedDB=new IDBFactory();});
 test('backup round-trip preserves editable strokes, paper, notes, study comments and preferences',async()=>{
- const storage=new MemoryStorage();storage.setItem('mj-character','{"name":"Test"}');storage.setItem('unrelated','keep');
+ const storage=new MemoryStorage();storage.setItem('mj-character','{"name":"Test"}');storage.setItem('unrelated','keep');storage.setItem('mj-programme-import-choice','personal-v1');
  await saveNote({meetingId:'week-a',partId:'reading',text:'My thought',updatedAt:'2026-10-25'});
  const stroke={points:[1,2,30,40],color:'#123456',size:4,mode:'pen'};await saveDrawing('week-a','reading',[stroke],{width:760,height:900});
  const study={...emptyStudy('week-a','reading'),paragraph:7,comments:[{id:'c1',paragraph:7,text:'My comment',ready:true,given:false}]};await saveStudy(study);
- const backup=validateBackup(await exportJournal(storage));assert.equal(backup.preferences.unrelated,undefined);
+ const backup=validateBackup(await exportJournal(storage));assert.equal(backup.preferences.unrelated,undefined);assert.equal(backup.preferences['mj-programme-import-choice'],undefined);
  globalThis.indexedDB=new IDBFactory();const restored=new MemoryStorage();assert.deepEqual(await importJournal(backup,true,restored),{added:3,kept:0});
  assert.equal((await readNote('week-a','reading')).text,'My thought');assert.deepEqual((await readDrawingPage('week-a','reading')).strokes,[stroke]);assert.equal((await readDrawingPage('week-a','reading')).paper.height,900);assert.equal((await readStudy('week-a','reading')).paragraph,7);assert.equal(restored.getItem('mj-character'),'{"name":"Test"}');
 });

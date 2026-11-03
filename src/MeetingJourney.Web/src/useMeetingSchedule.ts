@@ -6,6 +6,7 @@ import type { Meeting } from './types';
 import {VISIT_UPDATED} from './circuitVisit';
 import {assemblyMeeting, readCircuitAssembly, resolveJourney, type JourneyOverride, type JourneySelection} from './circuitAssembly';
 import {conventionMeeting, readConvention} from './convention';
+import {PROGRAMME_IMPORT_CHANGED,programmeImportEnabled} from './ProgrammeImport';
 
 function readSaved<T>(key: string): T | null {
   try { return JSON.parse(localStorage.getItem(key) ?? 'null') as T | null; } catch { return null; }
@@ -19,6 +20,13 @@ export function useMeetingSchedule() {
   const [days, setDays] = useState(() => normaliseMeetingDays(readSaved<MeetingDays>('mj-meeting-days')));
   const [override, setOverride] = useState(() => readSaved<JourneyOverride>('mj-meeting-choice'));
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [importRevision,setImportRevision]=useState(0);
+  useEffect(()=>{
+    const update=()=>setImportRevision(value=>value+1);
+    window.addEventListener(PROGRAMME_IMPORT_CHANGED,update);
+    window.addEventListener('storage',update);
+    return()=>{window.removeEventListener(PROGRAMME_IMPORT_CHANGED,update);window.removeEventListener('storage',update);};
+  },[]);
   const [,setVisitRevision]=useState(0);
   useEffect(()=>{const update=()=>setVisitRevision(value=>value+1);window.addEventListener(VISIT_UPDATED,update);return()=>window.removeEventListener(VISIT_UPDATED,update);},[]);
   const selection = resolveJourney(today, days, override,localStorage);
@@ -65,7 +73,7 @@ export function useMeetingSchedule() {
     window.addEventListener('focus', refresh);
     const timer = window.setInterval(refresh, 15 * 60 * 1000);
     return () => { controller.abort(); window.removeEventListener('online', refresh); window.removeEventListener('focus', refresh); window.clearInterval(timer); };
-  }, [currentMonth, selectedMonth]);
+  }, [currentMonth, selectedMonth, importRevision]);
 
   useEffect(() => {
     const update = () => setToday(localDateKey());
@@ -85,6 +93,7 @@ export function useMeetingSchedule() {
       if (controller.signal.aborted || next.id !== fallback.id || next.kind !== selection.type || next.weekOf !== fallback.weekOf || !next.parts?.length) return;
       const existing=readSaved<Meeting>(`mj-meeting-cache:${next.id}`);
       if(existing?.contentStatus==='dated'&&next.contentStatus!=='dated'){
+        if(!programmeImportEnabled())return;
         const retained={...existing,contentNotice:'The programme could not be refreshed. Showing the last saved programme.'};
         setDownloaded(retained);save(`mj-meeting-cache:${next.id}`,retained);return;
       }
@@ -96,7 +105,7 @@ export function useMeetingSchedule() {
     window.addEventListener('focus', refresh);
     const timer = window.setInterval(refresh, 15 * 60 * 1000);
     return () => { controller.abort(); window.removeEventListener('online', refresh); window.removeEventListener('focus', refresh); window.clearInterval(timer); };
-  }, [selection.type, selection.date, fallback.id, fallback.weekOf]);
+  }, [selection.type, selection.date, fallback.id, fallback.weekOf, importRevision]);
 
   return {
     meeting, today, days, selection, pickerOpen, setPickerOpen,

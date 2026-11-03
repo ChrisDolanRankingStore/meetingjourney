@@ -33,6 +33,7 @@ import {DETAILS_UPDATED, personalizeMeeting} from './localMeetingDetails';
 import {OfficialReturn} from './OfficialReturn';
 import {useOfflinePreparation} from './offlinePreparation';
 import { OfflineMeeting, DisplaySettings } from './OfflineMeeting';
+import {ProgrammeImport} from './ProgrammeImport';
 import { StudyTools } from './StudyTools';
 import { MeetingReview, WelcomeScreen } from './MeetingReview';
 import { sceneImage } from './artwork';
@@ -350,6 +351,7 @@ function AdventureHomeV2({ meeting, profile, partIndex, characterAction, onMoveC
     </div>
     <div className="home-avatar-layer"><CompanionActionHub profile={profile} characterAction={characterAction} onMoveCharacter={onMoveCharacter} onQuickAction={onQuickAction} placement="scene" homeGuide={{open:guideOpen, hint:!guideUsed, onOpen:()=>{setGuideUsed(true);setGuideOpen(true);}}} /></div>
     <div className="home-copy">
+      <ProgrammeImport />
       <p className="eyebrow">{profile.name.trim() ? tt`Welcome back, ${profile.name.trim()}` : t("Welcome to your adventure")}</p>
       <h2>{profile.ageGroup === "teen" ? t("Your meeting, your pace") : t("Let us take the next step")}</h2>
       <p className="home-details">{t(({midweek:'Midweek', weekend:'Weekend', assembly:'Assembly', convention:'Convention'})[meeting.kind ?? 'midweek'])} · {meeting.bibleReading} · {new Date(`${meeting.eventDate ?? meeting.weekOf}T12:00:00`).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'short' })}</p>

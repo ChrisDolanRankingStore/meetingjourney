@@ -1,4 +1,4 @@
-const CACHE = 'meeting-journey-087-smudge-programme';
+const CACHE = 'meeting-journey-088-personal-import';
 const APP_SHELL=['/','/index.html','/manifest.webmanifest','/journey-route-192.png','/journey-route-180.png','/journey-route-512.png','/privacy.html','/about.html','/welcome.html','/info.css','/refresh.html','/app-refresh.js','/es/privacy.html','/es/about.html','/es/welcome.html', .../*BUILD_ASSETS*/[]];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('meeting-journey-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));

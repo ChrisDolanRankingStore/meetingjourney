@@ -20,6 +20,11 @@ test('Node API serves the selected type/week and rejects bad calendar inputs', a
       });
     });
     const base = `http://127.0.0.1:${port}`;
+    for(const path of ['/api/meetings/current?type=midweek&date=2026-11-02','/api/meetings/meeting-2026-11-02','/api/meetings/current?type=midweek&date=2026-11-02&import=false']){
+      const general=await fetch(base+path).then(response=>response.json());
+      assert.equal(general.contentStatus,'general');
+      assert.equal(general.programmeMetadata,undefined);
+    }
     const month = await fetch(`${base}/api/meetings/month?date=2026-11-15`).then(response => response.json());
     assert.equal(month.month, '2026-11');
     assert.equal(month.meetings.length, 12);

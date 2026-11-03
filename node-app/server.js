@@ -6,11 +6,11 @@ import { currentMeeting } from './meeting.js';
 import { getMeeting } from './meeting-catalog.js';
 import { readPublishedMeeting } from './published-content.js';
 import {cachedWolMeeting,loadWolMeeting} from './wol-metadata.js';
-const meetingFor = (kind, date) => { try { return readPublishedMeeting(kind, date) ?? cachedWolMeeting(kind,date) ?? getMeeting(kind, date); } catch (error) { if (error instanceof RangeError) throw error; console.error(JSON.stringify({ level: 'error', message: 'Published outline could not be loaded', error: error.message })); return getMeeting(kind, date); } };
-async function onlineMeetingFor(kind,date){
+const meetingFor = (kind, date, personalImport=false) => { try { return readPublishedMeeting(kind, date) ?? (personalImport?cachedWolMeeting(kind,date):undefined) ?? getMeeting(kind, date); } catch (error) { if (error instanceof RangeError) throw error; console.error(JSON.stringify({ level: 'error', message: 'Published outline could not be loaded', error: error.message })); return getMeeting(kind, date); } };
+async function onlineMeetingFor(kind,date,personalImport=false){
   try { const published=readPublishedMeeting(kind,date);if(published)return published; }
   catch(error){if(error instanceof RangeError)throw error;console.error('Published outline could not be loaded.',error);}
-  return loadWolMeeting(kind,date);
+  return personalImport?loadWolMeeting(kind,date):getMeeting(kind,date);
 }
 import { localDateKey, suggestedMeeting, monthWeeks } from './meeting-schedule.js';
 
@@ -31,10 +31,10 @@ const json = (res, status, body) => {
 
 const notFound = (res) => json(res, 404, { error: 'Not found' });
 
-const findMeeting = async (id) => {
+const findMeeting = async (id,personalImport=false) => {
   const match = /^(meeting|weekend)-(\d{4}-\d{2}-\d{2})$/.exec(id);
   if (!match) return undefined;
-  try { const meeting = await onlineMeetingFor(match[1] === 'weekend' ? 'weekend' : 'midweek', match[2]); return meeting.id === id ? meeting : undefined; } catch (error) { if(error instanceof RangeError)return undefined;throw error; }
+  try { const meeting = await onlineMeetingFor(match[1] === 'weekend' ? 'weekend' : 'midweek', match[2],personalImport); return meeting.id === id ? meeting : undefined; } catch (error) { if(error instanceof RangeError)return undefined;throw error; }
 };
 const findPart = (id) => currentMeeting.parts.find((part) => part.id === id);
 
@@ -65,6 +65,7 @@ function safePublicPath(pathname) {
 async function handle(request, response) {
   const url = new URL(request.url || '/', `http://${request.headers.host || 'localhost'}`);
   const pathname = decodeURIComponent(url.pathname);
+  const personalImport=url.searchParams.get('import')==='personal';
 
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return json(response, 405, { error: 'Method not allowed' });
@@ -81,7 +82,7 @@ async function handle(request, response) {
   if (pathname === '/api/meetings/month') {
     try {
       const date = url.searchParams.get('date') ?? localDateKey();
-      const meetings = monthWeeks(date).flatMap(week => ['midweek', 'weekend'].map(kind => meetingFor(kind, week)));
+      const meetings = monthWeeks(date).flatMap(week => ['midweek', 'weekend'].map(kind => meetingFor(kind, week,personalImport)));
       return json(response, 200, { month: date.slice(0, 7), meetings });
     } catch (error) {
       return json(response, 400, { error: error instanceof Error ? error.message : 'Invalid month' });
@@ -91,7 +92,7 @@ async function handle(request, response) {
   if (pathname === '/api/meetings/current') {
     const suggestion = suggestedMeeting(localDateKey());
     try {
-      return json(response, 200, await onlineMeetingFor(url.searchParams.get('type') ?? suggestion.type, url.searchParams.get('date') ?? suggestion.date));
+      return json(response, 200, await onlineMeetingFor(url.searchParams.get('type') ?? suggestion.type, url.searchParams.get('date') ?? suggestion.date,personalImport));
     } catch (error) {
       return json(response, 400, { error: error instanceof Error ? error.message : 'Invalid meeting selection' });
     }
@@ -99,7 +100,7 @@ async function handle(request, response) {
 
   let match = pathname.match(/^\/api\/meetings\/([^/]+)\/journey$/);
   if (match) {
-    const meeting = await findMeeting(match[1]);
+    const meeting = await findMeeting(match[1],personalImport);
     return meeting
       ? json(response, 200, {
           meetingId: meeting.id,
@@ -118,13 +119,13 @@ async function handle(request, response) {
 
   match = pathname.match(/^\/api\/meetings\/([^/]+)\/parts$/);
   if (match) {
-    const meeting = await findMeeting(match[1]);
+    const meeting = await findMeeting(match[1],personalImport);
     return meeting ? json(response, 200, meeting.parts) : notFound(response);
   }
 
   match = pathname.match(/^\/api\/meetings\/([^/]+)$/);
   if (match) {
-    const meeting = await findMeeting(match[1]);
+    const meeting = await findMeeting(match[1],personalImport);
     return meeting ? json(response, 200, meeting) : notFound(response);
   }
 

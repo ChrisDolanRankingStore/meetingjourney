@@ -4,6 +4,7 @@ import {focusLandscape, sceneImage, portraitImage} from './artwork';
 import {sceneAssetsForWeek} from './sceneSets';
 import {paintedIconAssets} from './paintedIcons';
 import type {Meeting} from './types';
+import {ProgrammeImport,programmeImportEnabled} from './ProgrammeImport';
 
 export function OfflineMeeting({meeting, portrait}: {meeting: Meeting; portrait: string}) {
   const [status, setStatus] = useState('');
@@ -22,7 +23,7 @@ export function OfflineMeeting({meeting, portrait}: {meeting: Meeting; portrait:
         ...sceneSources.flatMap(source => [480, 960].map(width => sceneImage(source, width))),
         ...sceneSources.map(source => sceneImage(source, 1600)),
         ...[180, 360, 720].map(height => portraitImage(portrait, height)),
-        ...(meeting.kind === 'assembly' || meeting.kind === 'convention' ? [] : [`/api/meetings/current?${new URLSearchParams({type: meeting.kind ?? 'midweek', date: meeting.weekOf})}`])
+        ...(meeting.kind === 'assembly' || meeting.kind === 'convention' ? [] : [`/api/meetings/current?${new URLSearchParams({type: meeting.kind ?? 'midweek', date: meeting.weekOf,...(programmeImportEnabled()?{import:'personal'}:{})})}`])
       ])];
       await new Promise<void>((resolve, reject) => {
         const channel = new MessageChannel();
@@ -35,7 +36,7 @@ export function OfflineMeeting({meeting, portrait}: {meeting: Meeting; portrait:
       setStatus(error instanceof Error ? error.message : 'Could not save for offline use.');
     } finally { setBusy(false); }
   };
-  return <section className="settings-card"><h3>{t('Ready without a connection')}</h3><p>{t('The chosen companion and scenery prepare in the background when connected. Use this button to save or retry the meeting pack. Official reading material opens separately in JW Library.')}</p><button disabled={busy || !('serviceWorker' in navigator)} onClick={() => void save()}>{t('Save this meeting offline')}</button><p role="status">{t(status)}</p></section>;
+  return <><ProgrammeImport /><section className="settings-card"><h3>{t('Ready without a connection')}</h3><p>{t('The chosen companion and scenery prepare in the background when connected. Use this button to save or retry the meeting pack. Official reading material opens separately in JW Library.')}</p><button disabled={busy || !('serviceWorker' in navigator)} onClick={() => void save()}>{t('Save this meeting offline')}</button><p role="status">{t(status)}</p></section></>;
 }
 
 export function DisplaySettings() {
