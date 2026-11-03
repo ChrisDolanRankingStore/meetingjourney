@@ -3,6 +3,62 @@
 Reviewed: 3 November 2026  
 Application baseline: `c9abbe90c31dc50a484db1ef72beaade48fac7fe`
 
+## Release 0.5.6 follow-up: current status
+
+The five approved implementation phases have been delivered, followed by
+optional Breathe and Spin pause tools, an optional parent convenience lock,
+and explicit merge/replace backup handling. The parent lock is disclosed as
+device-local friction, not encryption. Users can begin without a companion;
+Quiet, text size, neutral presentation and hidden activity feedback are
+available without requiring a diagnosis or a particular way to participate.
+
+The engagement contract remains low-pressure: one current meeting part,
+optional listening support and personal notebooks; no countdown, ranking,
+forced writing, automatic speech or inferred attention score. Public talks
+provide personal listening notes, sketches and scripture spotting only, not
+audience-comment preparation, readiness or sharing controls.
+
+The final production build passes all 140 automated tests. The main JavaScript
+bundle is 190.49 KB gzip and the separate drawing chunk is 104.88 KB gzip,
+within the 250 KB main-bundle limit. The staged 0.5.6 runtime smoke check passes
+and includes 18 painted scene assets and 15 icons. Final browser spot checks
+covered the 390px phone Home/part screens, a 768px previous-notes view and
+Spanish navigation. Earlier responsive checks also covered four phone/tablet
+viewport sizes and enlarged Settings text. These are browser checks, not
+physical-device or screen-reader validation.
+
+### Remaining recommendations
+
+1. **Validate with people who may use the app.** Run short, optional co-design
+   sessions with different attention, sensory, language and motor preferences.
+   Ask people to start, find their place after an interruption, save or edit a
+   thought, and recover a backup. Observe effort and confusion; do not treat
+   taps, time in app, saved items or diagnosis as engagement measures.
+2. **Complete assistive-technology and real-device checks.** Test keyboard
+   navigation, VoiceOver and TalkBack, zoom/text enlargement, reduced motion,
+   touch/stylus drawing, safe areas, orientation changes and offline recovery on
+   physical devices. Verify focus, labels, exits and return-to-place through
+   every tool, not just Home and Settings.
+3. **Recheck progressive disclosure on a fresh install.** The companion's
+   appearance options include a horizontal strip on narrow screens. Confirm
+   first-time users understand that more options are available and can start
+   without customizing; prefer a wrapping layout if scrolling is not discoverable.
+   Keep comfort choices reachable but avoid asking users to configure everything
+   before they can begin.
+4. **Rehearse data recovery with a non-technical user.** The journal is local
+   and anyone using the same device may see it. Backups are explicit files, and
+   the convenience lock does not encrypt data. Validate that users understand
+   how to export before device changes and how merge differs from replacement.
+5. **Keep the engagement loop small.** Treat noticing, writing, drawing,
+   connecting and taking a pause as alternatives, not simultaneous tasks.
+   Preserve an easy path to do nothing in the app and return to listening. A
+   useful meeting may leave no saved record.
+
+The baseline findings below are retained for history. They are not a list of
+unresolved release blockers; the five approved implementation phases above
+address the draft, focus, comfort, import-copy, neutral-mode, connection and
+history concerns from that baseline.
+
 ## Approved implementation follow-through
 
 The five delivery phases below were approved for implementation. The updated
@@ -31,8 +87,10 @@ that these issues remain unchanged.
 
 Validation includes automated regressions for preserved drafts and length
 limits, neutral entry, hidden counters, translated controls, title/page labels
-and backup round trips. The production build, all 132 tests and packaged runtime
-smoke check pass. Browser checks cover Settings at the four viewport sizes listed
+and backup round trips. At the time of this implementation follow-through, the
+production build, all 132 tests and packaged runtime smoke check passed. The
+final Release 0.5.6 validation is summarized above. Browser checks cover
+Settings at the four viewport sizes listed
 below, 200% root text at 320px with administration expanded, Spanish enlarged
 labels, native-modal background focus blocking and focus restoration. Drawing
 labels use a horizontally scrolling toolbar without narrowing the paper; both
@@ -109,7 +167,11 @@ Observed checks included:
 - English/Spanish support, local data and editable backups.
 - Compact icons save space while retaining accessible names and selected states.
 
-## Findings and recommended changes
+## Baseline findings and recommendations (historical)
+
+The findings in this section describe the earlier review baseline. Consult
+"Release 0.5.6 follow-up: current status" above before treating a recommendation
+as still open.
 
 ### 1. Protect drafts from sentence-starter replacement
 

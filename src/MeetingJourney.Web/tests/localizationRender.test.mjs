@@ -15,8 +15,9 @@ test('welcome, character choice and home render in Spanish and still render in E
  const root=fileURLToPath(new URL('../',import.meta.url));
  const server=await createServer({root,configFile:false,server:{middlewareMode:true,hmr:false},logLevel:'error'});
  const data=new Map();
- const previousStorage=globalThis.localStorage, previousWindow=globalThis.window;
+ const previousStorage=globalThis.localStorage, previousWindow=globalThis.window, previousSessionStorage=globalThis.sessionStorage;
  globalThis.localStorage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value)};
+ globalThis.sessionStorage={getItem:()=>null,setItem:()=>{}};
  globalThis.window={innerWidth:1024,matchMedia:()=>({matches:false})};
  try{
   const {default:App,MeetingPartView}=await server.ssrLoadModule('/src/App.tsx');
@@ -52,11 +53,13 @@ test('welcome, character choice and home render in Spanish and still render in E
   assert.match(portrait,/<img /);assert.doesNotMatch(portrait,/<svg/);
   data.set('mj-character',JSON.stringify({gender:'boy',ageGroup:'teen',name:'My Own Name',style:'classic-boy'}));
   html=renderToStaticMarkup(React.createElement(App));
+  assert.doesNotMatch(html.replace(/<[^>]*>/g,' '),/adventure|treasure|aventura|tesoro/i);
   assert.match(html,/Inicio/);assert.match(html,/Recorrido/);assert.match(html,/Descubrimientos/);assert.match(html,/Ajustes/);
   assert.doesNotMatch(html,/class="header-character"|class="companion-action-hub companion-dock/);
   const navigation=html.match(/<nav class="mobile-nav"[\s\S]*?<\/nav>/)?.[0];
   assert.ok(navigation);assert.equal((navigation.match(/<button/g)??[]).length,4);
   for(const label of ['Inicio','Recorrido','Descubrimientos','Ajustes'])assert.ok(navigation.includes(`aria-label="${label}"`));
+  assert.match(navigation,/aria-label="Descubrimientos"[\s\S]*?<span class="icon-action-label">Explorar<\/span>/);
   assert.doesNotMatch(navigation,/nav-profile|character-avatar/);
   assert.match(html,/companion-nameplate[^>]*>My Own Name<\/span>/);assert.doesNotMatch(html,/>Start journey</);
   assert.match(html,/teen-1-ready-clean-\d+\.webp\?v=portraits-/);
@@ -85,8 +88,8 @@ test('welcome, character choice and home render in Spanish and still render in E
   assert.match(html,/Comenzar recorrido/);
   data.set('mj-character',JSON.stringify({gender:'boy',ageGroup:'adult35',name:'Christopher',style:'classic-boy'}));
   html=renderToStaticMarkup(React.createElement(App));
-  assert.match(html,/Demos el siguiente paso/);
-  assert.doesNotMatch(html,/Let us take the next step| back, |Start journey/);
+  assert.match(html,/Cuando estés listo/);
+  assert.doesNotMatch(html,/Let us take the next step| back, |Start journey|aventura|tesoro/i);
   const {WordBingo}=await server.ssrLoadModule('/src/WordBingo.tsx');
   const bingoPart=getMeeting('weekend','2026-10-25').parts[3];
   for(const older of [false,true]){
@@ -106,6 +109,19 @@ test('welcome, character choice and home render in Spanish and still render in E
   const {ComfortSettings}=await server.ssrLoadModule('/src/ComfortSettings.tsx');
   const {IconAction}=await server.ssrLoadModule('/src/IconAction.tsx');
   const {ProgrammeImport}=await server.ssrLoadModule('/src/ProgrammeImport.tsx');
+  const {ParentPinGate}=await server.ssrLoadModule('/src/ParentAccess.tsx');
+  const {QuietPauseTools}=await server.ssrLoadModule('/src/QuietPauseTools.tsx');
+  const pauseTools=renderToStaticMarkup(React.createElement(QuietPauseTools));
+  assert.match(pauseTools,/aria-label="Hands-only pause tools"/);
+  assert.match(pauseTools,/aria-label="Breathe"/);
+  assert.match(pauseTools,/aria-label="Spin"/);
+  assert.match(pauseTools,/aria-pressed="false"/);
+  data.set('mj-parent-pin',JSON.stringify({salt:'00',digest:'00'}));
+  const gated=renderToStaticMarkup(React.createElement(ParentPinGate,null,React.createElement('p',null,'Protected settings')));
+  assert.match(gated,/Parent or carer 4-digit code/);
+  assert.match(gated,/inputMode="numeric"/);
+  assert.doesNotMatch(gated,/Protected settings/);
+  data.delete('mj-parent-pin');
   data.set('mj-comfort',JSON.stringify({neutral:true,hideCounts:true,iconLabels:true,textSize:'larger'}));
   const quietBingo=renderToStaticMarkup(React.createElement(WordBingo,{meetingId:'weekend-2026-10-19',part:bingoPart,older:true}));
   assert.doesNotMatch(quietBingo,/<progress|bingo-progress|of 16 found|is-line/);
@@ -158,8 +174,14 @@ test('welcome, character choice and home render in Spanish and still render in E
   const {PartReferenceLinks}=await server.ssrLoadModule('/src/PartReferenceLinks.tsx');
   const {HomeGuidePanel}=await server.ssrLoadModule('/src/HomeGuidePanel.tsx');
   const {StoryJourneyMap}=await server.ssrLoadModule('/src/StoryJourneyMap.tsx');
+  const {DiscoveriesMap,savedDiscoveryLabel}=await server.ssrLoadModule('/src/DiscoveriesMap.tsx');
   const {localizeMeeting}=await server.ssrLoadModule('/src/meetingLocale.ts');
   for(const language of ['en','es']){
+   data.set('mj-language',language);
+   const discoveryMap=renderToStaticMarkup(React.createElement(DiscoveriesMap,{meeting:localizeMeeting(getMeeting('midweek','2026-10-19'),language),onReturn:()=>{},teen:true,standardRegister:true}));
+   assert.doesNotMatch(discoveryMap.replace(/<[^>]*>/g,' '),/adventure|treasure|aventura|tesoro/i);
+   assert.match(savedDiscoveryLabel(true),language==='es'?/Tu descubrimiento guardado · Parada/:/Your saved discovery · Stop/);
+   assert.doesNotMatch(savedDiscoveryLabel(true),/treasure|tesoro/i);
    for(const contentNotice of ['The public talk topic and opening and closing songs are chosen locally.','El tema del discurso y las canciones inicial y final se eligen en cada congregación.']){
     const cached=localizeMeeting({...getMeeting('weekend','2026-10-25'),contentNotice},language);
     assert.equal(cached.contentNotice,undefined);
@@ -199,6 +221,7 @@ test('welcome, character choice and home render in Spanish and still render in E
    }));
    assert.doesNotMatch(panel,/class="part-inline-sources"/);
    assert.match(panel,/class="part-single-focus"/);
+   assert.doesNotMatch(panel.replace(/<[^>]*>/g,' '),/adventure|treasure|aventura|tesoro/i);
    const reflectionPanel=renderToStaticMarkup(React.createElement(MeetingPartView,{
     meetingId:linkedMeeting.id,part:linkedPart,partIndex:4,material:linkedMeeting.material,
     profile:testProfile,totalParts:linkedMeeting.parts.length,engagement:'guided',presentation:'reflective',onOpenMaterial:()=>{}
@@ -219,6 +242,7 @@ test('welcome, character choice and home render in Spanish and still render in E
    assert.match(reflectionPanel,/class="part-guide"/);
    assert.match(reflectionPanel,/part-guide-portrait[\s\S]*?character-avatar/);
    assert.match(reflectionPanel,language==='es'?/¿Necesitas un poco de ayuda\?/:/Need a little help\?/);
+   assert.doesNotMatch(reflectionPanel.replace(/<[^>]*>/g,' '),/adventure|treasure|aventura|tesoro/i);
    assert.match(reflectionPanel,language==='es'?/Ver una pista/:/Show a clue/);
    assert.doesNotMatch(panel,/Show a clue|Ver una pista|Open activities|Abrir actividades/);
    assert.match(panel,language==='es'?/Puedes escuchar, dibujar o guardar una idea/:/You can just listen, draw or keep a thought/);
@@ -375,6 +399,6 @@ test('welcome, character choice and home render in Spanish and still render in E
    }
   }
  }finally{
-  globalThis.localStorage=previousStorage;globalThis.window=previousWindow;await server.close();
+  globalThis.localStorage=previousStorage;globalThis.window=previousWindow;globalThis.sessionStorage=previousSessionStorage;await server.close();
  }
 });

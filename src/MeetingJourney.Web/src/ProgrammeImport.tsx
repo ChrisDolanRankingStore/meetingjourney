@@ -22,21 +22,17 @@ export function ProgrammeContentNotice({notice,home=false,className='meeting-con
 
 export function ProgrammeImport({home=false}:{home?:boolean}){
   const [enabled,setEnabled]=useState(programmeImportEnabled);
-  const [expanded,setExpanded]=useState(()=>home?localStorage.getItem('mj-import-explanation-seen')!=='true'&&!localStorage.getItem(key):!programmeImportEnabled());
+  const [expanded,setExpanded]=useState(()=>!programmeImportEnabled());
   const [confirmed,setConfirmed]=useState(false);
   const [error,setError]=useState('');
-  useEffect(()=>{
-    if(!home||!expanded)return;
-    try{localStorage.setItem('mj-import-explanation-seen','true');}
-    catch{setError('Could not save your preference. Please try again.');}
-  },[home,expanded]);
   const choose=(allow:boolean)=>{
     try{
       localStorage.setItem(key,allow?'personal-v1':'disabled');
-      setEnabled(allow);setConfirmed(false);setError('');if(home)setExpanded(false);
+      setEnabled(allow);setConfirmed(false);setError('');setExpanded(false);
       window.dispatchEvent(new Event(PROGRAMME_IMPORT_CHANGED));
     }catch{setError('Could not save your import preference on this device. Please try again.');}
   };
+  if(home)return enabled?null:<p className="home-import-prompt"><button type="button" className="text-button" onClick={()=>window.dispatchEvent(new Event('mj-open-settings'))}>{t('Ask a grown-up to turn on meeting import in Settings')}</button></p>;
   return <section className="settings-card programme-import" aria-label={t('Personal programme import')}>
     <details open={expanded} onToggle={event=>setExpanded(event.currentTarget.open)}>
       <summary>{t(enabled?'Personal programme import is on':'Personal programme import')}</summary>

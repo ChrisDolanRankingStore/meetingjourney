@@ -36,6 +36,9 @@ import {OfficialReturn} from './OfficialReturn';
 import {useOfflinePreparation} from './offlinePreparation';
 import { OfflineMeeting, DisplaySettings } from './OfflineMeeting';
 import {ProgrammeImport, ProgrammeContentNotice} from './ProgrammeImport';
+import {ParentAccessControls, ParentUnlock} from './ParentAccess';
+import {hasParentPin} from './parentAccessStorage';
+import {registerText} from './registerCopy';
 import { StudyTools } from './StudyTools';
 import { MeetingReview, WelcomeScreen } from './MeetingReview';
 import { sceneImage } from './artwork';
@@ -121,14 +124,14 @@ function profileName(profile: CharacterProfile) {
 }
 
 function companionMessage(action: CharacterAction, partIndex = 0) {
-  if (action === 'fidget') return t("Moving helps. Keep going in the way that works for you.");
-  if (action === 'bounce') return t("Nice energy. We are ready when you are.");
-  if (action === 'stretch') return t("Take a stretch. Your body can help you reset.");
-  if (action === 'sway') return t("Sway, rock or settle in the way that feels good.");
-  if (action === 'shake') return t("Shake it out. Come back when you are ready.");
-  if (action === 'dance') return t("A little dance is welcome. We can keep going together.");
-  if (partIndex === 0) return t("You've got this. We can take it one step at a time.");
-  return t("Look how far you have come. Take your time with this stop.");
+  if (action === 'fidget') return t("Movement helps. Take your time.");
+  if (action === 'bounce') return t("Good energy. Go when ready.");
+  if (action === 'stretch') return t("Take a stretch. Reset when ready.");
+  if (action === 'sway') return t("Move or settle as you like.");
+  if (action === 'shake') return t("Shake it out. Return when ready.");
+  if (action === 'dance') return t("A little dance is welcome.");
+  if (partIndex === 0) return t("One step at a time.");
+  return t("Take your time with this stop.");
 }
 
 function genderColour(gender: CharacterGender) {
@@ -137,7 +140,8 @@ function genderColour(gender: CharacterGender) {
 
 function characterAsset(profile: CharacterProfile) { return companionAsset(profile); }
 
-function sectionLabel(section: MeetingPart['section']) {
+function sectionLabel(section: MeetingPart['section'],standardRegister=false) {
+  if(standardRegister&&section==='Treasures')return t('Bible insights');
   return t(({
     Opening: 'Opening',
     Treasures: "Treasures from God's Word",
@@ -233,12 +237,15 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
     return()=>window.removeEventListener('mj-open-profile',open);
   },[]);
   useEffect(()=>{
-    const open=()=>setScreen('settings');
+    const open=()=>openSettings();
     window.addEventListener('mj-open-comfort',open);
-    return()=>window.removeEventListener('mj-open-comfort',open);
+    window.addEventListener('mj-open-settings',open);
+    return()=>{window.removeEventListener('mj-open-comfort',open);window.removeEventListener('mj-open-settings',open);};
   },[]);
   useEffect(() => { const page = ({ home:'Home', overview:'Meeting map', outline:'Meeting outline', discoveries:'Discoveries', settings:'Settings', study:'Personal study', prep:'Meeting prep', review:'My meeting review' } as Record<string,string>)[screen]; document.title = (screen === 'journey' ? meeting.parts[partIndex]?.title : t(page)) + ' · Meeting Journey'; }, [screen, meeting, partIndex]);
   const [showMap, setShowMap] = useState(false);
+  const [settingsUnlocked,setSettingsUnlocked]=useState(()=>!hasParentPin());
+  const openSettings=()=>{setSettingsUnlocked(!hasParentPin());setScreen('settings');};
   useEffect(() => {
     const onlineNow = () => setOnline(true);
     const offlineNow = () => setOnline(false);
@@ -317,17 +324,18 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
 
   if (showCharacterChooser) return <CharacterChooserV2 current={readCharacterProfile()} onChoose={chooseCharacter} onSkip={()=>{saveComfort({...readComfort(),neutral:true});window.dispatchEvent(new Event(COMFORT_CHANGED));setShowCharacterChooser(false);}} onCancel={localStorage.getItem('mj-character')||readComfort().neutral ? () => setShowCharacterChooser(false) : undefined} />;
 
-  if (screen === 'home') return <div className={`${appClass} home-screen`} style={{ '--scene-home-image': `url("${sceneImage(scenePack.homeImage, 960)}")`, '--scene-home-wide': `url("${sceneImage(scenePack.homeImage, 1600)}")` } as CSSProperties}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell adventure-home-page"><AdventureHomeV2 meeting={meeting} profile={character} partIndex={partIndex} characterAction={characterAction} onMoveCharacter={moveCharacter} onQuickAction={runQuickAction} quiet={engagement==='quiet'} onStart={() => setScreen('journey')} onOverview={() => setScreen('overview')} onOpenMaterial={openMaterial} onSelectPart={setPartIndex} /></main><MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={() => setScreen('settings')} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} /><footer><p>{t("Your notes and drawings stay on this device. ")}<button type="button" className="text-button" onClick={() => setScreen('settings')}>{t("Privacy and data")}</button></p></footer></div>;
+  if (screen === 'home') return <div className={`${appClass} home-screen`} style={{ '--scene-home-image': `url("${sceneImage(scenePack.homeImage, 960)}")`, '--scene-home-wide': `url("${sceneImage(scenePack.homeImage, 1600)}")` } as CSSProperties}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell adventure-home-page"><AdventureHomeV2 meeting={meeting} profile={character} partIndex={partIndex} characterAction={characterAction} onMoveCharacter={moveCharacter} onQuickAction={runQuickAction} quiet={engagement==='quiet'} onStart={() => setScreen('journey')} onOverview={() => setScreen('overview')} onOpenMaterial={openMaterial} onSelectPart={setPartIndex} /></main><MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={openSettings} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} /><footer><p>{t("Your notes and drawings stay on this device. ")}<button type="button" className="text-button" onClick={openSettings}>{t("Privacy and data")}</button></p></footer></div>;
 
-  if (screen === 'overview' || screen === 'outline') return <div className={appClass} style={sceneStyle}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell overview-page"><MeetingOverview key={`${meeting.id}:${screen}`} initialList={screen === 'outline'} meeting={meeting} partIndex={partIndex} onSelect={(index) => { setPartIndex(index); setScreen('journey'); }} onBack={() => setScreen('home')} /></main><MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={() => setScreen('settings')} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} /><footer><p>{t("Your notes and drawings stay on this device. ")}<button type="button" className="text-button" onClick={() => setScreen('settings')}>{t("Privacy and data")}</button></p></footer></div>;
+  if (screen === 'overview' || screen === 'outline') return <div className={appClass} style={sceneStyle}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell overview-page">  <MeetingOverview key={`${meeting.id}:${screen}`} initialList={screen === 'outline'} standardRegister={character.ageGroup!=='child'} meeting={meeting} partIndex={partIndex} onSelect={(index) => { setPartIndex(index); setScreen('journey'); }} onBack={() => setScreen('home')} /></main><MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={openSettings} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} /><footer><p>{t("Your notes and drawings stay on this device. ")}<button type="button" className="text-button" onClick={openSettings}>{t("Privacy and data")}</button></p></footer></div>;
 
-  if (screen === 'discoveries' || screen === 'review') return <div className={appClass} style={sceneStyle}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell discovery-page">{screen === 'review' ? <MeetingReview meeting={meeting} onBack={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} /> : <DiscoveriesMap key={meeting.id} teen={detailedPrompts(character.ageGroup)} meeting={meeting} onReturn={index => { setPartIndex(index); setScreen('journey'); }} />}</main><MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={() => setScreen('settings')} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} /><footer><p>{t("Your notes and drawings stay on this device.")}</p></footer></div>;
+  if (screen === 'discoveries' || screen === 'review') return <div className={appClass} style={sceneStyle}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell discovery-page">{screen === 'review' ? <MeetingReview meeting={meeting} onBack={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} /> : <DiscoveriesMap key={meeting.id} teen={detailedPrompts(character.ageGroup)} standardRegister={character.ageGroup!=='child'} meeting={meeting} onReturn={index => { setPartIndex(index); setScreen('journey'); }} />}</main><MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={openSettings} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} /><footer><p>{t("Your notes and drawings stay on this device.")}</p></footer></div>;
 
   if (screen === 'study') return <div className={appClass} style={sceneStyle}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell tool-page"><PersonalStudyScreen meeting={meeting} onBack={() => setScreen('home')} /></main><footer><p>{t("Your notes stay on this device.")}</p></footer></div>;
 
   if (screen === 'prep') return <div className={appClass} style={sceneStyle}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell tool-page"><MeetingPrepScreen meeting={meeting} onBack={() => setScreen('home')} /></main><footer><p>{t("Your preparation stays on this device.")}</p></footer></div>;
 
-  if (screen === 'settings') return <div className={appClass} style={sceneStyle}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell settings-page"><SettingsScreen scheduleSettings={<><LanguageSelector meeting={{id:schedule.meeting.id,kind:schedule.meeting.kind}} /><MeetingDaysSettings schedule={schedule} /><OfflineMeeting meeting={meeting} portrait={characterAsset(character)} /><LocalPartTitles meeting={schedule.meeting} /><DataControls /></>} presentation={presentation} engagement={engagement} calmView={calmView} onPresentation={setPresentation} onEngagement={setEngagement} onCalmView={setCalmView} onOpenProfile={() => setShowCharacterChooser(true)} onOpenStudy={() => setScreen('study')} onOpenPrep={() => setScreen('prep')} /></main><MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={() => setScreen('settings')} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} /><footer><p>{t("Your notes and drawings stay on this device.")}</p></footer></div>;
+  if (screen === 'settings' && hasParentPin() && !settingsUnlocked) return <ParentUnlock onUnlocked={()=>setSettingsUnlocked(true)} onCancel={()=>setScreen('home')}/>;
+  if (screen === 'settings') return <div className={appClass} style={sceneStyle}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell settings-page"><SettingsScreen scheduleSettings={<><LanguageSelector meeting={{id:schedule.meeting.id,kind:schedule.meeting.kind}} /><MeetingDaysSettings schedule={schedule} /><OfflineMeeting meeting={meeting} portrait={characterAsset(character)} /><LocalPartTitles meeting={schedule.meeting} /><ProgrammeImport /><ParentAccessControls/><DataControls /></>} presentation={presentation} engagement={engagement} calmView={calmView} onPresentation={setPresentation} onEngagement={setEngagement} onCalmView={setCalmView} onOpenProfile={() => setShowCharacterChooser(true)} onOpenStudy={() => setScreen('study')} onOpenPrep={() => setScreen('prep')} /></main><MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={openSettings} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} /><footer><p>{t("Your notes and drawings stay on this device.")}</p></footer></div>;
 
   return <div className={`${appClass} journey-screen`} style={{'--journey-background':`url("${sceneImage(scenePack.homeImage, 1600)}")`} as CSSProperties}>
     <AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} />
@@ -335,7 +343,7 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
       <section className="welcome-card">
         <div className="adventure-scene" aria-hidden="true"><span className="scene-sun" /><span className="scene-cloud cloud-one" /><span className="scene-cloud cloud-two" /><span className="scene-mountain mountain-one" /><span className="scene-mountain mountain-two" /><span className="scene-path" /><CharacterAvatar profile={character} size="hero" action={characterAction} /></div>
         <div className="adventure-intro">
-          <div className="adventure-kicker"><CharacterAvatar profile={character} size="medium" action={characterAction} /><div><p className="eyebrow">{t("Your adventure · Week of ")}{new Date(`${meeting.weekOf}T12:00:00`).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'long', year: 'numeric' })}</p><strong>{profileName(character)}{t("'s journey")}</strong></div></div>
+          <div className="adventure-kicker"><CharacterAvatar profile={character} size="medium" action={characterAction} /><div><p className="eyebrow">{registerText("Your adventure · Week of ",character.ageGroup)}{new Date(`${meeting.weekOf}T12:00:00`).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'long', year: 'numeric' })}</p><strong>{profileName(character)}{t("'s journey")}</strong></div></div>
           <div className="character-movement" aria-label={t("Optional movement for your companion")}><span>{t("Need to move?")}</span><button type="button" onClick={() => moveCharacter('fidget')} aria-label={t("Let your companion fidget")}>{t("Fidget")}</button><button type="button" onClick={() => moveCharacter('bounce')} aria-label={t("Let your companion bounce")}>{t("Bounce")}</button><small aria-live="polite">{characterAction === 'steady' ? t("Your companion is ready.") : t("Movement is okay. Take your time.")}</small></div>
           <p className="companion-message" aria-live="polite">{t(companionMessage(characterAction, partIndex))}</p>
           <h2>{meeting.theme}</h2>
@@ -352,23 +360,18 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
       <section className="progress-card" aria-label={t("Your place in the meeting")}><div><span className="progress-label">{t("Your place")}</span><strong>{t("Part ")}{partIndex + 1}{t(" of ")}{meeting.parts.length}</strong><small>{t("No rush. You can move, pause or return whenever you need.")}</small></div><div className="progress-meter" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div><span className="progress-percent">{progress}%</span></section>
       <ProgrammeContentNotice notice={meeting.contentNotice}/>
       <WhereAmIControl meeting={meeting} partIndex={partIndex} onSelect={setPartIndex} />
-      <JourneyTrail meeting={meeting} partIndex={partIndex} onSelect={setPartIndex} />
+      <JourneyTrail meeting={meeting} partIndex={partIndex} standardRegister={character.ageGroup!=='child'} onSelect={setPartIndex} />
       <section className={`journey-layout ${showMap ? 'with-map' : 'focus-layout'}`}>
-        {showMap && <aside className="journey-map" aria-label={t("Meeting journey")}><div className="map-header"><div><p className="eyebrow">{t("Your journey")}</p><h2>{t("Meeting map")}</h2></div><button className="icon-button" type="button" aria-label={t("Hide journey map")} onClick={() => setShowMap(false)}>×</button></div><p className="map-help">{t("Choose any part, or use Next when you are ready.")}</p><div className="map-list">{Object.entries(sectionParts).map(([section, items]) => <div className="map-section" key={section}><h3>{sectionLabel(section as MeetingPart['section'])}</h3>{items.map(item => { const index = meeting.parts.indexOf(item); return <button key={item.id} type="button" className={`map-stop ${index === partIndex ? 'selected' : ''} ${index < partIndex ? t("visited") : ''}`} onClick={() => setPartIndex(index)}><span className="stop-number">{item.number ?? '•'}</span><span><strong>{item.title}</strong><small>{partTiming(item)}</small></span>{index < partIndex && <span aria-label={t("visited")}>✓</span>}</button>; })}</div>)}</div></aside>}
+        {showMap && <aside className="journey-map" aria-label={t("Meeting journey")}><div className="map-header"><div><p className="eyebrow">{t("Your journey")}</p><h2>{t("Meeting map")}</h2></div><button className="icon-button" type="button" aria-label={t("Hide journey map")} onClick={() => setShowMap(false)}>×</button></div><p className="map-help">{t("Choose any part to go straight there.")}</p><div className="map-list">{Object.entries(sectionParts).map(([section, items]) => <div className="map-section" key={section}><h3>{sectionLabel(section as MeetingPart['section'],character.ageGroup!=='child')}</h3>{items.map(item => { const index = meeting.parts.indexOf(item); return <button key={item.id} type="button" className={`map-stop ${index === partIndex ? 'selected' : ''} ${index < partIndex ? t("visited") : ''}`} onClick={() => setPartIndex(index)}><span className="stop-number">{item.number ?? '•'}</span><span><strong>{item.title}</strong><small>{partTiming(item)}</small></span>{index < partIndex && <span aria-label={t("visited")}>✓</span>}</button>; })}</div>)}</div></aside>}
         <section className="part-column">
           <PartScreen key={part.id} part={part} weekOf={meeting.weekOf} quiet={engagement === 'quiet'} profile={character} characterAction={characterAction} partIndex={partIndex} totalParts={meeting.parts.length} onMoveCharacter={moveCharacter} onQuickAction={runQuickAction} onSwipe={move}><MeetingPartView key={part.id} requestedTool={pendingTool} onToolOpened={() => setPendingTool(null)} songPart={meeting.kind === 'weekend' && part.type === 'Song' ? schedule.meeting.parts.find(item => item.id === part.id) : undefined} meetingId={meeting.id} part={part} partIndex={partIndex} material={meeting.material} profile={character} characterAction={characterAction} totalParts={meeting.parts.length} engagement={engagement} presentation={presentation} onOpenMaterial={openMaterial} /></PartScreen>
-          <nav className="part-step-footer" aria-label={t('Move between parts')}>
-            <button type="button" disabled={partIndex===0} onClick={()=>void move(-1)}>{t('← Previous')}</button>
-            <span>{tt`Part ${partIndex+1} of ${meeting.parts.length}`}</span>
-            <button type="button" onClick={()=>void move(1)}>{meeting.parts[partIndex+1]?t('Next: {title} · {minutes} min →',{title:meeting.parts[partIndex+1].title,minutes:meeting.parts[partIndex+1].durationMinutes}):t('Review →')}</button>
-          </nav>
           <p className="visually-hidden" role="status">{tt`Part ${partIndex+1} of ${meeting.parts.length}`}, {part.title}</p>
           {navigationError&&<p role="alert">{t(navigationError)}</p>}
         </section>
       </section>
     </main>
-    <MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={() => setScreen('settings')} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} />
-    <footer><p>{t("Your notes and drawings stay on this device. ")}<button type="button" className="text-button" onClick={() => setScreen('settings')}>{t("Privacy and data")}</button></p></footer>
+    <MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={openSettings} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} />
+    <footer><p>{t("Your notes and drawings stay on this device. ")}<button type="button" className="text-button" onClick={openSettings}>{t("Privacy and data")}</button></p></footer>
   </div>;
 }
 
@@ -381,7 +384,7 @@ function MobileNav({ screen, onHome, onJourney, onDiscoveries, onSettings }: { p
   return <nav className="mobile-nav" aria-label={t("Meeting Journey navigation")}>
     <IconAction showLabel icon="home" label={t("Home")} className={screen === 'home' ? 'active' : ''} onClick={onHome} aria-current={screen === 'home' ? 'page' : undefined} />
     <IconAction showLabel icon="route" label={t("Journey")} className={screen === 'overview' || screen === 'outline' || screen === 'journey' ? 'active' : ''} onClick={onJourney} aria-current={screen === 'overview' || screen === 'outline' || screen === 'journey' ? 'page' : undefined} />
-    <IconAction showLabel icon="treasure" label={t("Discoveries")} className={screen === 'discoveries' ? 'active' : ''} onClick={() => onDiscoveries?.()} aria-current={screen === 'discoveries' ? 'page' : undefined} />
+    <IconAction showLabel icon="treasure" label={t("Discoveries")} visibleLabel={t("Explore")} className={screen === 'discoveries' ? 'active' : ''} onClick={() => onDiscoveries?.()} aria-current={screen === 'discoveries' ? 'page' : undefined} />
     <IconAction showLabel icon="settings" label={t("Settings")} className={screen === 'settings' ? 'active' : ''} onClick={() => onSettings?.()} aria-current={screen === 'settings' ? 'page' : undefined} />
   </nav>;
 }
@@ -413,8 +416,8 @@ function AdventureHomeV2({ meeting, profile, partIndex, characterAction, onMoveC
     </div>
     <div className="home-avatar-layer"><CompanionActionHub profile={profile} characterAction={characterAction} onMoveCharacter={onMoveCharacter} onQuickAction={onQuickAction} placement="scene" homeGuide={{open:guideOpen, hint:!guideUsed, onOpen:()=>{setGuideUsed(true);setGuideOpen(true);}}} /></div>
     <div className="home-copy">
-      <p className="eyebrow">{profile.name.trim() ? tt`Welcome back, ${profile.name.trim()}` : t("Welcome to your adventure")}</p>
-      <h2>{profile.ageGroup === "teen" ? t("Your meeting, your pace") : t("Let us take the next step")}</h2>
+      <p className="eyebrow">{profile.name.trim() ? tt`Welcome back, ${profile.name.trim()}` : registerText("Welcome to your adventure",profile.ageGroup)}</p>
+      <h2>{profile.ageGroup === "child" ? t("Let us take the next step") : registerText("Let us take the next step",profile.ageGroup)}</h2>
       <p className="home-details">{t(({midweek:'Midweek', weekend:'Weekend', assembly:'Assembly', convention:'Convention'})[meeting.kind ?? 'midweek'])} · {meeting.bibleReading} · {new Date(`${meeting.eventDate ?? meeting.weekOf}T12:00:00`).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'short' })}</p>
       <ProgrammeContentNotice notice={meeting.contentNotice} home/>
       <WhereAmIControl meeting={meeting} partIndex={partIndex} onSelect={onSelectPart} compact />
@@ -531,11 +534,11 @@ function CompanionActionHub({ profile, characterAction, onMoveCharacter, onQuick
   </div>;
 }
 
-function MeetingOverview(props: { meeting: Meeting; partIndex: number; onSelect: (index: number) => void; onBack: () => void; initialList?: boolean }) {
+function MeetingOverview(props: { meeting: Meeting; partIndex: number; onSelect: (index: number) => void; onBack: () => void; initialList?: boolean; standardRegister?:boolean }) {
   return <StoryJourneyMap key={props.meeting.id} initialList={props.initialList} meeting={props.meeting} current={props.partIndex} onSelect={props.onSelect} onBack={props.onBack} listView={indices => <MeetingOverviewList {...props} indices={indices} />} />;
 }
 
-function MeetingOverviewList({ meeting, partIndex, onSelect, onBack, indices }: { meeting: Meeting; partIndex: number; onSelect: (index: number) => void; onBack: () => void; indices: number[] }) {
+function MeetingOverviewList({ meeting, partIndex, onSelect, onBack, indices,standardRegister=false }: { meeting: Meeting; partIndex: number; onSelect: (index: number) => void; onBack: () => void; indices: number[];standardRegister?:boolean }) {
   const visibleParts = indices.map(index => meeting.parts[index]);
   const sections = [...new Set(visibleParts.map(part => part.section))];
   const sectionIcon: Record<MeetingPart['section'], string> = { Opening: '♫', Treasures: '◇', FieldMinistry: '✦', Living: '♧', PublicTalk: '◇', Watchtower: '♡', Closing: '♡', Programme: '◇' };
@@ -545,7 +548,7 @@ function MeetingOverviewList({ meeting, partIndex, onSelect, onBack, indices }: 
     <div className="overview-heading"><div><p className="eyebrow">{t("Today's journey")}</p><h2>{new Date(`${meeting.eventDate ?? meeting.weekOf}T12:00:00`).toLocaleDateString(getLanguage(), { month: 'long', day: 'numeric', year: 'numeric' })}</h2><p>{meeting.theme}<br /><small>{meeting.bibleReading}</small></p></div><span className="overview-book" aria-hidden="true">▱</span></div>
     <div className="overview-sections">{sections.map(section => <section className={`overview-section overview-${section.toLowerCase()}`} key={section}>
       <div className="overview-section-icon" aria-hidden="true">{sectionIcon[section]}</div>
-      <div className="overview-section-content"><h3>{sectionLabel(section)}</h3>{visibleParts.filter(part => part.section === section).map(item => {
+      <div className="overview-section-content"><h3>{sectionLabel(section,standardRegister)}</h3>{visibleParts.filter(part => part.section === section).map(item => {
         const index = meeting.parts.indexOf(item);
         return <div className="overview-item" key={item.id}><button type="button" aria-current={index===partIndex?'step':undefined} className={`overview-stop ${index === partIndex ? 'current' : ''}`} onClick={() => onSelect(index)}><span>{index+1}</span><strong>{item.title}</strong><small>{partTiming(item)}{item.speakerName && <><br />{t('Speaker: {name}', {name:item.speakerName})}</>}</small></button><PartReferenceLinks part={item} material={meeting.material} compact /></div>;
       })}</div>
@@ -657,9 +660,9 @@ function CharacterAvatar({ profile, size, action = 'steady', description }: { pr
   return <span className={`character-avatar avatar-${size} character-${profile.gender} age-${profile.ageGroup} variant-${profile.variant} character-style-${profile.style} character-action-${action}`} style={{ '--character-colour': colour, '--hair-colour': hair, '--eye-colour': eyes } as CSSProperties} aria-hidden={description?undefined:true}><span className="character-body"><span className="character-layer-stage"><CompanionPortrait asset={characterAsset(profile)} description={description} resolution={size === 'small' ? 180 : size === 'medium' ? 360 : 720} /></span></span></span>;
 }
 
-function JourneyTrail({ meeting, partIndex, onSelect }: { meeting: Meeting; partIndex: number; onSelect: (index: number) => void }) {
+function JourneyTrail({ meeting, partIndex, onSelect,standardRegister=false }: { meeting: Meeting; partIndex: number; onSelect: (index: number) => void;standardRegister?:boolean }) {
   const sections = [...new Set(meeting.parts.map(part => part.section))];
-  return <section className="trail-card" aria-label={t("Adventure trail")}><div className="trail-heading"><div><p className="eyebrow">{t("The trail ahead")}</p><h2>{t("Follow the meeting journey")}</h2></div><span>{Math.round(((partIndex + 1) / meeting.parts.length) * 100)}{t("% explored")}</span></div><div className="trail-track">{sections.map((section, index) => { const first = meeting.parts.findIndex(part => part.section === section); const last = meeting.parts.map(part => part.section).lastIndexOf(section); const selected = partIndex >= first && partIndex <= last; const visited = partIndex > last; return <div className={`trail-stop ${selected ? 'selected' : ''} ${visited ? 'visited' : ''}`} key={section}><button type="button" onClick={() => onSelect(first)} aria-current={selected ? 'step' : undefined}><span className="trail-node">{visited ? '✓' : index + 1}</span><strong>{sectionLabel(section)}</strong><small>{selected ? t("You are here") : visited ? t("Complete when ready") : `${meeting.parts.filter(part => part.section === section).length} stops`}</small></button>{index < sections.length - 1 && <i aria-hidden="true" />}</div>; })}</div></section>;
+  return <section className="trail-card" aria-label={t(standardRegister?'Meeting path':'Adventure trail')}><div className="trail-heading"><div><p className="eyebrow">{t("The trail ahead")}</p><h2>{t("Follow the meeting journey")}</h2></div><span>{Math.round(((partIndex + 1) / meeting.parts.length) * 100)}{t("% explored")}</span></div><div className="trail-track">{sections.map((section, index) => { const first = meeting.parts.findIndex(part => part.section === section); const last = meeting.parts.map(part => part.section).lastIndexOf(section); const selected = partIndex >= first && partIndex <= last; const visited = partIndex > last; return <div className={`trail-stop ${selected ? 'selected' : ''} ${visited ? 'visited' : ''}`} key={section}><button type="button" onClick={() => onSelect(first)} aria-current={selected ? 'step' : undefined}><span className="trail-node">{visited ? '✓' : index + 1}</span><strong>{sectionLabel(section,standardRegister)}</strong><small>{selected ? t("You are here") : visited ? t("Complete when ready") : `${meeting.parts.filter(part => part.section === section).length} stops`}</small></button>{index < sections.length - 1 && <i aria-hidden="true" />}</div>; })}</div></section>;
 }
 
 function PartScreen({ profile, part, weekOf, quiet, characterAction, partIndex, totalParts, onMoveCharacter, onQuickAction, onSwipe, children }: { profile: CharacterProfile; part: MeetingPart; weekOf: string; quiet: boolean; characterAction: CharacterAction; partIndex: number; totalParts: number; onMoveCharacter: (action: Exclude<CharacterAction, 'steady'>) => void; onQuickAction: (action: CompanionQuickAction) => void; onSwipe: (delta: number) => void; children: ReactNode }) {
@@ -770,7 +773,7 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
   };
   const focusQuestion = part.id==='part-1' && meetingId==='meeting-2026-10-19' ? t('What helped Baruch regain his hope?') : t(reflection.title);
   const primary=primaryPartAction(part);
-  return <article className="part-card" data-section={part.section}><div className="part-kicker"><span>{programmePart ? t(programmePartLabel(part.type)) : sectionLabel(part.section)}</span><span>{tt`Part ${partIndex + 1} of ${totalParts}`}</span></div><h2 id={`${part.id}-heading`} tabIndex={-1} aria-live="polite">{part.number ? part.number + '. ' : ''}{part.title}</h2><div className="part-place-row"><p className="part-duration"><NotebookIcon name="clock" />{partTiming(part)}</p><button type="button" className="find-my-place" onClick={findPlace}><NotebookIcon name="pin" /><span>{t('Find my place')}</span></button></div>
+  return <article className="part-card" data-section={part.section}><div className="part-kicker"><span>{programmePart ? t(programmePartLabel(part.type)) : sectionLabel(part.section,profile.ageGroup!=='child')}</span><span>{tt`Part ${partIndex + 1} of ${totalParts}`}</span></div><h2 id={`${part.id}-heading`} tabIndex={-1} aria-live="polite">{part.number ? part.number + '. ' : ''}{part.title}</h2><div className="part-place-row"><p className="part-duration"><NotebookIcon name="clock" />{partTiming(part)}</p><button type="button" className="find-my-place" onClick={findPlace}><NotebookIcon name="pin" /><span>{t('Find my place')}</span></button></div>
     <ElapsedPart minutes={part.durationMinutes}/>
     {part.speakerName && <p className="part-speaker">{t('Speaker: {name}', {name:part.speakerName})}</p>}
     {presentation!=='reflective'&&<section className="part-single-focus">

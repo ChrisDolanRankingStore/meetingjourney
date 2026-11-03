@@ -7,6 +7,7 @@ import type {MeetingPart} from './types';
 import {ScriptureLookup} from './ScriptureLookup';
 import {insertStarter} from './comfortPreferences';
 import {useComfort} from './ComfortSettings';
+import {QuietPauseTools} from './QuietPauseTools';
 
 function Rehearsal({text}: {text: string}) {
   const [volume, setVolume] = useState(.25), [speaking, setSpeaking] = useState(false), [status, setStatus] = useState('');
@@ -61,7 +62,7 @@ export function StudyTools({meetingId, part, teen, quiet, onDraw, onWrite}: {mee
   const choices = cue?.pointChoices ?? ['A helpful example', 'A reason for hope', 'A kind choice'];
   const pointKey = String(cue?.from ?? value.paragraph);
   const ready = study && value.comments.some(comment => comment.ready && !comment.given);
-  if (pause) return <div className="study-tools pause-card"><h4>{t('A quiet pause')}</h4><p>{t('Rest your hands. Look away from the screen, or let your companion move. Come back whenever you are ready.')}</p><QuietFidget /><button type="button" onClick={() => setPause(false)}>{t('Return to my place')}</button><button type="button" onClick={onDraw}>{t('Draw quietly')}</button></div>;
+  if (pause) return <div className="study-tools pause-card"><h4>{t('A quiet pause')}</h4><p>{t('Rest your hands. Look away from the screen, or let your companion move. Come back whenever you are ready.')}</p><QuietPauseTools/><QuietFidget /><button type="button" onClick={() => setPause(false)}>{t('Return to my place')}</button><button type="button" onClick={onDraw}>{t('Draw quietly')}</button></div>;
   return <div className="study-tools" aria-busy={!loaded}>
     <p className="tool-introduction">{study ? teen ? t('Follow the discussion in the way that helps you.') : t('One small step at a time. You can just listen, too.') : part.type === 'PublicTalk' ? t('Listen to the talk. Keep a thought or sketch for yourself; there are no audience comments.') : t('Follow this programme part. Keep a thought or sketch for yourself; these are personal notes, not audience comments.')}</p>
     {!quiet && <InterestPrompts part={part}/>}

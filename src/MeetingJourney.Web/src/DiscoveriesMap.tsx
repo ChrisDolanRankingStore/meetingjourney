@@ -58,7 +58,11 @@ function TreasureContents({ treasure, onReturn, onEdit }: { treasure: DiscoveryT
   </div>;
 }
 
-export function DiscoveriesMap({ meeting, onReturn, teen = false }: { meeting: Meeting; teen?: boolean; onReturn: (index: number) => void }) {
+export function savedDiscoveryLabel(standardRegister:boolean){
+  return t(standardRegister?"Your saved discovery · Stop ":"Your saved treasure · Stop ");
+}
+
+export function DiscoveriesMap({ meeting, onReturn, teen = false, standardRegister = teen }: { meeting: Meeting; teen?: boolean; standardRegister?: boolean; onReturn: (index: number) => void }) {
   const [savedView]=useState(()=>{try{return sessionStorage.getItem('mj-discovery-view');}catch(error){console.warn('Could not restore discovery view.',error);return null;}});
   const [timeline,setTimeline]=useState(savedView==='history');
   const [editing,setEditing]=useState<HistoricalTarget|null>(null);
@@ -113,7 +117,7 @@ export function DiscoveriesMap({ meeting, onReturn, teen = false }: { meeting: M
   const selectTreasure = (id: string) => setSelectedId(current => current === id ? null : id);
   if(editing)return <section className="discovery-map-screen"><HistoricalNotebook target={editing} onClose={()=>{setEditing(null);setRetry(value=>value+1);requestAnimationFrame(()=>closeRef.current?.focus());}}/></section>;
   return <section className={`discovery-map-screen ${split ? 'has-day-sessions' : ''} ${timeline ? 'showing-timeline' : ''} ${selected&&!timeline ? 'reading-discovery' : ''}`}>
-    <header className="discovery-map-heading"><div><p className="eyebrow">{teen ? t("Your meeting journal") : t("Your adventure journal")}</p><h2>{t("My discoveries")}</h2><p>{t("The things you chose to keep along the way.")}</p></div><div className="discovery-view-picker" role="group" aria-label={t('Discovery view')}>
+    <header className="discovery-map-heading"><div><p className="eyebrow">{standardRegister ? t("My notes") : t("Your adventure journal")}</p><h2>{t("My discoveries")}</h2><p>{t("The things you chose to keep along the way.")}</p></div><div className="discovery-view-picker" role="group" aria-label={t('Discovery view')}>
       <IconAction icon="grid" label={t('Gallery')} aria-pressed={!timeline&&gallery} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(true);}} />
       <IconAction icon="route" label={t('Map')} aria-pressed={!timeline&&!gallery&&!list} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(false);setList(false);}} />
       <IconAction icon="list" label={t('List')} aria-pressed={!timeline&&!gallery&&list} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(false);setList(true);}} />
@@ -132,7 +136,7 @@ export function DiscoveriesMap({ meeting, onReturn, teen = false }: { meeting: M
           <div className="treasure-stop-preview" id={`${panelId}-${treasure.part.id}-preview`} role="tooltip"><strong>{treasure.part.title}</strong><small>{discoverySummary(treasure)}</small>{treasure.note?.text?.trim() && <p>{treasure.note.text.slice(0, 90)}{treasure.note.text.length > 90 ? '…' : ''}</p>}</div>
         </div>;})}
       </div></div>}
-      {selected && <aside className="open-treasure" id={panelId} aria-labelledby={`${panelId}-title`}><button ref={closeRef} className="close-treasure" type="button" onClick={() => setSelectedId(null)} aria-label={t("Close this discovery")}>×</button><div className="open-treasure-heading"><TreasureChest open /><p className="eyebrow">{t("Your saved treasure · Stop ")}{selected.partIndex + 1}</p><h3 id={`${panelId}-title`}>{selected.part.title}</h3></div><TreasureContents key={selected.part.id} treasure={selected} onReturn={onReturn} onEdit={(kind,page)=>setEditing({meetingId:meeting.id,partId:`${selected.part.id}${page?`::page::${page}`:''}`,kind})} /></aside>}
+      {selected && <aside className="open-treasure" id={panelId} aria-labelledby={`${panelId}-title`}><button ref={closeRef} className="close-treasure" type="button" onClick={() => setSelectedId(null)} aria-label={t("Close this discovery")}>×</button><div className="open-treasure-heading"><TreasureChest open /><p className="eyebrow">{savedDiscoveryLabel(standardRegister)}{selected.partIndex + 1}</p><h3 id={`${panelId}-title`}>{selected.part.title}</h3></div><TreasureContents key={selected.part.id} treasure={selected} onReturn={onReturn} onEdit={(kind,page)=>setEditing({meetingId:meeting.id,partId:`${selected.part.id}${page?`::page::${page}`:''}`,kind})} /></aside>}
       {(loading || failed) && <div className="treasure-map-message" role="status">{loading ? t("Opening your discovery map…") : <><p>{t("Your discoveries could not be loaded from this device.")}</p><button type="button" onClick={() => setRetry(value => value + 1)}>{t("Try again")}</button></>}</div>}
     </div>
     <p className="discovery-map-hint">{treasures.length ? gallery || list ? t('Choose a card to open your saved discovery.') : t("Tap a chest to open it. Hover or focus for a preview.") : t("Your notes and drawings stay on this device.")}</p></>}

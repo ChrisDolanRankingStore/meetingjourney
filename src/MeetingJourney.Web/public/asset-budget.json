@@ -1,7 +1,9 @@
 {
   "sceneOriginalBytes": 21589173,
-  "scene960WebpBytes": 1901706,
-  "savingPercent": 91,
+  "scene960WebpBytes": 1766712,
+  "savingPercent": 92,
+  "sceneWebpQuality": 72,
+  "portraitWebpQuality": 78,
   "sceneCount": 7,
   "characterCount": 58
 }

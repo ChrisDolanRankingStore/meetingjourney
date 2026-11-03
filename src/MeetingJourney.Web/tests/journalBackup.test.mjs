@@ -19,13 +19,41 @@ test('backup round-trip preserves editable strokes, paper, notes, study comments
  await saveNote({meetingId:'week-a',partId:'reading',text:'My thought',updatedAt:'2026-10-25'});
  const stroke={points:[1,2,30,40],color:'#123456',size:4,mode:'pen',smooth:true};await saveDrawing('week-a','reading',[stroke],{width:760,height:900});
  const study={...emptyStudy('week-a','reading'),paragraph:7,comments:[{id:'c1',paragraph:7,text:'My comment',ready:true,given:false}]};await saveStudy(study);
- const backup=validateBackup(await exportJournal(storage));assert.equal(backup.preferences.unrelated,undefined);assert.equal(backup.preferences['mj-programme-import-choice'],undefined);
- globalThis.indexedDB=new IDBFactory();const restored=new MemoryStorage();assert.deepEqual(await importJournal(backup,true,restored),{added:3,kept:0});
+ const backup=validateBackup(await exportJournal(storage));assert.equal(backup.formatVersion,2);assert.equal(backup.preferences.unrelated,undefined);assert.equal(backup.preferences['mj-programme-import-choice'],undefined);assert.equal(backup.preferences['mj-parent-pin'],undefined);assert.ok(backup.notes.every(entry=>/^[0-9a-f-]{36}$/i.test(entry.id)&&Number.isFinite(Date.parse(entry.modifiedAt))));assert.ok(backup.preferenceRecords.every(entry=>/^[0-9a-f-]{36}$/i.test(entry.id)&&Number.isFinite(Date.parse(entry.modifiedAt))));
+ globalThis.indexedDB=new IDBFactory();const restored=new MemoryStorage();assert.deepEqual(await importJournal(backup,true,restored),{added:3,updated:3,kept:0});
  assert.equal((await readNote('week-a','reading')).text,'My thought');assert.deepEqual((await readDrawingPage('week-a','reading')).strokes,[stroke]);assert.equal((await readDrawingPage('week-a','reading')).paper.height,900);assert.equal((await readStudy('week-a','reading')).paragraph,7);assert.equal(restored.getItem('mj-character'),'{"name":"Test"}');
  assert.equal(JSON.parse(restored.getItem('mj-comfort')).hideCounts,true);
  assert.equal(JSON.parse(restored.getItem('mj-notebook-labels:week-a')).parts[0].title,'A saved title');
 });
-test('restore keeps newer device entries instead of overwriting them',async()=>{await saveNote({meetingId:'week-a',partId:'reading',text:'Old',updatedAt:'2026-10-25'});const backup=await exportJournal(new MemoryStorage());await saveNote({meetingId:'week-a',partId:'reading',text:'Keep this',updatedAt:'2026-10-26'});assert.deepEqual(await importJournal(backup,false,new MemoryStorage()),{added:0,kept:1});assert.equal((await readNote('week-a','reading')).text,'Keep this');});
+test('restore keeps newer device entries instead of overwriting them',async()=>{await saveNote({meetingId:'week-a',partId:'reading',text:'Old',updatedAt:'2026-10-25'});const backup=await exportJournal(new MemoryStorage());await saveNote({meetingId:'week-a',partId:'reading',text:'Keep this',updatedAt:'2026-10-26'});assert.deepEqual(await importJournal(backup,false,new MemoryStorage()),{added:0,updated:0,kept:1});assert.equal((await readNote('week-a','reading')).text,'Keep this');});
+test('merge adds different device entries and is idempotent',async()=>{
+ await saveNote({meetingId:'week-a',partId:'device-a',text:'A',updatedAt:'2026-10-25'});
+ const backup=await exportJournal(new MemoryStorage());
+ globalThis.indexedDB=new IDBFactory();
+ await saveNote({meetingId:'week-b',partId:'device-b',text:'B',updatedAt:'2026-10-26'});
+ const storage=new MemoryStorage();
+ const first=await importJournal(backup,false,storage),second=await importJournal(backup,false,storage);
+ assert.equal(first.added,1);assert.equal(second.added,0);assert.equal((await readNote('week-a','device-a')).text,'A');assert.equal((await readNote('week-b','device-b')).text,'B');
+});
+test('merge keeps comments created independently on two devices',async()=>{
+ const progressA={...emptyStudy('week-a','study'),updatedAt:'2026-10-25T10:00:00Z',comments:[{id:'comment-a',paragraph:1,text:'A',ready:false,given:false}]};
+ await saveStudy(progressA);const backup=await exportJournal(new MemoryStorage());
+ globalThis.indexedDB=new IDBFactory();
+ const progressB={...emptyStudy('week-a','study'),updatedAt:'2026-10-26T10:00:00Z',draft:'B',comments:[{id:'comment-b',paragraph:2,text:'B',ready:false,given:false}]};
+ await saveStudy(progressB);
+ const first=await importJournal(backup,false,new MemoryStorage()),second=await importJournal(backup,false,new MemoryStorage()),merged=await readStudy('week-a','study');
+ assert.equal(first.updated,1);assert.equal(second.kept,1);assert.equal(merged.draft,'B');assert.deepEqual(merged.comments.map(comment=>comment.id).sort(),['comment-a','comment-b']);
+});
+test('replace mode removes local entries that are absent from the chosen backup',async()=>{
+ await saveNote({meetingId:'week-a',partId:'kept',text:'Backup entry',updatedAt:'2026-10-25'});
+ const exportedSettings=new MemoryStorage();exportedSettings.setItem('mj-character','{"name":"From backup"}');
+ const backup=await exportJournal(exportedSettings);
+ await saveNote({meetingId:'week-b',partId:'removed',text:'Local only',updatedAt:'2026-10-26'});
+ const localSettings=new MemoryStorage();localSettings.setItem('mj-character','{"name":"Local"}');localSettings.setItem('mj-comfort','{}');localSettings.setItem('mj-parent-pin','device-only');
+ await importJournal(backup,false,localSettings,'replace');
+ assert.equal((await readNote('week-a','kept')).text,'Backup entry');assert.equal(await readNote('week-b','removed'),undefined);
+ assert.equal(localSettings.getItem('mj-character'),'{"name":"From backup"}');assert.equal(localSettings.getItem('mj-comfort'),null);assert.equal(localSettings.getItem('mj-parent-pin'),'device-only');
+});
 
 test('smudge strokes and new prepared connections survive a backup round-trip',async()=>{
  const strokes=[{points:[10,20,40,50],color:'#163b5c',size:5,mode:'pen'},{points:[20,30,70,80],color:'#163b5c',size:12,mode:'smudge'}];

@@ -26,8 +26,9 @@ excluded. Content-specific lenses use extracted nouns with generic fallbacks.
 
 Simple and Standard show one cue, one part-specific primary action and More.
 Reflective retains the toolbox. References live in the References tool rather
-than above the cue. Previous/Next and arrow keys complement swipe; navigation
-waits for journal writes and announces the new place.
+than above the cue. Swipes and arrow keys change parts; the journey route
+provides direct access. Navigation waits for journal writes and announces the
+new place.
 
 Opt-in imports extract a bounded bilingual noun vocabulary from cited passages
 on the server. Only words and programme metadata reach the device; article and
@@ -39,6 +40,24 @@ Simple/Standard/Reflective, neutral on/off, high contrast, 13 Next taps to Revie
 Simple/Standard had at most two visible controls inside the part card. Entry JS
 was 184.57 KB gzip; drawing is a separate 104.88 KB gzip chunk.
 These are browser checks, not physical-device or screen-reader certification.
+
+### Calm setup, self-regulation and portable journals (0.5.6)
+
+First-run setup can be resumed after a refresh, and age/register choices use
+plain, non-judgmental copy. Breathe and Spin are optional, hands-only pause
+tools; Spin is unavailable with reduced motion. Neither activity tracks
+attention or participation.
+
+An optional four-digit parent code is a convenience gate for Settings, import
+and restore, not encryption. It remains on the device and is never exported.
+Backups keep stable record IDs and edit times so merge can add missing entries,
+prefer newer edits and retain independently written study comments. Replace
+everything is explicit, confirmed, and restores exported settings as well as
+journal records; the parent code and import consent remain device-local.
+
+Acceptance checks cover English and Spanish teen copy, reduced-motion pause
+tools, parent-code storage and gating, merge and replace behavior, and the
+production bundle's compressed size.
 
 ### Make the next step obvious
 
