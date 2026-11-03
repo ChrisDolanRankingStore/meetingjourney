@@ -2,6 +2,7 @@ import {t, tt} from './i18n';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { Stroke } from './types';
 import { NotebookIcon } from './NotebookIcon';
+import {useComfort} from './ComfortSettings';
 
 export interface DrawingPageControls {
   page: number;
@@ -27,6 +28,7 @@ type DrawingPanel = Stroke['mode'] | 'colour' | 'edit' | 'pages' | 'paper';
 const drawingColours = [['#163b5c','Ink blue'],['#c54d43','Red'],['#d6a63e','Gold'],['#785ca3','Purple'],['#49896a','Green']] as const;
 
 export function DrawingToolbar(props: Props) {
+  const comfort=useComfort();
   const [panel, setPanel] = useState<DrawingPanel | null>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -56,7 +58,7 @@ export function DrawingToolbar(props: Props) {
   const panelTitle = panel ? t(({pen:'Pen options',highlighter:'Highlighter options',eraser:'Eraser options',smudge:'Smudge options',colour:'Pen colour',edit:'Edit drawing',pages:'Your drawing pages',paper:'Paper and drawing'})[panel]) : '';
   const sizeLabel = t(panel === 'smudge' ? 'Smudge size' : panel === 'eraser' ? 'Eraser size' : panel === 'highlighter' ? 'Highlighter size' : 'Pen size');
   return <div className="drawing-toolbar-host" ref={hostRef}>
-    <div className="drawing-toolbar drawing-icon-toolbar" role="toolbar" aria-orientation="vertical" aria-label={t("Drawing tools")}>
+    <div className="drawing-toolbar drawing-icon-toolbar" role="toolbar" aria-orientation={comfort.iconLabels?'horizontal':'vertical'} aria-label={t("Drawing tools")}>
       {(['pen','highlighter','eraser','smudge'] as const).map(tool=><button key={tool} className={`drawing-icon-button${props.tool===tool?' is-selected':''}`} type="button" title={t(tool[0].toUpperCase()+tool.slice(1))} aria-label={t(tool[0].toUpperCase()+tool.slice(1))} aria-pressed={props.tool===tool} aria-expanded={panel===tool} aria-controls={id} onClick={event=>toggle(tool,event.currentTarget)}><NotebookIcon name={tool} /></button>)}
       {drawingColours.slice(0,3).map(([value,label])=><button className="drawing-icon-button drawing-rail-colour" type="button" key={value} aria-label={t(label)} title={t(label)} aria-pressed={props.colour===value} onClick={()=>{props.onColour(value);setPanel(null);}}><span className="drawing-colour-swatch" style={{backgroundColor:value}} aria-hidden="true" /></button>)}
       <button className="drawing-icon-button drawing-all-colours" type="button" title={t("More colours")} aria-label={t("More colours")} aria-expanded={panel === 'colour'} aria-controls={id} onClick={event => toggle('colour', event.currentTarget)}><NotebookIcon name="plus" /></button>

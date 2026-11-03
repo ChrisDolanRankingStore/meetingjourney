@@ -5,6 +5,8 @@ import {allowsComments, appendListeningPoint, localRehearsalVoices, pauseBoundar
 import {InterestPrompts, QuietFidget} from './ListeningActivities';
 import type {MeetingPart} from './types';
 import {ScriptureLookup} from './ScriptureLookup';
+import {insertStarter} from './comfortPreferences';
+import {useComfort} from './ComfortSettings';
 
 function Rehearsal({text}: {text: string}) {
   const [volume, setVolume] = useState(.25), [speaking, setSpeaking] = useState(false), [status, setStatus] = useState('');
@@ -37,6 +39,9 @@ export function StudyTools({meetingId, part, teen, quiet, onDraw, onWrite}: {mee
   const [loaded, setLoaded] = useState(false), [status, setStatus] = useState(''), [pause, setPause] = useState(false), [pauseOffered, setPauseOffered] = useState(false);
   const [preferences] = useState(readListeningPreferences);
   const current = useRef(value), saves = useRef(Promise.resolve());
+  const draftField = useRef<HTMLTextAreaElement>(null);
+  const [starterUndo, setStarterUndo] = useState<{before:string; after:string}|null>(null);
+  const comfort = useComfort();
   const study = allowsComments(part.type), total = part.studyGuide?.paragraphCount ?? value.total;
   useEffect(() => {
     let active = true;
@@ -72,8 +77,16 @@ export function StudyTools({meetingId, part, teen, quiet, onDraw, onWrite}: {mee
     {!quiet && study && <section className="pick-the-point"><h4>{t('Pick a point to keep')}</h4><p>{cue?.pointChoices ? t('Which idea fits what you noticed? Any choice is fine.') : t('Choose a listening lens. These are prompts, not a quiz about the paragraph.')}</p><div className="listening-chips">{choices.map(choice => <button type="button" key={choice} disabled={!loaded} aria-pressed={value.pointChoices?.[pointKey] === choice} onClick={() => update({pointChoices: {...current.current.pointChoices, [pointKey]: choice}, draft: appendListeningPoint(current.current.draft, t(choice))})}>{t(choice)}</button>)}</div></section>}
     {study ? <section className="comment-builder"><h4>{teen ? t('Prepare a comment') : t('Something I could say')}</h4>
       {ready && <p role="status" className="comment-ready">{t('Ready to comment ✓')}</p>}
-      <div className="sentence-starters">{['I noticed…', 'The scripture helps me…', 'One thing I could try…'].map(starter => <button type="button" key={starter} disabled={!loaded} onClick={() => update({draft: t(starter).replace(/…$/, ' ')})}>{t(starter)}</button>)}</div>
-      <label>{t('Your own words')}<textarea disabled={!loaded} value={value.draft ?? ''} maxLength={10000} onChange={event => update({draft: event.target.value})} placeholder={t('Type, or use your keyboard’s dictation.')} rows={3} /></label>
+      <div className="sentence-starters">{['I noticed…', 'The scripture helps me…', 'One thing I could try…'].map(starter => <button type="button" key={starter} disabled={!loaded} onClick={() => {
+        const before=current.current.draft??'', field=draftField.current;
+        try {
+          const next=insertStarter(before,t(starter),field?.selectionStart??before.length,field?.selectionEnd??before.length);
+          update({draft:next.text});setStarterUndo({before,after:next.text});
+          requestAnimationFrame(()=>{field?.focus();field?.setSelectionRange(next.cursor,next.cursor);});
+        } catch(error) {setStatus(error instanceof Error?error.message:'Could not insert this starter.');}
+      }}>{t(starter)}</button>)}</div>
+      {starterUndo&&value.draft===starterUndo.after&&<button type="button" onClick={()=>{update({draft:starterUndo.before});setStarterUndo(null);draftField.current?.focus();}}>{t('Undo sentence starter')}</button>}
+      <label>{t('Your own words')}<textarea ref={draftField} disabled={!loaded} value={value.draft ?? ''} maxLength={10000} onChange={event => {setStarterUndo(null);update({draft: event.target.value});}} placeholder={t('Type, or use your keyboard’s dictation.')} rows={3} /></label>
       <ScriptureLookup text={value.draft ?? ''}/>
       <button type="button" disabled={!loaded || !value.draft?.trim() || value.comments.length >= 300} onClick={() => update({draft: '', comments: [...current.current.comments, {id: crypto.randomUUID(), paragraph: value.paragraph, text: value.draft!.trim(), ready: false, given: false}]})}>{t('Keep this comment')}</button>
       <Rehearsal text={value.draft ?? ''} />
@@ -83,7 +96,7 @@ export function StudyTools({meetingId, part, teen, quiet, onDraw, onWrite}: {mee
       {value.draft?.trim() && <details><summary>{t('Previously saved draft')}</summary><p>{value.draft}</p></details>}
       {value.comments.length > 0 && <details><summary>{t('Previously saved thoughts')}</summary>{value.comments.map(comment => <p key={comment.id}>{comment.text}</p>)}</details>}
     </section>}
-    <section className="scripture-spotter"><h4>{teen ? t('Scriptures noticed') : t('I heard a scripture')}</h4><div><button type="button" disabled={!loaded} aria-label={t('Remove one scripture count')} onClick={() => update({scriptures: Math.max(0, current.current.scriptures - 1)})}>−</button><output aria-live="polite">{value.scriptures}</output><button type="button" disabled={!loaded} onClick={() => update({scriptures: Math.min(10000, current.current.scriptures + 1)})}>{t('Scripture +')}</button></div><small>{t('Optional. Tap when you notice one; nothing is scored.')}</small></section>
+    {!comfort.hideCounts&&<section className="scripture-spotter"><h4>{teen ? t('Scriptures noticed') : t('I heard a scripture')}</h4><div><button type="button" disabled={!loaded} aria-label={t('Remove one scripture count')} onClick={() => update({scriptures: Math.max(0, current.current.scriptures - 1)})}>−</button><output aria-live="polite">{value.scriptures}</output><button type="button" disabled={!loaded} onClick={() => update({scriptures: Math.min(10000, current.current.scriptures + 1)})}>{t('Scripture +')}</button></div><small>{t('Optional. Tap when you notice one; nothing is scored.')}</small></section>}
     <div className="study-tool-links"><button type="button" onClick={onDraw}>{t('Draw')}</button><button type="button" onClick={onWrite}>{t('My note')}</button><button type="button" onClick={() => setPause(true)}>{t('Take a quiet pause')}</button></div><p role="status" className="study-save-status">{t(status)}</p>
   </div>;
 }

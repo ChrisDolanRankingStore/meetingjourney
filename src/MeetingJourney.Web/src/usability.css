@@ -1,0 +1,134 @@
+:root[data-text-size="large"] { font-size: 18px; }
+:root[data-text-size="larger"] { font-size: 20px; }
+.app :is(p, small, label, summary, legend, .settings-help, .illustrated-stop-caption strong, .icon-action-label) {
+  overflow-wrap: anywhere;
+}
+.app small, .app .settings-help, .app .illustrated-stop-caption small,
+.app .illustrated-tool-heading p, .app .part-kicker, .app .part-duration,
+.app .part-scene-details > summary, .app .part-workspace-tabs button,
+.app .discovery-activity-picker button { font-size: .875rem; line-height: 1.45; }
+.app .illustrated-stop-caption strong { font-size: .875rem; line-height: 1.3; }
+.app .settings-card :is(p,label,summary,small,button), .app .part-summary,
+.app .story-map-list .overview-stop, .app .part-inline-sources, .app .connection-summary,
+.app .study-tools button { font-size: .875rem; line-height: 1.5; }
+.app .header-meeting-choice { font-size: clamp(.875rem,3vw,1rem); }
+.app :is(input:not([type="checkbox"]):not([type="range"]),textarea,select) { font-size: 1rem; max-width: 100%; }
+.app .mobile-nav .icon-action-label { font-size: .75rem; white-space: normal; }
+.app > .mobile-nav > .icon-action { height: auto; min-height: 52px; }
+.app .discovery-view-picker { flex-wrap: wrap; }
+.app .icon-action:has(.icon-action-label) { width: auto; max-width: 100%; padding-inline: 8px; }
+.app .discovery-view-picker .icon-action:has(.icon-action-label) { gap: 5px; }
+.app .discovery-view-picker .icon-action-label { font-size: .875rem; white-space: normal; }
+.comfort-settings { display: grid; gap: 12px; }
+.comfort-settings label:has(input[type="checkbox"]) { display: flex; gap: 10px; align-items: flex-start; min-height: 44px; }
+.comfort-settings input[type="checkbox"] { flex: 0 0 20px; width: 20px; height: 20px; margin: 2px 0; }
+.comfort-settings p:empty { display: none; }
+.app .settings-page { display: block; overflow: auto; }
+.app .settings-screen { display: block; height: auto; min-height: 100%; overflow: visible; }
+.app .settings-screen .settings-grid { height: auto; overflow: visible; min-width: 0; }
+.app .settings-screen > .settings-grid,
+.app .programme-settings > .settings-grid { grid-template-columns: repeat(auto-fit,minmax(min(100%,300px),1fr)); align-items: start; }
+.app .programme-settings { grid-column: 1 / -1; }
+.app .settings-card :is(h3,button) { overflow-wrap: anywhere; }
+.app .settings-card select { min-width: 0; width: 100%; }
+.app .palette-picker { min-inline-size: 0; }
+.app .settings-screen .screen-heading { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
+.app .settings-screen .screen-heading > div { flex: 1 1 120px; min-width: 0; }
+.app .settings-screen .screen-heading h2 { margin: 0; }
+.app .settings-screen .settings-update-button { flex: 0 0 auto; max-width: 100%; }
+.app .palette-options { grid-template-columns: repeat(auto-fit,minmax(min(100%,180px),1fr)); }
+.app .settings-card { min-width: 0; }
+.programme-settings > summary, .part-guidance > summary { cursor: pointer; min-height: 44px; padding-block: 10px; }
+.programme-settings[open] > .settings-grid { margin-top: 12px; }
+.app .home-copy > .programme-import { margin-top: 12px; }
+.app .home-copy .comfort-shortcut { min-height: 44px; }
+.neutral-notebook-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 12px; }
+.neutral-notebook-actions button { min-height: 44px; }
+.app .part-guidance { margin-block: 8px; }
+.app .part-guidance > summary { color: #31485f; font-weight: 600; }
+.app .part-guidance .part-focus-panel { margin: 0; }
+.app .part-card .journey-tool-backdrop { position: static; display: contents; background: none; padding: 0; }
+.app .part-card dialog.journey-tool-modal[open] {
+  position: fixed; inset: 0; margin: auto; display: flex; flex-direction: column;
+  width: min(920px, calc(100vw - 24px)); height: min(860px, calc(100dvh - 24px));
+  max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px);
+  overflow: auto; color: var(--navy); box-sizing: border-box;
+}
+.journey-tool-modal::backdrop { background: #1f2740a6; }
+.app .part-card dialog.journey-tool-modal:not([open]) { display: none; }
+.app .journey-tool-modal > * { flex-shrink: 0; }
+.app .journey-tool-modal > .drawing-notebook { flex: 1 1 auto; min-height: 260px; }
+.app .part-card .journey-tool-close { position: sticky; top: 0; align-self: flex-end; z-index: 5; margin-bottom: -44px; }
+.app .idea-connections { display: flex; flex-direction: column; gap: 12px; }
+.app .connection-source-picker > summary { cursor: pointer; min-height: 44px; padding: 8px; border: 1px solid #ad9470; border-radius: 6px; }
+.app .idea-column { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; width: 100%; }
+.app .idea-column button { min-width: 0; min-height: 64px; display: flex; align-items: center; justify-content: flex-start; gap: 8px; font-size: .875rem; overflow-wrap: normal; text-align: left; }
+.app .idea-column .illustrated-icon { width: 24px; height: 24px; flex-basis: 24px; }
+.app .connection-step { margin: 0; }
+.app .connection-source-picker .idea-column { margin-top: 8px; }
+.app .connection-summary button { min-height: 44px; text-align: left; }
+.app .idea-column button[aria-pressed="true"] { outline: 2px solid #244c63; outline-offset: -2px; }
+.app .connection-help { font-size: .875rem; }
+html[data-neutral="true"] .app { --scene-home-image: none; --scene-home-wide: none; background: #f7f8fa !important; color: #243653; }
+html[data-neutral="true"] .app .home-scene,
+html[data-neutral="true"] .app .home-avatar-layer,
+html[data-neutral="true"] .app .part-scene-details,
+html[data-neutral="true"] .app .part-guide-portrait,
+html[data-neutral="true"] .app .companion-action-hub { display: none !important; }
+html[data-neutral="true"] .app .map-companion,
+html[data-neutral="true"] .app .character-avatar { display: none !important; }
+html[data-neutral="true"] .app .illustrated-journey-map { background-image: none !important; background-color: #f7f8fa; }
+html[data-neutral="true"] .app .treasure-terrain picture { display: none; }
+html[data-neutral="true"] .app .adventure-home {
+  display: block; height: auto; min-height: 0; background: none; padding: 16px;
+}
+html[data-neutral="true"] .app .home-copy { position: static; width: 100%; max-width: 720px; margin: auto; padding: 16px; }
+html[data-neutral="true"] .app .part-focus-panel,
+html[data-neutral="true"] .app .part-guide { background: #fff; padding: 12px; }
+html[data-neutral="true"] .app .part-guide { grid-template-columns: minmax(0,1fr); }
+html[data-hide-counts="true"] .app .progress-percent,
+html[data-hide-counts="true"] .app .progress-meter,
+html[data-hide-counts="true"] .app .prep-progress { display: none; }
+html[data-palette="high-contrast"] .app :is(.settings-card,.notes-timeline,.historical-notebook,.part-focus-panel,.part-guide,.activity-card,.journey-tool-modal) {
+  color: #172b45; background: #fffdf5; border-color: #31455b;
+}
+html[data-palette="high-contrast"] .app :is(p,small,label,legend,summary,h2,h3,h4) { color: #172b45; }
+html[data-palette="high-contrast"] .app :is(button,a)[aria-pressed="true"] { color: #fff; background: #123f8c; }
+html[data-palette="high-contrast"] .app :is(button,a)[aria-pressed="true"] :is(small,strong,span) { color: inherit; }
+html[data-palette="high-contrast"] .app .part-kicker :is(span,small) { color: #fff; }
+html[data-icon-labels="true"] .app .part-workspace-tabs button > span { display: inline; }
+html[data-icon-labels="true"] .app .drawing-paper-workspace { flex-direction: column; }
+html[data-icon-labels="true"] .app .drawing-toolbar-host { flex: 0 0 auto; width: 100%; }
+html[data-icon-labels="true"] .app .drawing-toolbar.drawing-icon-toolbar,
+html[data-icon-labels="true"] .app .journey-tool-modal[data-tool="doodle"] .drawing-toolbar.drawing-icon-toolbar {
+  flex-direction: row; align-items: stretch; height: auto; max-height: 6rem;
+  width: 100%; overflow-x: auto; overflow-y: hidden; border-right: 0; border-bottom: 1px solid #d6c6a9;
+}
+html[data-icon-labels="true"] .app .drawing-icon-toolbar .drawing-icon-button,
+html[data-icon-labels="true"] .app .journey-tool-modal[data-tool="doodle"] .drawing-icon-toolbar .drawing-icon-button {
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  width: 5rem; min-width: 5rem; height: auto; min-height: 3.5rem; padding: 5px;
+}
+html[data-icon-labels="true"] .app .drawing-icon-toolbar .drawing-icon-button::after {
+  content: attr(title); font-size: .75rem; line-height: 1.25; white-space: normal; overflow-wrap: anywhere;
+}
+html[data-icon-labels="true"] .app .drawing-options-panel { top: 6rem; left: 0; width: min(380px,100%); max-height: calc(100% - 6rem); }
+html[data-icon-labels="true"] .app .drawing-paper-workspace .canvas-shell,
+html[data-icon-labels="true"] .app .journey-tool-modal[data-tool="doodle"] .drawing-paper-workspace .canvas-shell { width: 100%; flex: 1 1 auto; align-self: stretch; min-height: 180px; }
+html[data-text-size="large"] .app :is(.part-workspace-tabs,.notebook-tabs),
+html[data-text-size="larger"] .app :is(.part-workspace-tabs,.notebook-tabs) { display: flex; flex-wrap: wrap; }
+html[data-text-size="large"] .app .part-workspace-tabs button,
+html[data-text-size="larger"] .app .part-workspace-tabs button { flex: 1 1 90px; }
+@media (max-width: 600px) {
+  .app .connection-targets { grid-template-columns: minmax(0,1fr); }
+  .app .settings-screen { padding: 12px; }
+  .app .settings-screen .screen-heading { flex-direction: row; }
+  .app .settings-screen .screen-heading h2 { font-size: 1.5rem; }
+  .app .settings-screen .screen-heading .eyebrow { letter-spacing: .04em; }
+  .app .part-card dialog.journey-tool-modal[open] { width: calc(100vw - 12px); max-width: calc(100vw - 12px); height: calc(100dvh - 12px); max-height: calc(100dvh - 12px); }
+  .app .part-focus-panel { padding-right: 12px; }
+  .app .part-kicker { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html .app [class], html .app.sensory-calm [class], .app *::before, .app *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

@@ -6,6 +6,8 @@ A manual selection is remembered for the current local day, allowing preparation
 
 **Update app / Actualizar app** is a normal button at the top of Settings. It opens the existing `/refresh` flow to replace app files and cached images without clearing the journal. Journal export/import and the version remain in the journal section below.
 
+Settings starts with Everyday comfort and reading options. Meeting days, visits, assemblies, local titles, offline packs and journal backups are under **Meeting setup, offline packs and backups**. The Home import explanation is presented once, below the main action, then remains available in a compact disclosure. This does not enable imports or replace the separate explicit consent.
+
 The weekend journey has opening, public talk, study song, Watchtower study and closing stops. Public talk titles and locally selected songs are not guessed. Original prompts support listening, optional three-level clues, writing, drawing and reflection. Official study links use JW finder document IDs when a dated entry is known.
 
 **Settings > Your meeting details** stores an optional speaker name with each non-song part, alongside its local title. Names appear on the part card, notebook/tool heading, outline and painted route, and remain exactly as entered when switching English/Spanish. Clearing the name removes it without changing the title or notebook. Assembly/convention parts also accept speaker names, but their published titles cannot be replaced. Older title-only and song records remain supported; speaker details are included with device settings in local journal backups and are never uploaded.
@@ -21,6 +23,8 @@ The successful WOL programme-import notice appears only on the first Home view o
 Discovery browsing uses a consistent 12px gap between its heading, filters and content. Previous notes is a calendar icon alongside Gallery, Map and List, with a translated accessible label and tooltip, rather than a separate full-width button. History-panel padding is symmetric without the heading's default extra top margin.
 
 Gallery, Map and List leave Previous notes and show the selected discovery view. History includes saved drawing pages as well as text. Expanded records offer editing of the original note/reflection, study draft/comments or drawing page, even when the old programme is not downloaded. Text edits use Save changes and preserve other record fields; drawing edits use the existing autosaving notebook. Saved discovery previews also offer Edit note/Edit drawing.
+
+History groups entries by last edit, while each entry retains its meeting date. Search includes cached programme titles, references and personal connection examples, ignoring case and accents. Drawing pages have readable page numbers. Compact notebook labels are retained with device preferences (and backups), independently of downloadable programmes. The current discovery view and history search are remembered for the browser tab; no search or journal text is uploaded.
 
 New drawing strokes retain coalesced pointer samples where supported, include the pen-up position and use the same smoothed curve for the live canvas, saved preview and PNG export. Existing strokes retain their original rendering; undo/redo and backup preserve the optional smoothing flag.
 

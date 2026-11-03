@@ -244,7 +244,6 @@ select { min-width: 155px; padding: 9px 11px; }
 .next-nav { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding-top: 17px; color: var(--muted); font-size: .85rem; }
 footer { padding: 22px 20px; border-top: 1px solid var(--line); color: var(--muted); text-align: center; font-size: .82rem; }
 footer .text-button { color: var(--blue); }
-.presentation-simple .notes-card, .presentation-simple .drawing-actions { display: none; }
 .presentation-reflective .part-card { border-color: #c7b46f; }
 .sensory-calm { --card-shadow: 0 8px 20px rgba(55, 63, 116, .06); }
 .sensory-calm .welcome-card, .sensory-calm .part-card, .sensory-calm .journey-map, .sensory-calm .material-panel { background: #fff; }

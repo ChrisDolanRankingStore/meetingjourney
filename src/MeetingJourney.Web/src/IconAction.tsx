@@ -1,9 +1,12 @@
 import type {ButtonHTMLAttributes, AnchorHTMLAttributes} from 'react';
 import {NotebookIcon, type NotebookIconName} from './NotebookIcon';
+import {useComfort} from './ComfortSettings';
 
 export function IconAction({icon, label, showLabel = false, className = '', ...props}: {icon: NotebookIconName; label: string; showLabel?: boolean} & ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button {...props} type="button" className={`icon-action ${className}`} aria-label={label} title={label}><NotebookIcon name={icon} />{showLabel&&<span className="icon-action-label">{label}</span>}</button>;
+  const comfort=useComfort();
+  return <button {...props} type="button" className={`icon-action ${className}`} aria-label={label} title={label}><NotebookIcon name={icon} />{(showLabel||comfort.iconLabels)&&<span className="icon-action-label">{label}</span>}</button>;
 }
 export function IconLink({icon, label, className = '', ...props}: {icon: NotebookIconName; label: string} & AnchorHTMLAttributes<HTMLAnchorElement>) {
-  return <a {...props} className={`icon-action ${className}`} aria-label={label} title={label}><NotebookIcon name={icon} /></a>;
+  const comfort=useComfort();
+  return <a {...props} className={`icon-action ${className}`} aria-label={label} title={label}><NotebookIcon name={icon} />{comfort.iconLabels&&<span className="icon-action-label">{label}</span>}</a>;
 }

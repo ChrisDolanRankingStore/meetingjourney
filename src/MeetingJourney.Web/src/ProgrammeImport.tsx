@@ -20,19 +20,25 @@ export function ProgrammeContentNotice({notice,home=false,className='meeting-con
   return visible?<small className={className}>{notice}</small>:null;
 }
 
-export function ProgrammeImport(){
+export function ProgrammeImport({home=false}:{home?:boolean}){
   const [enabled,setEnabled]=useState(programmeImportEnabled);
+  const [expanded,setExpanded]=useState(()=>home?localStorage.getItem('mj-import-explanation-seen')!=='true'&&!localStorage.getItem(key):!programmeImportEnabled());
   const [confirmed,setConfirmed]=useState(false);
   const [error,setError]=useState('');
+  useEffect(()=>{
+    if(!home||!expanded)return;
+    try{localStorage.setItem('mj-import-explanation-seen','true');}
+    catch{setError('Could not save your preference. Please try again.');}
+  },[home,expanded]);
   const choose=(allow:boolean)=>{
     try{
       localStorage.setItem(key,allow?'personal-v1':'disabled');
-      setEnabled(allow);setConfirmed(false);setError('');
+      setEnabled(allow);setConfirmed(false);setError('');if(home)setExpanded(false);
       window.dispatchEvent(new Event(PROGRAMME_IMPORT_CHANGED));
     }catch{setError('Could not save your import preference on this device. Please try again.');}
   };
   return <section className="settings-card programme-import" aria-label={t('Personal programme import')}>
-    <details open={!enabled}>
+    <details open={expanded} onToggle={event=>setExpanded(event.currentTarget.open)}>
       <summary>{t(enabled?'Personal programme import is on':'Personal programme import')}</summary>
       <p>{t('Meeting Journey is an independent focus aid designed to help neurodivergent users follow meetings. It is not affiliated with or endorsed by Jehovah’s Witnesses, and does not replace JW.org, JW Library or Watchtower ONLINE LIBRARY (wol.jw.org).')}</p>
       <p>{t('With your confirmation, the app requests meeting item names, timings and scripture/publication references from WOL through our server, and saves the programme on this device. Article text, answers, images and your personal notes are not imported or sent to WOL.')}</p>

@@ -3,6 +3,49 @@
 Reviewed: 3 November 2026  
 Application baseline: `c9abbe90c31dc50a484db1ef72beaade48fac7fe`
 
+## Approved implementation follow-through
+
+The five delivery phases below were approved for implementation. The updated
+app now includes:
+
+1. Draft-safe starter insertion and Undo, explicit length-limit errors, native
+   modal notebook focus, persistent Close/Back and protection against meeting
+   swipes inside tools.
+2. Comfort-first settings, a Home comfort shortcut, pre-companion comfort
+   options, grouped administration and a non-repeating Home import disclosure
+   without changing consent.
+3. Standard/Large/Larger text, larger supporting labels, optional icon names,
+   accurate mode descriptions and distinct Simple/Reflective/Active behaviour.
+   Settings uses one scrolling surface at enlarged text sizes.
+4. An optional neutral notebook and Continue without a companion; optional
+   hidden activity counts, Bingo completion feedback and review/prep totals.
+   These settings do not delete stored content or infer support needs.
+5. Sequential connection choices, selection state and Undo, optional examples
+   per connection, labelled historical notebooks, title/reference/example search
+   and remembered discovery view/history search within the current browser tab.
+
+All changes retain English/Spanish support and existing notebook keys. New
+connection examples and comfort/title preferences are included in editable
+backups. The original findings below document the review baseline, not a claim
+that these issues remain unchanged.
+
+Validation includes automated regressions for preserved drafts and length
+limits, neutral entry, hidden counters, translated controls, title/page labels
+and backup round trips. The production build, all 132 tests and packaged runtime
+smoke check pass. Browser checks cover Settings at the four viewport sizes listed
+below, 200% root text at 320px with administration expanded, Spanish enlarged
+labels, native-modal background focus blocking and focus restoration. Drawing
+labels use a horizontally scrolling toolbar without narrowing the paper; both
+labelled and compact layouts and paper options were checked at 320px.
+Real Tab/Escape input was not verifiable in the hidden automation page; native
+focus blocking and the dialog cancel-handler path were tested instead.
+
+Sampled comfort-label text/background contrast minima were Journey 4.77:1,
+Ocean 5.50:1, Meadow 4.97:1, Sunset 5.59:1 and High contrast 14.05:1. This is
+a scoped computed-colour check, not an audit of every image-backed surface.
+Physical-device, VoiceOver and participant co-design checks remain outstanding;
+implementation does not constitute validation of clinical or learning outcomes.
+
 ## Overall conclusion
 
 Meeting Journey has a useful foundation: optional participation, several ways to
@@ -267,8 +310,8 @@ material or a tool for monitoring attendees.
 4. Co-design optional neutral presentation and hidden counters.
 5. Refine connections, historical labels and recovery based on observed need.
 
-These are recommendations, not changes silently included in the completed
-history/drawing update.
+These were the baseline recommendations, not changes silently included in the
+earlier history/drawing update. Their approved implementation is recorded above.
 
 ## Validation still required
 

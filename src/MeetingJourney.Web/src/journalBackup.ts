@@ -22,6 +22,8 @@ export function validateBackup(value: any): JournalBackup {
       if(name === 'engagement' && entry.value.bingoWords !== undefined && (!Array.isArray(entry.value.bingoWords) || entry.value.bingoWords.length > 100 || !entry.value.bingoWords.every((word: unknown) => typeof word === 'string' && word.length <= 60))) throw Error('Invalid bingo words');
       if(name === 'engagement' && entry.value.bingoSize !== undefined && entry.value.bingoSize !== 3 && entry.value.bingoSize !== 4) throw Error('Invalid bingo size');
       if(name === 'engagement') {
+        const examples=entry.value.connectionExamples;
+        if(examples!==undefined&&(!examples||typeof examples!=='object'||Array.isArray(examples)||!entry.value.partId.endsWith(':connections')||Object.keys(examples).length>20||Object.entries(examples).some(([source,text])=>typeof text!=='string'||text.length>1000||!validConnectionChoice(entry.value.meetingId,entry.value.partId,source,''))))throw Error('Invalid connection examples');
         for(const field of ['prediction','predictionChecked']) if(entry.value[field] !== undefined && (typeof entry.value[field] !== 'string' || entry.value[field].length > 200)) throw Error('Invalid listening choice');
         const choices=entry.value.pointChoices;
         const connections = entry.value.partId.endsWith(':connections');

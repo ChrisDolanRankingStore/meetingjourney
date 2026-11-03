@@ -8,6 +8,7 @@ export function ConnectIdeas({meetingId, partId, part}: {meetingId: string; part
   const activity = connectionActivityFor(meetingId, partId, part);
   const [value,setValue] = useState<StudyProgress>(()=>emptyStudy(meetingId,`${partId}:connections`));
   const [active,setActive] = useState<string | null>(null);
+  const [undo,setUndo]=useState<Record<string,string>|null>(null);
   const [loaded,setLoaded] = useState(false), [status,setStatus] = useState('');
   const current = useRef(value), saves=useRef(Promise.resolve());
   useEffect(()=>{
@@ -33,18 +34,20 @@ export function ConnectIdeas({meetingId, partId, part}: {meetingId: string; part
     <h3>{display(activity.title)}</h3>
     <p>{t(activity===generalConnections?'General listening prompts. Choose an idea, then tap a related example. Your connections are not scored.':'Choose an idea, then tap a related example. Your connections are not scored.')}</p>
     <div className="idea-connections">
-      <div className="idea-column">{sources.map((source,index)=><button type="button" key={source} disabled={!loaded} aria-pressed={active===source} onClick={()=>setActive(source)}><span className="connection-dot" data-colour={index} />{display(source)}</button>)}</div>
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">{sources.map((source,index)=>{
-        const target=targets.indexOf(value.pointChoices?.[source]??'');
-        return target<0?null:<path key={source} stroke={['#55917b','#b87746','#7474b0','#c36e68'][index]} d={`M 0 ${12.5+index*25} C 50 ${12.5+index*25}, 50 ${12.5+target*25}, 100 ${12.5+target*25}`} />;
-      })}</svg>
-      <div className="idea-column">{targets.map(target=><button type="button" key={target} disabled={!loaded||!active} onClick={()=>{
+      <details className="connection-source-picker" open={!active}><summary>{active?display(active):t('Choose an idea')}</summary>
+      <div className="idea-column">{sources.map((source,index)=><button type="button" key={source} disabled={!loaded} aria-pressed={active===source} onClick={()=>setActive(previous=>previous===source?null:source)}><span className="connection-dot" data-colour={index} />{display(source)}</button>)}</div>
+      </details>
+      {active&&<><p className="connection-step" role="status">{t('Choose a related example for {idea}',{idea:display(active)})}</p><div className="idea-column connection-targets">{targets.map(target=><button type="button" key={target} disabled={!loaded} aria-pressed={Boolean(value.pointChoices?.[active]===target)} onClick={()=>{
         if(!active)return;
+        setUndo({...current.current.pointChoices});
         update({pointChoices:{...current.current.pointChoices,[active]:current.current.pointChoices?.[active]===target?'':target}});
-      }}><IllustratedIcon name={target===targets[0]?'thought':target===targets[1]?'heart':target===targets[2]?'references':'listen'} /><span>{display(target)}</span></button>)}</div>
+      }}><IllustratedIcon name={target===targets[0]?'thought':target===targets[1]?'heart':target===targets[2]?'references':'listen'} /><span>{display(target)}</span></button>)}</div></>}
     </div>
-    <ul className="connection-summary">{sources.filter(source=>value.pointChoices?.[source]).map(source=><li key={source}>{display(source)} → {display(value.pointChoices![source])}</li>)}</ul>
-    <label>{t('Add my own example')}<textarea disabled={!loaded} value={value.draft??''} onChange={event=>update({draft:event.target.value})} rows={2} /></label>
+    {undo&&<button type="button" onClick={()=>{update({pointChoices:undo});setUndo(null);}}>{t('Undo connection')}</button>}
+    <p className="connection-help">{t('Tap the selected idea to deselect it. Tap its related example again to remove a connection.')}</p>
+    <ul className="connection-summary">{sources.filter(source=>value.pointChoices?.[source]).map(source=><li key={source}><button type="button" aria-pressed={active===source} onClick={()=>setActive(source)}>{display(source)} → {display(value.pointChoices![source])}</button>{value.connectionExamples?.[source]&&<p>{value.connectionExamples[source]}</p>}</li>)}</ul>
+    {active&&value.pointChoices?.[active]&&<label>{t('My example for {idea} (optional)',{idea:display(active)})}<textarea disabled={!loaded} maxLength={1000} value={value.connectionExamples?.[active]??''} onChange={event=>update({connectionExamples:{...current.current.connectionExamples,[active]:event.target.value}})} rows={2}/></label>}
+    <label>{t('Add my own example')}<textarea disabled={!loaded} maxLength={10000} value={value.draft??''} onChange={event=>update({draft:event.target.value})} rows={2} /></label>
     <small role="status">{t(status)}</small>
   </section>;
 }

@@ -14,12 +14,16 @@ class MemoryStorage{data=new Map();get length(){return this.data.size;}key(i){re
 beforeEach(()=>{globalThis.indexedDB=new IDBFactory();});
 test('backup round-trip preserves editable strokes, paper, notes, study comments and preferences',async()=>{
  const storage=new MemoryStorage();storage.setItem('mj-character','{"name":"Test"}');storage.setItem('unrelated','keep');storage.setItem('mj-programme-import-choice','personal-v1');
+ storage.setItem('mj-comfort','{"neutral":true,"hideCounts":true,"iconLabels":true,"textSize":"larger"}');
+ storage.setItem('mj-notebook-labels:week-a','{"parts":[{"id":"reading","title":"A saved title","textReference":"John 3:16"}]}');
  await saveNote({meetingId:'week-a',partId:'reading',text:'My thought',updatedAt:'2026-10-25'});
  const stroke={points:[1,2,30,40],color:'#123456',size:4,mode:'pen',smooth:true};await saveDrawing('week-a','reading',[stroke],{width:760,height:900});
  const study={...emptyStudy('week-a','reading'),paragraph:7,comments:[{id:'c1',paragraph:7,text:'My comment',ready:true,given:false}]};await saveStudy(study);
  const backup=validateBackup(await exportJournal(storage));assert.equal(backup.preferences.unrelated,undefined);assert.equal(backup.preferences['mj-programme-import-choice'],undefined);
  globalThis.indexedDB=new IDBFactory();const restored=new MemoryStorage();assert.deepEqual(await importJournal(backup,true,restored),{added:3,kept:0});
  assert.equal((await readNote('week-a','reading')).text,'My thought');assert.deepEqual((await readDrawingPage('week-a','reading')).strokes,[stroke]);assert.equal((await readDrawingPage('week-a','reading')).paper.height,900);assert.equal((await readStudy('week-a','reading')).paragraph,7);assert.equal(restored.getItem('mj-character'),'{"name":"Test"}');
+ assert.equal(JSON.parse(restored.getItem('mj-comfort')).hideCounts,true);
+ assert.equal(JSON.parse(restored.getItem('mj-notebook-labels:week-a')).parts[0].title,'A saved title');
 });
 test('restore keeps newer device entries instead of overwriting them',async()=>{await saveNote({meetingId:'week-a',partId:'reading',text:'Old',updatedAt:'2026-10-25'});const backup=await exportJournal(new MemoryStorage());await saveNote({meetingId:'week-a',partId:'reading',text:'Keep this',updatedAt:'2026-10-26'});assert.deepEqual(await importJournal(backup,false,new MemoryStorage()),{added:0,kept:1});assert.equal((await readNote('week-a','reading')).text,'Keep this');});
 
@@ -48,12 +52,17 @@ test('bingo grid size and marked words survive backup without accepting invalid 
 });
 
 test('Connect the ideas links and personal examples survive backup and reject unsupported connections',async()=>{
- const progress={...emptyStudy('meeting-2026-10-19','part-8:connections'),pointChoices:{Time:'Visit someone who is unwell',Encouragement:''},draft:'My own example'};
+ const progress={...emptyStudy('meeting-2026-10-19','part-8:connections'),pointChoices:{Time:'Visit someone who is unwell',Encouragement:''},draft:'My own example',connectionExamples:{Time:'Make time for a visit'}};
  await saveStudy(progress);
  const backup=validateBackup(await exportJournal(new MemoryStorage()));
  globalThis.indexedDB=new IDBFactory();await importJournal(backup,true,new MemoryStorage());
  const restored=await readStudy(progress.meetingId,progress.partId);
  assert.deepEqual(restored.pointChoices,progress.pointChoices);assert.equal(restored.draft,progress.draft);
+ assert.deepEqual(restored.connectionExamples,progress.connectionExamples);
+ const invalid=structuredClone(backup);invalid.engagement[0].value.connectionExamples={Time:'x'.repeat(1001)};
+ assert.throws(()=>validateBackup(invalid),/Invalid connection examples/);
+ invalid.engagement[0].value.connectionExamples={Unsupported:'Words'};
+ assert.throws(()=>validateBackup(invalid),/Invalid connection examples/);
  backup.engagement[0].value.pointChoices={Unknown:'Share a scripture'};
  assert.throws(()=>validateBackup(backup),/Invalid listening points/);
  backup.engagement[0].value.pointChoices={Time:'Unsupported example'};

@@ -24,6 +24,9 @@ test('timeline includes saved meeting and assembly notes and study drafts, newes
   assert.equal(drawing.meetingId,'meeting-2026-10-19');assert.equal(drawing.partId,'old-part::page::2');
   assert.equal(notes.find(note=>note.text==='Study draft').kind,'study');
   assert.equal(notes.find(note=>note.text==='John 3:16').kind,'note');
+  await saveStudy({...emptyStudy('meeting-2026-11-02','part-1:connections'),pointChoices:{'An idea I heard':'Something I could try'},connectionExamples:{'An idea I heard':'A personal connection'}});
+  const connections=(await readNotesTimeline()).find(note=>note.partId.endsWith(':connections'));
+  assert.match(connections.text,/A personal connection/);assert.match(connections.text,/Something I could try/);
   const {ScriptureLookup}=await server.ssrLoadModule('/src/ScriptureLookup.tsx');
   const html=renderToStaticMarkup(React.createElement(ScriptureLookup,{text:'My thought: John 3:16 and Salmos 37:4'}));
   assert.match(html,/bible=43003016/);assert.match(html,/bible=19037004/);

@@ -58,7 +58,8 @@ function TreasureContents({ treasure, onReturn, onEdit }: { treasure: DiscoveryT
 }
 
 export function DiscoveriesMap({ meeting, onReturn, teen = false }: { meeting: Meeting; teen?: boolean; onReturn: (index: number) => void }) {
-  const [timeline,setTimeline]=useState(false);
+  const [savedView]=useState(()=>{try{return sessionStorage.getItem('mj-discovery-view');}catch(error){console.warn('Could not restore discovery view.',error);return null;}});
+  const [timeline,setTimeline]=useState(savedView==='history');
   const [editing,setEditing]=useState<HistoricalTarget|null>(null);
   const scenePack = sceneSetForWeek(meeting.weekOf);
   const split = hasDaySessions(meeting);
@@ -66,8 +67,12 @@ export function DiscoveriesMap({ meeting, onReturn, teen = false }: { meeting: M
   const indices = sessionPartIndices(meeting,session);
   const [treasures, setTreasures] = useState<DiscoveryTreasure[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [list, setList] = useState(teen);
-  const [gallery, setGallery] = useState(true);
+  const [list, setList] = useState(savedView==='list'||!savedView&&teen);
+  const [gallery, setGallery] = useState(savedView!=='list'&&savedView!=='map');
+  useEffect(()=>{
+    try{sessionStorage.setItem('mj-discovery-view',timeline?'history':gallery?'gallery':list?'list':'map');}
+    catch(error){console.warn('Could not remember discovery view.',error);}
+  },[timeline,gallery,list]);
   const [filter, setFilter] = useState<'all' | 'drawings' | 'thoughts' | 'feelings'>('all');
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);

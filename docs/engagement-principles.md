@@ -24,7 +24,13 @@ The current part continues that painted setting with readable parchment content 
 
 ### Support different kinds of attention
 
-Simple, Standard and Reflective views change the amount of writing and reflection. Guided and Active activities add prompts without making participation compulsory. The companion character is a reversible visual preference, not a performance or identity label.
+Simple collapses the listening guidance without hiding notebook tools; Standard opens the main guidance; Reflective also offers a reflection question. Quiet reduces suggestions while leaving activities available on request. Guided opens listening guidance, and Active adds a direct activity shortcut. All choices remain optional and retain the user's place. The companion character is a reversible visual preference, not a performance or identity label.
+
+Everyday comfort is the first Settings group, with a quick Quiet toggle, three text sizes, optional icon labels, a neutral notebook without scenery/companion, and hidden activity counts/completion feedback. Reading comfort is also available before companion selection and directly from Home. A companion is optional; skipping it does not create or overwrite a profile. Meeting administration, offline packs and backups are grouped separately. Settings uses a single scrolling surface instead of a fixed heading above a second short scroll area.
+
+Notebook tools use native modal dialogs with inert background controls, a persistent close/back button and focus restoration. Swiping inside a dialog never changes the meeting part. Sentence starters insert without replacing existing or selected words and offer Undo; an insertion that exceeds the text limit reports an error without truncating the draft.
+
+Connections use a sequential idea/example choice rather than simultaneous crossing lines. Each connection can have an optional personal example, can be removed or undone, and remains available through historical notebooks. Examples and connections survive local backup/restore. Activity totals, Bingo line feedback, scripture counters and meeting-review counts can be hidden without deleting their saved values. A separate, optional one-thing listening cue requires no written response or completion.
 
 ### Encourage interest without pressure
 

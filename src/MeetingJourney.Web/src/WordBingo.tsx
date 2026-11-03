@@ -5,9 +5,11 @@ import {bingoLineCells, bingoSize, bingoWords} from './bingoBoard';
 import {emptyStudy, readStudy, saveStudy, type StudyProgress} from './studyStorage';
 import type {MeetingPart} from './types';
 import './wordBingo.css';
+import {useComfort} from './ComfortSettings';
 
 export function WordBingo({meetingId, part, older, onClue, onWrite, onDraw}: {meetingId: string; part: MeetingPart; older: boolean; onClue?: () => void; onWrite?: () => void; onDraw?: () => void}) {
   const language = getLanguage();
+  const comfort=useComfort();
   // A separate engagement record prevents the comment builder from overwriting taps.
   const recordId = `${part.id}:bingo:${language}`;
   const [value, setValue] = useState<StudyProgress>(() => emptyStudy(meetingId, recordId));
@@ -43,12 +45,12 @@ export function WordBingo({meetingId, part, older, onClue, onWrite, onDraw}: {me
     <p className="bingo-instruction">{t('Tap a word when you hear it. Tap again to undo.')}</p>
     <div className="bingo-workspace">
     <div className="word-bingo-board" style={{'--bingo-size': size} as CSSProperties}>
-      {board.map(word => <button type="button" key={word} disabled={!loaded} aria-pressed={selected.includes(word)} className={line.has(word) ? 'is-line' : ''} onClick={() => toggle(word)}><span>{word}</span>{selected.includes(word) && <span className="bingo-check" aria-hidden="true">✓</span>}</button>)}
+      {board.map(word => <button type="button" key={word} disabled={!loaded} aria-pressed={selected.includes(word)} className={!comfort.hideCounts&&line.has(word) ? 'is-line' : ''} onClick={() => toggle(word)}><span>{word}</span>{selected.includes(word) && <span className="bingo-check" aria-hidden="true">✓</span>}</button>)}
     </div>
     <aside className="bingo-listening-card">
       <h4><IllustratedIcon name="clue" />{t('Listen for…')}</h4>
       <p>{objective}</p>
-      <div className="bingo-progress"><strong>{tt`${found} of ${board.length} found`}</strong><progress value={found} max={board.length} aria-label={t('Words noticed')} /></div>
+      {!comfort.hideCounts&&<div className="bingo-progress"><strong>{tt`${found} of ${board.length} found`}</strong><progress value={found} max={board.length} aria-label={t('Words noticed')} /></div>}
       {onClue&&<button type="button" className="bingo-clue" onClick={onClue}><IllustratedIcon name="discover" />{t('Need a clue?')}</button>}
     </aside>
     </div>
@@ -57,7 +59,7 @@ export function WordBingo({meetingId, part, older, onClue, onWrite, onDraw}: {me
       {onDraw&&<button type="button" onClick={onDraw}><IllustratedIcon name="notes" />{t('Draw')}</button>}
     </nav>}
     <small>{t('Words from this part and familiar meeting words. You may not hear every word.')}</small>
-    {line.size > 0 && <p role="status">{t('A line of words you noticed. Keep listening at your own pace.')}</p>}
+    {!comfort.hideCounts&&line.size > 0 && <p role="status">{t('A line of words you noticed. Keep listening at your own pace.')}</p>}
     <small role="status">{t(status)}</small>
   </section>;
 }

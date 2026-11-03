@@ -103,6 +103,29 @@ test('welcome, character choice and home render in Spanish and still render in E
   html=renderToStaticMarkup(React.createElement(App));
   assert.match(html,/Start journey/);assert.match(html,/Discoveries/);assert.match(html,/Christopher/);
   const {StudyTools}=await server.ssrLoadModule('/src/StudyTools.tsx');
+  const {ComfortSettings}=await server.ssrLoadModule('/src/ComfortSettings.tsx');
+  const {IconAction}=await server.ssrLoadModule('/src/IconAction.tsx');
+  const {ProgrammeImport}=await server.ssrLoadModule('/src/ProgrammeImport.tsx');
+  data.set('mj-comfort',JSON.stringify({neutral:true,hideCounts:true,iconLabels:true,textSize:'larger'}));
+  const quietBingo=renderToStaticMarkup(React.createElement(WordBingo,{meetingId:'weekend-2026-10-19',part:bingoPart,older:true}));
+  assert.doesNotMatch(quietBingo,/<progress|bingo-progress|of 16 found|is-line/);
+  const quietStudy=renderToStaticMarkup(React.createElement(StudyTools,{meetingId:'test',part:{...bingoPart,type:'WatchtowerStudy'},teen:true,quiet:true,onDraw:()=>{},onWrite:()=>{}}));
+  assert.doesNotMatch(quietStudy,/scripture-spotter/);
+  assert.match(quietStudy,/Your own words/);
+  assert.match(renderToStaticMarkup(React.createElement(IconAction,{icon:'calendar',label:'Previous notes'})),/icon-action-label/);
+  const characterBefore=data.get('mj-character');data.delete('mj-character');
+  assert.doesNotMatch(renderToStaticMarkup(React.createElement(App)),/age-only-chooser/);
+  data.set('mj-character',characterBefore);
+  data.set('mj-language','es');
+  const comfortEs=renderToStaticMarkup(React.createElement(ComfortSettings));
+  assert.match(comfortEs,/Comodidad diaria|Tamaño del texto/);
+  assert.match(comfortEs,/Ocultar contadores/);
+  data.set('mj-language','en');
+  data.delete('mj-comfort');
+  data.set('mj-import-explanation-seen','true');
+  assert.doesNotMatch(renderToStaticMarkup(React.createElement(ProgrammeImport,{home:true})),/<details open/);
+  assert.match(renderToStaticMarkup(React.createElement(ProgrammeImport)),/<details open/);
+  data.delete('mj-import-explanation-seen');
   const {CircuitVisitSettings}=await server.ssrLoadModule('/src/CircuitVisitSettings.tsx');
   const {LocalPartTitles}=await server.ssrLoadModule('/src/MeetingDetails.tsx');
   const {applyCircuitVisit}=await server.ssrLoadModule('/src/circuitVisit.ts');
@@ -287,11 +310,12 @@ test('welcome, character choice and home render in Spanish and still render in E
    assert.match(renderToStaticMarkup(React.createElement(ConventionSettings)),language==='es'?/Viernes de inicio de la asamblea regional/:/Convention opening Friday/);
    const connections=renderToStaticMarkup(React.createElement(ConnectIdeas,{meetingId:'meeting-2026-10-19',partId:'part-8'}));
    assert.match(connections,language==='es'?/Conecta las ideas/:/Connect the ideas/);
-   assert.equal((connections.match(/<button/g)??[]).length,8);
+   assert.equal((connections.match(/<button/g)??[]).length,4);
+   assert.doesNotMatch(connections,/connection-targets|<svg viewBox="0 0 100 100"/);
    const generalConnections=renderToStaticMarkup(React.createElement(ConnectIdeas,{meetingId:'weekend-2026-11-02',partId:'public-talk'}));
    assert.match(generalConnections,language==='es'?/Ayudas generales para escuchar/:/General listening prompts/);
    assert.match(generalConnections,language==='es'?/no se puntúan/:/not scored/);
-   assert.equal((generalConnections.match(/<button/g)??[]).length,8);
+   assert.equal((generalConnections.match(/<button/g)??[]).length,4);
    for(const kind of ['midweek','weekend']){
     const visitProgramme=applyCircuitVisit(getMeeting(kind,'2026-10-26'),globalThis.localStorage,language);
     for(const part of visitProgramme.parts.filter(part=>part.id.startsWith('co-'))){
