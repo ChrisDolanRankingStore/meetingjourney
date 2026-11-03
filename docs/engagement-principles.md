@@ -4,6 +4,20 @@ Meeting Journey is designed to support attention, processing and participation. 
 
 ## Product decisions
 
+### Optional map companion and translucent paper (0.5.8)
+
+The journey map companion can be dragged onto a stop to open it. Direct stop
+buttons, List and Continue remain available; activating the companion without
+dragging continues the current session. Invalid drops and Escape do not move
+the user's place. Dragging near the map edges scrolls it. The cursor is absent
+in List and neutral views, and does not store a position or journal entry.
+
+Painted panels use subtly translucent paper backgrounds, not reduced text
+opacity. Writing/drawing surfaces and modal tools retain their solid paper.
+Plain, Calm, neutral and high-contrast modes keep their existing treatment.
+The tool close/back button occupies its own header column with consistent
+padding and a 44px target; the heading stays visible while scrolling.
+
 ### Preserve the notebook visual language (0.5.7)
 
 Connect the ideas again shows both sets of choices with visible linking curves.

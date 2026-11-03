@@ -3,6 +3,32 @@
 Reviewed: 3 November 2026  
 Application baseline: `c9abbe90c31dc50a484db1ef72beaade48fac7fe`
 
+## Map and panel follow-up (0.5.8)
+
+The optional companion now acts as a draggable map cursor. Dropping on a stop
+opens it; ordinary stop buttons, List and Continue remain available. Neutral
+and List views omit the cursor. Invalid drops, Escape and pointer cancellation
+leave the current place unchanged. Map-edge dragging scrolls the route.
+The release gesture is consumed so it cannot activate a tool on the new screen.
+
+Painted panels use 88%-opaque paper backgrounds while text stays fully opaque.
+Opaque parent shells no longer hide the scenery behind these panels. Inputs,
+drawing paper and modal tools retain solid backgrounds. Plain, Calm, neutral
+and high-contrast preferences preserve their existing treatment.
+
+The close/back button now belongs to the sticky tool heading rather than
+overlapping it with a negative margin. Browser checks at 320px, 390px and 768px
+confirmed a 44px target, 12px right inset and no title overlap. At 320px with
+200% root text, it remains visible after scrolling without horizontal overflow.
+
+Production build, all 140 automated tests and packaged runtime checks pass.
+The main bundle is 191.87 KB gzip. Browser checks covered mouse and emulated
+touch drops, invalid drops, Escape, pointer cancellation, keyboard activation,
+edge scrolling, map/list switching, English/Spanish instructions and neutral
+cursor removal. Translucent Settings and retained solid inputs were inspected,
+alongside the Plain/Calm/neutral/high-contrast style exceptions.
+These checks do not replace physical-device or screen-reader validation.
+
 ## Visual follow-up (0.5.7)
 
 The user reported that the new surfaces lost the established notebook styling.

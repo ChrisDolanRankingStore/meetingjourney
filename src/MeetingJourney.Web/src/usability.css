@@ -117,7 +117,13 @@ html[data-neutral="true"] .app .home-sources-card { margin: 24px auto; max-width
 .app .part-card dialog.journey-tool-modal:not([open]) { display: none; }
 .app .journey-tool-modal > * { flex-shrink: 0; }
 .app .journey-tool-modal > .drawing-notebook { flex: 1 1 auto; min-height: 260px; }
-.app .part-card .journey-tool-close { position: sticky; top: 0; align-self: flex-end; z-index: 5; margin-bottom: -44px; }
+.app .part-card .illustrated-tool-heading {
+  position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: auto minmax(0,1fr) 44px;
+  min-height: 76px; box-sizing: border-box; padding: 12px;
+}
+.app .part-card .journey-tool-close {
+  position: static; align-self: center; margin: 0; width: 44px; height: 44px; min-height: 44px;
+}
 .app .idea-connections { position: relative; display: grid; grid-template-columns: minmax(0,1fr) clamp(28px,6vw,64px) minmax(0,1fr); gap: 0; }
 .app .idea-column { display: grid; grid-template-columns: minmax(0,1fr); grid-template-rows: repeat(4,minmax(80px,1fr)); gap: 8px; min-width: 0; }
 .app .connection-sources { grid-column: 1; }
@@ -243,3 +249,29 @@ html[data-text-size="larger"] .app .part-workspace-tabs button { flex: 1 1 90px;
   html .app [class], html .app.sensory-calm [class], .app *::before, .app *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .breathe-tile.is-running .breathe-ring { animation: breathe-cycle 14s steps(14,end) infinite !important; }
 }
+.app .story-map-footer .map-companion-cursor {
+  position: relative; display: grid; place-items: center; flex: 0 0 54px; width: 54px; height: 66px;
+  padding: 0; border: 0; background: transparent; touch-action: none; user-select: none; cursor: grab;
+}
+.map-companion-cursor > .character-avatar,
+.map-companion-drag-preview > .character-avatar {
+  position: relative; inset: auto; width: 54px; height: 70px; border: 0; border-radius: 0;
+  background: transparent; box-shadow: none; pointer-events: none;
+}
+.map-companion-cursor img, .map-companion-drag-preview img { -webkit-user-drag: none; }
+.map-companion-cursor.is-dragging { opacity: .35; cursor: grabbing; }
+.map-companion-drag-preview {
+  position: fixed; z-index: 100; width: 54px; height: 70px; transform: translate(-50%,-75%);
+  pointer-events: none; user-select: none;
+}
+.app .illustrated-stop.is-drop-target { outline: 3px solid #426851; outline-offset: 3px; background: #edf2e4; }
+.app .story-map-footer:has(.map-companion-cursor) { gap: 8px; }
+.app .story-map-footer > p { min-width: 0; }
+html[data-theme="painted"]:not([data-neutral="true"]):not([data-palette="high-contrast"]) .app:not(.sensory-calm) :is(
+  .home-copy,.home-sources-card,.part-card,.settings-card,.settings-screen > .screen-heading,
+  .notes-timeline,.historical-notebook,.discovery-map-heading,
+  .story-map-heading,.story-map-footer,.overview-section,.discovery-gallery-card
+) { background-color: rgb(255 249 236 / 88%); }
+html[data-theme="painted"]:not([data-neutral="true"]):not([data-palette="high-contrast"]) .app:not(.sensory-calm) :is(
+  .storybook-home,.part-screen-shell,.story-map-screen,.story-map-list,.discovery-map-screen,.settings-screen
+) { background-color: transparent; }

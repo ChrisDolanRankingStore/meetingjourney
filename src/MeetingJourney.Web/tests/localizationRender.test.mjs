@@ -196,6 +196,18 @@ test('welcome, character choice and home render in Spanish and still render in E
   const regularMap=renderToStaticMarkup(React.createElement(StoryJourneyMap,{meeting:getMeeting('midweek','2026-10-19'),current:0,onSelect:()=>{},onBack:()=>{},listView:()=>null}));
   assert.match(regularMap,/artwork-painted/);
   assert.match(regularMap,/journey-discovery-map-v1-960.webp/);
+  for(const language of ['en','es']){
+   data.set('mj-language',language);
+   const props={meeting:getMeeting('midweek','2026-10-19'),current:0,onSelect:()=>{},onBack:()=>{},listView:()=>null,companion:React.createElement('span',null,'Companion')};
+   const draggable=renderToStaticMarkup(React.createElement(StoryJourneyMap,props));
+   assert.match(draggable,/class="map-companion-cursor/);
+   assert.match(draggable,/data-journey-stop="0"/);
+   assert.match(draggable,language==='es'?/Arrastra a tu compañero/:/Drag your companion/);
+   assert.doesNotMatch(renderToStaticMarkup(React.createElement(StoryJourneyMap,{...props,initialList:true})),/class="map-companion-cursor/);
+   data.set('mj-comfort','{"neutral":true}');
+   assert.doesNotMatch(renderToStaticMarkup(React.createElement(StoryJourneyMap,props)),/class="map-companion-cursor/);
+   data.delete('mj-comfort');
+  }
   const outline=renderToStaticMarkup(React.createElement(StoryJourneyMap,{meeting:getMeeting('midweek','2026-10-19'),current:0,initialList:true,onSelect:()=>{},onBack:()=>{},listView:indices=>React.createElement('p',null,`outline stops: ${indices.length}`)}));
   assert.match(outline,/story-map-list/);
   assert.match(outline,/outline stops: 14/);
@@ -392,10 +404,12 @@ test('welcome, character choice and home render in Spanish and still render in E
     assert.match(markup,language==='es'?/Asamblea/:/Assembly|Convention/);
     assert.doesNotMatch(markup,/Week of |Semana del /);
     assert.match(markup,language==='es'?/sustituye a ambas reuniones/:/replaces both congregation meetings/);
-    const map=renderToStaticMarkup(React.createElement(StoryJourneyMap,{meeting,current:meeting.parts.length-1,onSelect:()=>{},onBack:()=>{},listView:()=>null}));
+    const map=renderToStaticMarkup(React.createElement(StoryJourneyMap,{meeting,current:meeting.parts.length-1,onSelect:()=>{},onBack:()=>{},listView:()=>null,companion:React.createElement('span',null,'Companion')}));
     assert.match(map,/has-day-sessions/);
     assert.match(map,language==='es'?/Mapa del programa de la tarde/:/Afternoon programme map/);
     assert.doesNotMatch(map,/morning-music/);
+    assert.match(map,/class="map-companion-cursor/);
+    assert.ok(map.includes(`data-journey-stop="${meeting.parts.length-1}"`));
     for(const part of localizeMeeting(meeting,language).parts.filter(part=>!['Song','Music','MusicVideo'].includes(part.type))){
      const tools=renderToStaticMarkup(React.createElement(StudyTools,{meetingId:meeting.id,part,teen:true,quiet:false,onDraw:()=>{},onWrite:()=>{}}));
      assert.match(tools,/talk-listening-kit/);
