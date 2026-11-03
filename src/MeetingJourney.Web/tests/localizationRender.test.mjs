@@ -128,7 +128,11 @@ test('welcome, character choice and home render in Spanish and still render in E
   const quietStudy=renderToStaticMarkup(React.createElement(StudyTools,{meetingId:'test',part:{...bingoPart,type:'WatchtowerStudy'},teen:true,quiet:true,onDraw:()=>{},onWrite:()=>{}}));
   assert.doesNotMatch(quietStudy,/scripture-spotter/);
   assert.match(quietStudy,/Your own words/);
-  assert.match(renderToStaticMarkup(React.createElement(IconAction,{icon:'calendar',label:'Previous notes'})),/icon-action-label/);
+  const historyIcon=renderToStaticMarkup(React.createElement(IconAction,{icon:'calendar',label:'Previous notes'}));
+  assert.match(historyIcon,/icon-action-hint/);
+  assert.doesNotMatch(historyIcon,/icon-action-label/);
+  assert.match(historyIcon,/title="Previous notes"/);
+  assert.match(renderToStaticMarkup(React.createElement(IconAction,{icon:'home',label:'Home',showLabel:true})),/icon-action-label/);
   const characterBefore=data.get('mj-character');data.delete('mj-character');
   assert.doesNotMatch(renderToStaticMarkup(React.createElement(App)),/age-only-chooser/);
   data.set('mj-character',characterBefore);
@@ -333,12 +337,14 @@ test('welcome, character choice and home render in Spanish and still render in E
    assert.match(renderToStaticMarkup(React.createElement(ConventionSettings)),language==='es'?/Viernes de inicio de la asamblea regional/:/Convention opening Friday/);
    const connections=renderToStaticMarkup(React.createElement(ConnectIdeas,{meetingId:'meeting-2026-10-19',partId:'part-8'}));
    assert.match(connections,language==='es'?/Conecta las ideas/:/Connect the ideas/);
-   assert.equal((connections.match(/<button/g)??[]).length,4);
-   assert.doesNotMatch(connections,/connection-targets|<svg viewBox="0 0 100 100"/);
+   assert.equal((connections.match(/data-connection-source=/g)??[]).length,4);
+   assert.equal((connections.match(/data-connection-target=/g)??[]).length,4);
+   assert.match(connections,/<svg class="connection-lines"[^>]*aria-hidden="true"/);
+   assert.doesNotMatch(connections,/connection-source-picker/);
    const generalConnections=renderToStaticMarkup(React.createElement(ConnectIdeas,{meetingId:'weekend-2026-11-02',partId:'public-talk'}));
    assert.match(generalConnections,language==='es'?/Ayudas generales para escuchar/:/General listening prompts/);
    assert.match(generalConnections,language==='es'?/no se puntúan/:/not scored/);
-   assert.equal((generalConnections.match(/<button/g)??[]).length,4);
+   assert.equal((generalConnections.match(/<button/g)??[]).length,8);
    for(const kind of ['midweek','weekend']){
     const visitProgramme=applyCircuitVisit(getMeeting(kind,'2026-10-26'),globalThis.localStorage,language);
     for(const part of visitProgramme.parts.filter(part=>part.id.startsWith('co-'))){

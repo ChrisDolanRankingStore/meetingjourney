@@ -1,8 +1,13 @@
 :root[data-text-size="large"] { font-size: 18px; }
 .app [hidden] { display: none !important; }
 .app .part-single-focus { display: grid; gap: 16px; padding-block: 16px; }
-.app .part-single-focus button { min-height: 48px; }
-.app .part-single-focus .part-primary-action { background: var(--blue); color: white; }
+.app .part-single-focus button, .app .part-more-menu button {
+  min-height: 48px; padding: 10px 14px; border: 1px solid #c4a16d; border-radius: 8px;
+  background: linear-gradient(125deg,#fff7dd,#ebd0a0); color: #44546c;
+  box-shadow: inset 0 1px #fffdf2, 0 2px 2px #866a3820; font: inherit; font-size: .9375rem;
+}
+.app .part-single-focus .part-primary-action { background: #3e6486; border-color: #264462; color: #fffdf6; }
+.app .part-single-focus button:hover, .app .part-more-menu button:hover { border-color: #617fa1; }
 .app:not(.presentation-reflective) .part-place-row .find-my-place,
 .app:not(.presentation-reflective) .part-screen-shell > .part-scene-details { display: none; }
 .app .part-more-menu { display: grid; gap: 10px; }
@@ -56,9 +61,23 @@ html[data-neutral="true"] .app .home-sources-card { margin: 24px auto; max-width
 .app .mobile-nav .icon-action-label { font-size: .75rem; white-space: nowrap; overflow-wrap: normal; }
 .app > .mobile-nav > .icon-action { height: auto; min-height: 52px; }
 .app .discovery-view-picker { flex-wrap: wrap; }
-.app .icon-action:has(.icon-action-label) { width: auto; max-width: 100%; padding-inline: 8px; }
-.app .discovery-view-picker .icon-action:has(.icon-action-label) { gap: 5px; }
-.app .discovery-view-picker .icon-action-label { font-size: .875rem; white-space: normal; }
+.app .icon-action:has(.icon-action-hint) { position: relative; }
+.icon-action-hint {
+  display: none; position: absolute; z-index: 20; bottom: calc(100% + 6px); right: 0;
+  width: max-content; max-width: min(220px,70vw); padding: 6px 9px;
+  border: 1px solid #c4a16d; border-radius: 6px; background: #fff9ec; color: #30466b;
+  font-size: .875rem; line-height: 1.4; font-weight: 400; white-space: normal; pointer-events: none;
+}
+.icon-action:focus-visible > .icon-action-hint { display: block; }
+@media (hover: hover) { .icon-action:hover > .icon-action-hint { display: block; } }
+.app .notes-timeline > label { display: grid; gap: 6px; min-width: 0; }
+.app .notes-timeline input[type="search"] {
+  appearance: none; -webkit-appearance: none; box-sizing: border-box; display: block;
+  width: 100%; min-width: 0; max-width: 100%; min-height: 44px; margin: 0; padding: 10px 12px;
+  border: 1px solid #ad9470; border-radius: 7px; background: #fffdf5; color: #314f70;
+  box-shadow: inset 0 1px 2px #785a3410;
+}
+.app .notes-timeline input[type="search"]:focus-visible { outline: 2px solid #3e6486; outline-offset: 2px; }
 .comfort-settings { display: grid; gap: 12px; }
 .comfort-settings label:has(input[type="checkbox"]) { display: flex; gap: 10px; align-items: flex-start; min-height: 44px; }
 .comfort-settings input[type="checkbox"] { flex: 0 0 20px; width: 20px; height: 20px; margin: 2px 0; }
@@ -99,16 +118,76 @@ html[data-neutral="true"] .app .home-sources-card { margin: 24px auto; max-width
 .app .journey-tool-modal > * { flex-shrink: 0; }
 .app .journey-tool-modal > .drawing-notebook { flex: 1 1 auto; min-height: 260px; }
 .app .part-card .journey-tool-close { position: sticky; top: 0; align-self: flex-end; z-index: 5; margin-bottom: -44px; }
-.app .idea-connections { display: flex; flex-direction: column; gap: 12px; }
-.app .connection-source-picker > summary { cursor: pointer; min-height: 44px; padding: 8px; border: 1px solid #ad9470; border-radius: 6px; }
-.app .idea-column { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; width: 100%; }
-.app .idea-column button { min-width: 0; min-height: 64px; display: flex; align-items: center; justify-content: flex-start; gap: 8px; font-size: .875rem; overflow-wrap: normal; text-align: left; }
+.app .idea-connections { position: relative; display: grid; grid-template-columns: minmax(0,1fr) clamp(28px,6vw,64px) minmax(0,1fr); gap: 0; }
+.app .idea-column { display: grid; grid-template-columns: minmax(0,1fr); grid-template-rows: repeat(4,minmax(80px,1fr)); gap: 8px; min-width: 0; }
+.app .connection-sources { grid-column: 1; }
+.app .connection-targets { grid-column: 3; }
+.app .idea-column button { min-width: 0; min-height: 64px; margin: 0; display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: .875rem; overflow-wrap: anywhere; text-align: left; }
+.app .idea-column button > span:last-child { min-width: 0; }
 .app .idea-column .illustrated-icon { width: 24px; height: 24px; flex-basis: 24px; }
+.app .idea-connections > .connection-lines { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; pointer-events: none; }
+.connection-lines path { stroke: #55917b; }
+.connection-lines path[data-colour="1"] { stroke: #b87746; }
+.connection-lines path[data-colour="2"] { stroke: #7474b0; }
+.connection-lines path[data-colour="3"] { stroke: #c36e68; }
 .app .connection-step { margin: 0; }
-.app .connection-source-picker .idea-column { margin-top: 8px; }
 .app .connection-summary button { min-height: 44px; text-align: left; }
 .app .idea-column button[aria-pressed="true"] { outline: 2px solid #244c63; outline-offset: -2px; }
 .app .connection-help { font-size: .875rem; }
+.connect-activity > label { display: grid; gap: 6px; margin-block: 12px; }
+:is(.welcome-intro,.parent-unlock-screen,.parent-pin-gate,.parent-access-controls,.restore-preview,.delete-confirmation) button,
+.app .connect-activity > button, .app .connection-summary button, .app .home-copy .comfort-shortcut {
+  min-height: 44px; padding: 8px 12px; border: 1px solid #c4a16d; border-radius: 8px;
+  background: linear-gradient(125deg,#fff7dd,#ebd0a0); color: #44546c; font: inherit; font-size: .875rem;
+  box-shadow: inset 0 1px #fffdf2, 0 2px 2px #866a3820;
+}
+:is(.welcome-intro,.parent-unlock-screen) .primary-adventure-button,
+.parent-unlock-screen > button:first-of-type { background: #3e6486; border-color: #264462; color: #fffdf6; }
+:is(.welcome-intro,.parent-unlock-screen,.parent-pin-gate,.parent-access-controls,.restore-preview,.delete-confirmation) button:disabled {
+  opacity: .55; cursor: default;
+}
+:is(.welcome-intro,.parent-unlock-screen) :is(button,input,select,summary):focus-visible {
+  outline: 3px solid var(--blue); outline-offset: 3px;
+}
+.welcome-intro, .parent-unlock-screen {
+  color: #30466b; background: #fff6e2; border: 1px solid #c9ad7b; border-radius: 12px;
+  box-sizing: border-box;
+}
+.welcome-intro h1, .parent-unlock-screen h1 { font-family: Georgia,serif; font-weight: 600; }
+.welcome-intro > details { padding: 12px; border: 1px solid #d5bc8d; border-radius: 8px; background: #fffbef; }
+.welcome-intro summary { min-height: 44px; align-content: center; cursor: pointer; }
+.welcome-intro .settings-card { margin-top: 12px; }
+.welcome-intro :is(input,select) { max-width: 100%; box-sizing: border-box; }
+.welcome-intro nav { flex-wrap: wrap; }
+.welcome-intro nav a { min-height: 44px; display: inline-flex; align-items: center; }
+:is(.parent-pin-gate,.parent-access-controls,.parent-unlock-screen) input {
+  box-sizing: border-box; padding: 8px; border: 1px solid #cfb990; border-radius: 6px;
+  background: #fffdf5; color: #314f70;
+}
+.app .settings-card, .welcome-intro .settings-card { border-color: #d5bc8d; background: #fff9ec; }
+.app .settings-card :is(select,input:not([type="checkbox"]):not([type="range"]):not([type="color"])) {
+  box-sizing: border-box; min-height: 44px; padding: 8px; border: 1px solid #cfb990;
+  border-radius: 6px; background: #fffdf5; color: #314f70;
+}
+.app .settings-card input[type="checkbox"], .welcome-intro input[type="checkbox"] { accent-color: #426851; }
+.app .settings-card > details > summary, .app .data-controls summary { min-height: 44px; align-content: center; cursor: pointer; }
+.app .restore-preview, .app .delete-confirmation {
+  display: grid; gap: 12px; margin-block: 12px; padding: 12px; border: 1px solid #d5bc8d;
+  border-radius: 8px; background: #f7edd6;
+}
+.restore-preview :is(h4,p), .delete-confirmation p { margin: 0; }
+.restore-preview label { display: flex; align-items: flex-start; gap: 8px; }
+.restore-preview input[type="checkbox"] { flex-shrink: 0; margin-top: 4px; }
+.delete-confirmation label { display: grid; gap: 6px; }
+.app .quiet-pause-tile {
+  min-height: 112px; padding: 16px; border-color: #c4a16d; border-radius: 8px 12px 9px 10px;
+  background: linear-gradient(125deg,#fff7dd,#ebd0a0); color: #44546c;
+  box-shadow: inset 0 1px #fffdf2, 0 2px 2px #866a3820;
+}
+.app .quiet-pause-tile[aria-pressed="true"] { border-color: #617fa1; background: #e3edf0; outline: 2px solid #617fa1; outline-offset: -3px; }
+.app .listening-chips button { border-color: #c4a16d; background: #fff5df; }
+.app .listening-chips button[aria-pressed="true"] { background: #e3edf0; border-color: #617fa1; box-shadow: inset 0 0 0 1px #617fa1; }
+.app .pause-offer { border: 1px solid #d5bc8d; background: #f7edd6; }
 html[data-neutral="true"] .app { --scene-home-image: none; --scene-home-wide: none; background: #f7f8fa !important; color: #243653; }
 html[data-neutral="true"] .app .home-scene,
 html[data-neutral="true"] .app .home-avatar-layer,
@@ -137,25 +216,15 @@ html[data-palette="high-contrast"] .app :is(button,a)[aria-pressed="true"] { col
 html[data-palette="high-contrast"] .app :is(button,a)[aria-pressed="true"] :is(small,strong,span) { color: inherit; }
 html[data-palette="high-contrast"] .app .elapsed-part button[aria-pressed] { background: transparent; color: #172b45; }
 html[data-palette="high-contrast"] .app .part-kicker :is(span,small) { color: #fff; }
-html[data-icon-labels="true"] .app .part-workspace-tabs button > span { display: inline; }
-html[data-icon-labels="true"] .app .drawing-paper-workspace { flex-direction: column; }
-html[data-icon-labels="true"] .app .drawing-toolbar-host { flex: 0 0 auto; width: 100%; }
-html[data-icon-labels="true"] .app .drawing-toolbar.drawing-icon-toolbar,
-html[data-icon-labels="true"] .app .journey-tool-modal[data-tool="doodle"] .drawing-toolbar.drawing-icon-toolbar {
-  flex-direction: row; align-items: stretch; height: auto; max-height: 6rem;
-  width: 100%; overflow-x: auto; overflow-y: hidden; border-right: 0; border-bottom: 1px solid #d6c6a9;
+html[data-palette="high-contrast"] :is(.welcome-intro,.parent-unlock-screen) { color: #172b45; background: #fffdf5; border-color: #31455b; }
+html[data-palette="high-contrast"] :is(.quiet-pause-tile,.restore-preview,.delete-confirmation,.parent-access-controls button,.parent-pin-gate button,.connection-summary button,.connect-activity > button) {
+  color: #172b45; background: #fffdf5; border-color: #31455b; box-shadow: none;
 }
-html[data-icon-labels="true"] .app .drawing-icon-toolbar .drawing-icon-button,
-html[data-icon-labels="true"] .app .journey-tool-modal[data-tool="doodle"] .drawing-icon-toolbar .drawing-icon-button {
-  display: flex; flex-direction: column; justify-content: center; gap: 4px;
-  width: 5rem; min-width: 5rem; height: auto; min-height: 3.5rem; padding: 5px;
+html[data-palette="high-contrast"] .connection-lines path { stroke: #172b45; }
+html[data-neutral="true"] :is(.welcome-intro,.parent-unlock-screen),
+html[data-neutral="true"] .app :is(.quiet-pause-tile,.settings-card,.restore-preview,.delete-confirmation,.idea-column button,.connect-activity > button,.connection-summary button,.part-more-menu button,.part-single-focus > button:not(.part-primary-action)) {
+  background: #fff; box-shadow: none;
 }
-html[data-icon-labels="true"] .app .drawing-icon-toolbar .drawing-icon-button::after {
-  content: attr(title); font-size: .75rem; line-height: 1.25; white-space: normal; overflow-wrap: anywhere;
-}
-html[data-icon-labels="true"] .app .drawing-options-panel { top: 6rem; left: 0; width: min(380px,100%); max-height: calc(100% - 6rem); }
-html[data-icon-labels="true"] .app .drawing-paper-workspace .canvas-shell,
-html[data-icon-labels="true"] .app .journey-tool-modal[data-tool="doodle"] .drawing-paper-workspace .canvas-shell { width: 100%; flex: 1 1 auto; align-self: stretch; min-height: 180px; }
 html[data-text-size="large"] .app :is(.part-workspace-tabs,.notebook-tabs),
 html[data-text-size="larger"] .app :is(.part-workspace-tabs,.notebook-tabs) { display: flex; flex-wrap: wrap; }
 html[data-text-size="large"] .app .part-workspace-tabs button,

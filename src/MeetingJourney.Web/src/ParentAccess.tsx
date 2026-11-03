@@ -10,7 +10,7 @@ export function ParentPinGate({children}:{children:ReactNode}){
 
 export function ParentAccessControls(){
  const[pin,setPin]=useState(''),[confirm,setConfirm]=useState(''),[current,setCurrent]=useState(''),[message,setMessage]=useState(''),[hasPin,setHasPin]=useState(hasParentPin);
- return <section className="parent-access-controls"><h3>{t('Optional parent lock')}</h3><p>{t('A four-digit code can protect Settings, programme import and backup restore. The journey stays available without it.')}</p><small>{t('This is a convenience lock, not encryption. It stays on this device and is not included in backups.')}</small>
+ return <section className="settings-card parent-access-controls"><h3>{t('Optional parent lock')}</h3><p>{t('A four-digit code can protect Settings, programme import and backup restore. The journey stays available without it.')}</p><small>{t('This is a convenience lock, not encryption. It stays on this device and is not included in backups.')}</small>
   {hasPin&&<label>{t('Current code')}<input type="password" inputMode="numeric" maxLength={4} value={current} onChange={event=>setCurrent(event.target.value.replace(/\D/g,'').slice(0,4))}/></label>}
   <label>{t(hasPin?'New four-digit code':'Set a four-digit code')}<input type="password" inputMode="numeric" maxLength={4} value={pin} onChange={event=>setPin(event.target.value.replace(/\D/g,'').slice(0,4))}/></label>
   <label>{t('Confirm code')}<input type="password" inputMode="numeric" maxLength={4} value={confirm} onChange={event=>setConfirm(event.target.value.replace(/\D/g,'').slice(0,4))}/></label>

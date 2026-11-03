@@ -3,6 +3,26 @@
 Reviewed: 3 November 2026  
 Application baseline: `c9abbe90c31dc50a484db1ef72beaade48fac7fe`
 
+## Visual follow-up (0.5.7)
+
+The user reported that the new surfaces lost the established notebook styling.
+The listening stylesheet was not loaded, the simplified primary/More actions
+were missing the framed button treatment, and the parent-access controls were
+not enclosed in a settings card. These are now integrated with the warm paper
+and ink styling. History search has a defined four-sided border and focus ring.
+
+Visible connection curves have been restored without removing deselection,
+Undo, optional examples or the text summary. Curves use the rendered button
+centres and resize with the layout. English and Spanish checks at 320px, 390px
+and tablet widths found no horizontal page overflow in the sampled views.
+
+Following user feedback, enabling icon hints no longer adds labels beside
+buttons or changes the drawing-toolbar layout. Hints appear on hover/focus
+while accessible names remain available. Discovery targets remain 44px square
+with the setting on or off. History search retains all four borders and its
+focus ring at 320px, 390px and 768px; a 320px check with 200% root text also
+kept the field within its panel.
+
 ## Release 0.5.6 follow-up: current status
 
 The five approved implementation phases have been delivered, followed by

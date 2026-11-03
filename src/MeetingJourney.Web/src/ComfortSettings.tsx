@@ -36,7 +36,7 @@ export function ComfortSettings() {
     <label><input type="checkbox" checked={value.neutral} onChange={event => update({neutral:event.target.checked})}/>{t('Neutral notebook: hide scenery and companion')}</label>
     <label><input type="checkbox" checked={value.hideCounts} onChange={event => update({hideCounts:event.target.checked})}/>{t('Hide activity counts and completion feedback')}</label>
     <label><input type="checkbox" checked={value.showMinutes} onChange={event => update({showMinutes:event.target.checked})}/>{t('Show minutes')}</label>
-    <label><input type="checkbox" checked={value.iconLabels} onChange={event => update({iconLabels:event.target.checked})}/>{t('Show labels beside icons')}</label>
+    <label><input type="checkbox" checked={value.iconLabels} onChange={event => update({iconLabels:event.target.checked})}/>{t('Show icon hints on hover or focus')}</label>
     <p role="status">{t(status)}</p>
   </section>;
 }
