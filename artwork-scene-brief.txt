@@ -1,0 +1,125 @@
+MEETING JOURNEY: SIX WEEKLY WORLDS WITH FOUR SEASONS
+
+Purpose
+Create original painted background artwork for a calm, bilingual meeting
+companion. A different world is selected each meeting week, cycling through
+six worlds. Each world has winter, spring, summer and autumn artwork.
+The app will select the season using the meeting date and a device-local
+Northern/Southern hemisphere setting. Do not bake dates or hemisphere names
+into the pictures. Weather is illustrated atmosphere, not live local weather.
+
+Deliverables
+Six worlds x four seasons x six images = 144 individual images.
+For each world and season supply:
+1. map: an elevated illustrated overview of the whole world.
+2. gate: the welcoming entrance/start of the route.
+3. river: a calm waterside listening location.
+4. bridge: a pedestrian crossing.
+5. village: a village path or small residential lane.
+6. garden: a quiet garden/resting place at the end.
+Home will reuse one of the five location images; no separate Home image needed.
+
+Worlds
+valley: river valley, rounded green hills, stone bridge, small village.
+coast: sheltered coastal village, freshwater stream meeting the sea,
+       footbridge, dunes, coastal garden. No dramatic storms or cliffs.
+woodland: woodland settlement, forest stream, timber footbridge,
+          cottage lane, peaceful clearing garden.
+mountain: gentle mountain foothills, stream, stone footbridge,
+          mountain village, sheltered garden. Route is safe and walkable.
+countryside: rolling farmland, small stream, low bridge, country lane,
+             orchard and flower garden.
+lake: lakeside town, lake-fed stream, footbridge, residential promenade,
+      quiet lakeside garden.
+Make the geography, architecture, silhouettes and compositions genuinely
+different. Do not produce six recolourings of the same valley.
+
+Visual style
+Use the supplied current app artwork as the reference for style and framing:
+warm hand-painted watercolour/gouache, softly textured paper, natural detail,
+welcoming light, readable silhouettes, gently muted colours.
+Original artwork only. No copied illustrations or branded visual elements.
+Not photorealistic, not flat vector art, not a videogame screenshot.
+No people, avatars, text, labels, numbers, buttons, pins, treasure chests,
+logos, religious symbols, borders, parchment panels or UI.
+The app overlays its own companion, route controls, notes and treasure markers.
+Keep busy high-contrast detail away from the central foreground and route.
+
+Season continuity
+First establish each world's summer geography and all six compositions.
+Approve these before generating other seasons.
+For each matching image, keep the camera, buildings, path, bridge, river,
+garden and major landmarks in the same positions in every season.
+Winter: bare deciduous trees, evergreens, light settled snow where appropriate,
+        cool daylight, soft cloud or mist; path and bridge remain visible.
+Spring: fresh leaves, blossom, small flowers, moist ground, gentle rain-cloud
+        atmosphere or soft sunshine after rain.
+Summer: full foliage, warm daylight, clear or lightly clouded sky.
+Autumn: gold/rust deciduous foliage, fallen leaves, soft overcast light,
+        occasional damp surfaces and gentle mist.
+Adapt intensity to the world: coast has milder snow than mountain.
+No heavy rain streaks over the entire image, blizzards, lightning, flooding,
+dangerous weather, particles covering controls, or animation.
+Season changes must affect the painted foliage, ground and sky, not just tint.
+
+Map composition
+Portrait 2:3 aspect ratio, elevated illustrative view, not a diagram.
+Build a clearly visible, gently winding walking route connecting all five
+locations within one coherent geography.
+Use broadly consistent landmark positions across worlds so app overlays can
+share their layout. Coordinates are percentages from top-left:
+entrance around (24,86);
+waterside around (48,71);
+bridge around (51,53), with route extending towards (75,43);
+village around (78,24), continuing towards (43,23);
+quiet garden around (31,17), ending towards (14,11).
+Keep these zones open and identifiable; do not paint markers at the coordinates.
+Keep landmarks comfortably inside the image, with scenery beyond them.
+Avoid giant central buildings, tiny unreadable paths, or important landmarks
+right against the edge.
+
+Location composition
+Portrait 2:3 aspect ratio, human-height or gently elevated viewpoint.
+Each location must recognisably belong to its matching map and season:
+same architecture, vegetation, terrain, bridge material and water character.
+Leave a calm central/lower foreground for a companion overlay.
+Allow generous crop-safe surroundings for narrow phones and landscape tablets.
+No essential object should be clipped by a centred crop.
+Gate and bridge must be recognisable as those places; village and garden
+must not be interchangeable generic backgrounds.
+
+Output
+Deliver separate PNG master files, ideally 2048 x 3072 pixels, sRGB.
+If the engine cannot produce that resolution, use its native portrait 2:3
+resolution and report the actual dimensions; do not upscale merely to meet it.
+Do not deliver contact sheets as substitutes for individual images.
+Do not bake compression artifacts into masters.
+The app developer will create optimized WebP delivery sizes.
+
+Naming and folders
+<world>/<season>/<view>.png
+World: valley, coast, woodland, mountain, countryside, lake
+Season: winter, spring, summer, autumn
+View: map, gate, river, bridge, village, garden
+Example: woodland/autumn/bridge.png
+All names lowercase ASCII. Keep geography consistent within each world.
+
+Generation workflow
+1. Create six summer maps, one per world, for composition/style approval.
+2. Create each approved world's five summer location images using its map
+   as a reference.
+3. Create winter, spring and autumn versions using the corresponding summer
+   image as the composition reference. Do not independently invent new layouts.
+4. Compare each world as a six-image set, then each view across four seasons.
+5. Deliver all 144 individual files; identify any missing or failed images.
+
+Reusable single-image prompt
+Create the [VIEW] background for Meeting Journey's [WORLD] world in [SEASON].
+Use the supplied approved reference image(s) to preserve the geography,
+architecture, landmark positions and camera composition.
+Original warm hand-painted watercolour/gouache on subtly textured paper.
+Portrait 2:3, gentle natural light, quiet welcoming atmosphere, crop-safe
+surroundings and uncluttered foreground for app overlays.
+Show [WORLD-SPECIFIC LANDMARKS] with [SEASONAL FOLIAGE, GROUND AND WEATHER].
+No people, text, icons, markers, chests, logos, UI, frames or animation.
+Return one individual image, not a collage.

@@ -706,6 +706,7 @@ function PartScreen({ profile, part, weekOf, quiet, characterAction, partIndex, 
 }
 
 export function MeetingPartView({ meetingId, part, partIndex, songPart, material, profile, characterAction = 'steady', totalParts, engagement, presentation, onOpenMaterial, requestedTool, onToolOpened }: { meetingId: string; part: MeetingPart; partIndex: number; songPart?: MeetingPart; material: Meeting['material']; profile: CharacterProfile; characterAction?: CharacterAction; totalParts: number; engagement: Engagement; presentation: Presentation; onOpenMaterial: () => void; requestedTool?: CompanionQuickAction | null; onToolOpened?: () => void }) {
+  const sceneryWeek=meetingId.match(/\d{4}-\d{2}-\d{2}/)?.[0];
   const toolDialog=useRef<HTMLDialogElement>(null);
   const [note, setNote] = useState('');
   const [feedback, setFeedback] = useState('');
@@ -797,7 +798,7 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
       <button type="button" aria-label={t('References')} title={t('References')} onClick={()=>setToolOpen('source')}><IllustratedIcon name="references" /><span>{t('References')}</span></button>
     </nav>
     <details className="one-thing-focus"><summary>{t('Listen for one thing (optional)')}</summary><p>{t('Choose one idea, example or scripture to notice. You do not need to count, write or finish anything.')}</p><button type="button" onClick={()=>setToolOpen('note')}>{t('Keep a thought')}</button></details>
-    <details className="part-guidance" key={`${presentation}:${engagement}`} open={presentation!=='simple'&&engagement!=='quiet'}><summary>{t('Listening guidance')}</summary><section className="part-focus-panel" style={{'--focus-landscape':`url("${sceneImage(storyMoment(part).image,480)}")`} as CSSProperties}><h3>{focusQuestion}</h3><p className="part-summary">{part.summary}</p></section></details>
+    <details className="part-guidance" key={`${presentation}:${engagement}`} open={presentation!=='simple'&&engagement!=='quiet'}><summary>{t('Listening guidance')}</summary><section className="part-focus-panel" style={{'--focus-landscape':`url("${sceneImage(storyMoment(part,sceneryWeek).image,480)}")`} as CSSProperties}><h3>{focusQuestion}</h3><p className="part-summary">{part.summary}</p></section></details>
     {presentation==='reflective'&&engagement!=='quiet'&&<p className="reflection-question">{t('What would I like to remember from this part?')}</p>}
     {engagement==='active'&&<button type="button" className="active-activity-shortcut" onClick={()=>setToolOpen('activities')}>{t('Choose an activity, or just listen')}</button>}
     {part.section==='Treasures'&&(part.id==='part-2'||part.title===t('Spiritual gems')) && <SpiritualGemsCard part={part} material={material} />}
@@ -812,7 +813,7 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
     {engagement!=='quiet'&&<fieldset className="part-reflection-choices"><legend>{t('What I noticed')}</legend>{reflection.choices.map(choice=>choice==='My own thought'
       ? <button className="reflection-write-action" type="button" key={choice} disabled={!noteLoaded} onClick={()=>setToolOpen('note')}><NotebookIcon name="pen" />{t(choice)}<NotebookIcon name="next" /></button>
       : <label key={choice}><input type="checkbox" disabled={!noteLoaded} checked={feedbackChoices.includes(choice)} onChange={()=>toggleFeedbackChoice(choice)} /><span>{t(choice)}</span></label>)}</fieldset>}
-    <aside className="part-guide" aria-label={t('Your guide for this part')} style={{'--guide-landscape':`url("${sceneImage(storyMoment(part).image,480)}")`} as CSSProperties}>
+    <aside className="part-guide" aria-label={t('Your guide for this part')} style={{'--guide-landscape':`url("${sceneImage(storyMoment(part,sceneryWeek).image,480)}")`} as CSSProperties}>
       <div className="part-guide-portrait"><CharacterAvatar profile={profile} size="hero" action={characterAction} /></div>
       <div className="part-guide-help"><h3>{t('Need a little help?')}</h3><p>{t(engagement==='quiet'?'You can just listen, draw or keep a thought.':'You can just listen, or choose a clue to get started.')}</p>
         <div className="part-guide-actions">{engagement!=='quiet'&&<button type="button" onClick={()=>{setDiscoveryPage('0');setReturnToActivities(false);setToolOpen('story');}}><IllustratedIcon name="clue" /><span>{t('Show a clue')}</span></button>}

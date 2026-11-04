@@ -1,10 +1,11 @@
 import {APP_CACHE} from './release';
 ﻿import {useEffect} from 'react';
 import {focusLandscape,sceneImage,portraitImage} from './artwork';
-import {sceneAssetsForWeek} from './sceneSets';
+import {sceneAssetsForWeek,readSceneHemisphere} from './sceneSets';
 import {paintedIconAssets} from './paintedIcons';
 import type {Meeting} from './types';
 export function useOfflinePreparation(meeting:Meeting,portrait?:string){
+ const hemisphere=readSceneHemisphere();
  useEffect(()=>{
   if(!portrait||!navigator.onLine||!('caches'in window))return;
   const connection=(navigator as Navigator&{connection?:{saveData?:boolean;effectiveType?:string}}).connection;
@@ -17,5 +18,5 @@ export function useOfflinePreparation(meeting:Meeting,portrait?:string){
    for(const url of urls){if(controller.signal.aborted)return;if(await cache.match(url))continue;const response=await fetch(url,{signal:controller.signal});if(!response.ok||response.headers.get('content-type')?.includes('text/html'))continue;await cache.put(url,response);}
   })().catch(()=>undefined);},2500);
   return()=>{clearTimeout(timer);controller.abort();};
- },[meeting.id,portrait]);
+ },[meeting.id,meeting.weekOf,portrait,hemisphere]);
 }

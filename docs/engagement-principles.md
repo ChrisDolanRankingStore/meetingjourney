@@ -4,6 +4,26 @@ Meeting Journey is designed to support attention, processing and participation. 
 
 ## Product decisions
 
+### Seasonal scenery integration (awaiting final location artwork)
+
+Six supplied landscapes rotate by calendar week, with the same selection from
+Monday through Sunday and a six-week cycle across year boundaries. Spring,
+summer, autumn and winter use separate supplied artwork, not recoloured
+versions of the old valley. Settings offers a device-local Northern/Southern
+hemisphere choice, defaulting to Northern; no location permission or live
+weather service is used.
+
+The full landscapes are map/Home backgrounds. Five temporary framed locations
+are derived from each matching landscape; separate location artwork is pending.
+The current week and hemisphere also select scenery for part guidance and
+offline preparation. Offline packs cache only the selected set, not all worlds.
+
+PNG masters remain in the untracked artwork directory. Run
+`node node-app/scripts/prepare-seasonal-artwork.mjs` to regenerate optimized
+WebP/JPEG delivery images from the 24 extracted masters. Map and crop outputs
+use 480/960/1600 delivery names without upscaling the native image resolution.
+This integration is not yet a refreshed upload release or a verified deployment.
+
 ### Colour fill and roomier drawing paper (0.5.10)
 
 The drawing rail includes a paint-bucket Fill tool using the selected colour.

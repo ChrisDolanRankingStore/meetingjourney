@@ -1,7 +1,7 @@
 import {t} from './i18n';
 import {useState, type CSSProperties} from 'react';
 import {focusLandscape, sceneImage, portraitImage} from './artwork';
-import {sceneAssetsForWeek} from './sceneSets';
+import {sceneAssetsForWeek,readSceneHemisphere,SCENE_HEMISPHERE_KEY,type SceneHemisphere} from './sceneSets';
 import {paintedIconAssets} from './paintedIcons';
 import type {Meeting} from './types';
 import {ProgrammeImport,programmeImportEnabled} from './ProgrammeImport';
@@ -40,6 +40,8 @@ export function OfflineMeeting({meeting, portrait}: {meeting: Meeting; portrait:
 }
 
 export function DisplaySettings() {
+  const [hemisphere,setHemisphere]=useState(readSceneHemisphere);
+  const [sceneStatus,setSceneStatus]=useState('');
   const [theme, setTheme] = useState(() => localStorage.getItem('mj-theme') ?? 'painted');
   const [font, setFont] = useState(() => localStorage.getItem('mj-font') ?? 'system');
   const [palette, setPalette] = useState(() => localStorage.getItem('mj-palette') ?? 'journey');
@@ -47,6 +49,13 @@ export function DisplaySettings() {
   const palettes = [{id: 'journey', label: 'Journey blue', detail: 'The original Meeting Journey colours', swatch: '#5b61d6'}, {id: 'ocean', label: 'Calm ocean', detail: 'Cool blue and teal', swatch: '#2e77b7'}, {id: 'meadow', label: 'Meadow green', detail: 'Soft green and earth tones', swatch: '#548f67'}, {id: 'sunset', label: 'Warm sunset', detail: 'Gentle plum and amber', swatch: '#9b5ea0'}, {id: 'high-contrast', label: 'High contrast', detail: 'Strongest text and focus colours', swatch: '#123f8c'}] as const;
   return <section className="settings-card">
     <h3>{t('Scene and reading comfort')}</h3>
+    <label>{t('Seasons for your hemisphere')}<select value={hemisphere} onChange={event=>{
+      const next:SceneHemisphere=event.target.value==='south'?'south':'north';
+      try{localStorage.setItem(SCENE_HEMISPHERE_KEY,next);setHemisphere(next);window.dispatchEvent(new Event('mj-display-change'));setSceneStatus('Saved on this device');}
+      catch{setSceneStatus('Could not save your preference. Please try again.');}
+    }}><option value="north">{t('Northern hemisphere')}</option><option value="south">{t('Southern hemisphere')}</option></select></label>
+    <p className="settings-help">{t('Scenery changes each meeting week. Seasons follow the selected week, not live weather. No location permission is needed.')}</p>
+    {sceneStatus&&<p role="status">{t(sceneStatus)}</p>}
     <label>{t('Reading treatment')}<select value={theme} onChange={event => { setTheme(event.target.value); choose('mj-theme', event.target.value); }}><option value="painted">{t('Full colour')}</option><option value="soft">{t('Soft')}</option><option value="plain">{t('Plain')}</option></select></label>
     <label>{t('Text')}<select value={font} onChange={event => { setFont(event.target.value); choose('mj-font', event.target.value); }}><option value="system">{t('System')}</option><option value="readable">{t('Spacious, clear text')}</option></select></label>
     <details className="palette-details"><summary>{t('Colour scheme')}</summary><fieldset className="palette-picker"><legend className="visually-hidden">{t('Colour scheme')}</legend><div className="palette-options">{palettes.map(option => <button key={option.id} type="button" className={`palette-option ${palette === option.id ? 'selected' : ''}`} aria-pressed={palette === option.id} onClick={() => { setPalette(option.id); choose('mj-palette', option.id); }}><span className="palette-swatch" style={{'--palette-swatch': option.swatch} as CSSProperties} /><span><strong>{t(option.label)}</strong><small>{t(option.detail)}</small></span></button>)}</div><small className="settings-help">{t('Your choice stays on this device and can be changed at any time.')}</small></fieldset></details>
