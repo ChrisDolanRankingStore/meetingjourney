@@ -44,7 +44,9 @@ open. Text receives extra side clearance.
 
 Home no longer repeats Reading comfort or Customise companion: both remain in
 Settings. Its notice, current-place control and journey actions have consistent
-12px separation. A part's title is the official-material link when a source is
+12px separation, with matching 12px padding around the action panel so the
+Preview and Meeting outline buttons do not touch its bottom edge.
+A part's title is the official-material link when a source is
 known, retaining keyboard focus and the return check-in without adding another
 text action. All official source links share the HTTPS Finder handoff where a
 publication, Bible or media identifier is available; this allows JW Library

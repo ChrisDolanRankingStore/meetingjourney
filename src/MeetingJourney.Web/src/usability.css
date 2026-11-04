@@ -20,7 +20,7 @@ html[data-theme] .app > :is(.app-header,.mobile-nav) { background: var(--browser
   border: 0; border-radius: 6px; background: transparent; color: inherit;
 }
 .app .dismissible-programme-notice > p { grid-column: 1 / -1; margin: 0; }
-.app .home-redesign .home-copy { display: flex; flex-direction: column; gap: 12px; }
+.app .home-redesign .home-copy { display: flex; flex-direction: column; gap: 12px; padding: 12px; }
 .app .home-redesign .home-copy > :is(.meeting-content-notice,.where-am-i,.home-actions,.storybook-links) { margin: 0; }
 .app .part-title-link {
   display: inline-flex; align-items: center; min-height: 44px; color: inherit;

@@ -3,6 +3,16 @@
 Reviewed: 3 November 2026  
 Application baseline: `c9abbe90c31dc50a484db1ef72beaade48fac7fe`
 
+## Home panel spacing follow-up (0.5.11)
+
+The Home action panel now explicitly keeps 12px padding on every edge as well
+as its 12px internal gaps. Resetting child margins had exposed an older
+zero-bottom-padding rule, leaving Preview and Meeting outline against the
+frame. Browser measurements in English and Spanish at 320px, 390px and 768px
+confirm 12px gaps and 12px clearance below the final row, without horizontal
+overflow. The clearance also holds after dismissing the notice and enlarging
+root text to 24px. Build, all 148 tests and packaged runtime smoke check pass.
+
 ## Drawing and Settings follow-up (0.5.10)
 
 The drawing toolbar now offers colour fill with a translated paint-bucket
