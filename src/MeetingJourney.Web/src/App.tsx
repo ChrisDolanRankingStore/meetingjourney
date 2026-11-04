@@ -22,7 +22,7 @@ import {partSources} from './partSources';
 import {IllustratedIcon} from './IllustratedIcon';
 import {MovementIcon} from './MovementIcon';
 import {HomeGuidePanel, type HomeGuideAction} from './HomeGuidePanel';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import { useMeetingSchedule, type MeetingSchedule } from './useMeetingSchedule';
 import { MeetingPicker, MeetingDaysSettings, meetingDateLabel } from './MeetingPicker';
 import { applyCircuitVisit, VISIT_UPDATED } from './circuitVisit';
@@ -340,7 +340,7 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
   if (screen === 'settings' && hasParentPin() && !settingsUnlocked) return <ParentUnlock onUnlocked={()=>setSettingsUnlocked(true)} onCancel={()=>setScreen('home')}/>;
   if (screen === 'settings') return <div className={appClass} style={sceneStyle}><AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} /><main id="main-content" tabIndex={-1} className="page-shell settings-page"><SettingsScreen scheduleSettings={<><LanguageSelector meeting={{id:schedule.meeting.id,kind:schedule.meeting.kind}} /><MeetingDaysSettings schedule={schedule} /><OfflineMeeting meeting={meeting} portrait={characterAsset(character)} /><LocalPartTitles meeting={schedule.meeting} /><ProgrammeImport /><ParentAccessControls/><DataControls /></>} presentation={presentation} engagement={engagement} calmView={calmView} onPresentation={setPresentation} onEngagement={setEngagement} onCalmView={setCalmView} onOpenProfile={() => setShowCharacterChooser(true)} onOpenStudy={() => setScreen('study')} onOpenPrep={() => setScreen('prep')} /></main><MobileNav profile={character} screen={screen} onHome={() => setScreen('home')} onJourney={() => setScreen('overview')} onDiscoveries={() => setScreen('discoveries')} onSettings={openSettings} onMaterial={openMaterial} onProfile={() => setShowCharacterChooser(true)} /><footer><p>{t("Your notes and drawings stay on this device.")}</p></footer></div>;
 
-  return <div className={`${appClass} journey-screen`} style={{'--journey-background':`url("${sceneImage(scenePack.homeImage, 1600)}")`} as CSSProperties}>
+  return <div className={`${appClass} journey-screen`} style={{'--journey-background':`url("${sceneImage(scenePack.moments[part.section].image, 1600)}")`} as CSSProperties}>
     <AppHeader schedule={schedule} partId={part.id} online={online} onOpenJourney={() => setScreen('overview')} />
     <main id="main-content" tabIndex={-1} className="page-shell journey-stage-page">
       <section className="welcome-card">
@@ -367,7 +367,7 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
       <section className={`journey-layout ${showMap ? 'with-map' : 'focus-layout'}`}>
         {showMap && <aside className="journey-map" aria-label={t("Meeting journey")}><div className="map-header"><div><p className="eyebrow">{t("Your journey")}</p><h2>{t("Meeting map")}</h2></div><button className="icon-button" type="button" aria-label={t("Hide journey map")} onClick={() => setShowMap(false)}>×</button></div><p className="map-help">{t("Choose any part to go straight there.")}</p><div className="map-list">{Object.entries(sectionParts).map(([section, items]) => <div className="map-section" key={section}><h3>{sectionLabel(section as MeetingPart['section'],character.ageGroup!=='child')}</h3>{items.map(item => { const index = meeting.parts.indexOf(item); return <button key={item.id} type="button" className={`map-stop ${index === partIndex ? 'selected' : ''} ${index < partIndex ? t("visited") : ''}`} onClick={() => setPartIndex(index)}><span className="stop-number">{item.number ?? '•'}</span><span><strong>{item.title}</strong><small>{partTiming(item)}</small></span>{index < partIndex && <span aria-label={t("visited")}>✓</span>}</button>; })}</div>)}</div></aside>}
         <section className="part-column">
-          <PartScreen key={part.id} part={part} weekOf={meeting.weekOf} quiet={engagement === 'quiet'} profile={character} characterAction={characterAction} partIndex={partIndex} totalParts={meeting.parts.length} onMoveCharacter={moveCharacter} onQuickAction={runQuickAction} onSwipe={move}><MeetingPartView key={part.id} requestedTool={pendingTool} onToolOpened={() => setPendingTool(null)} songPart={meeting.kind === 'weekend' && part.type === 'Song' ? schedule.meeting.parts.find(item => item.id === part.id) : undefined} meetingId={meeting.id} part={part} partIndex={partIndex} material={meeting.material} profile={character} characterAction={characterAction} totalParts={meeting.parts.length} engagement={engagement} presentation={presentation} onOpenMaterial={openMaterial} /></PartScreen>
+          <PartScreen part={part} weekOf={meeting.weekOf} quiet={engagement === 'quiet'} profile={character} characterAction={characterAction} partIndex={partIndex} totalParts={meeting.parts.length} onMoveCharacter={moveCharacter} onQuickAction={runQuickAction} onSwipe={move}><MeetingPartView key={part.id} requestedTool={pendingTool} onToolOpened={() => setPendingTool(null)} songPart={meeting.kind === 'weekend' && part.type === 'Song' ? schedule.meeting.parts.find(item => item.id === part.id) : undefined} meetingId={meeting.id} part={part} partIndex={partIndex} material={meeting.material} profile={character} characterAction={characterAction} totalParts={meeting.parts.length} engagement={engagement} presentation={presentation} onOpenMaterial={openMaterial} /></PartScreen>
           <p className="visually-hidden" role="status">{tt`Part ${partIndex+1} of ${meeting.parts.length}`}, {part.title}</p>
           {navigationError&&<p role="alert">{t(navigationError)}</p>}
         </section>
@@ -669,6 +669,10 @@ function JourneyTrail({ meeting, partIndex, onSelect,standardRegister=false }: {
 function PartScreen({ profile, part, weekOf, quiet, characterAction, partIndex, totalParts, onMoveCharacter, onQuickAction, onSwipe, children }: { profile: CharacterProfile; part: MeetingPart; weekOf: string; quiet: boolean; characterAction: CharacterAction; partIndex: number; totalParts: number; onMoveCharacter: (action: Exclude<CharacterAction, 'steady'>) => void; onQuickAction: (action: CompanionQuickAction) => void; onSwipe: (delta: number) => void; children: ReactNode }) {
   const moment = storyMoment(part, weekOf);
   const scenePack = sceneSetForWeek(weekOf);
+  const [sceneryRevealed,setSceneryRevealed]=useState(false);
+  const pullStart=useRef<{id:number;y:number}|null>(null);
+  const pulled=useRef(false);
+  const panelId=useId();
   const routeProgress = totalParts <= 1 ? 0 : partIndex / (totalParts - 1);
   const gestureStart = useRef<{ x: number; y: number } | null>(null);
   const gestureTarget = useRef<HTMLElement | null>(null);
@@ -689,13 +693,32 @@ function PartScreen({ profile, part, weekOf, quiet, characterAction, partIndex, 
     if (Math.abs(deltaX) < 55 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) return;
     onSwipe(deltaX < 0 ? 1 : -1);
   };
-  return <div className="part-screen-shell" onPointerDown={beginGesture} onPointerUp={finishGesture} onPointerCancel={() => { gestureStart.current = null; gestureTarget.current = null; }}>
-    {children}
+  return <div className={`part-screen-shell${sceneryRevealed?' is-scenery-revealed':''}`} onPointerDown={beginGesture} onPointerUp={finishGesture} onPointerCancel={() => { gestureStart.current = null; gestureTarget.current = null; }}>
+    <button type="button" className="scenery-pull-handle" aria-label={t(sceneryRevealed?'Show meeting panel':'Reveal scenery')} aria-expanded={!sceneryRevealed} aria-controls={panelId}
+      onPointerDown={event=>{
+        if(!event.isPrimary||event.button!==0)return;
+        event.stopPropagation();
+        pulled.current=false;pullStart.current={id:event.pointerId,y:event.clientY};
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerUp={event=>{
+        event.stopPropagation();
+        const start=pullStart.current;pullStart.current=null;
+        if(!start||start.id!==event.pointerId)return;
+        const distance=event.clientY-start.y;
+        if(Math.abs(distance)>=35){pulled.current=true;setSceneryRevealed(distance>0);}
+      }}
+      onPointerCancel={()=>{pullStart.current=null;pulled.current=true;}}
+      onLostPointerCapture={()=>{pullStart.current=null;}}
+      onKeyDown={event=>{if(event.key==='Escape'){event.preventDefault();setSceneryRevealed(false);}}}
+      onClick={event=>{if(event.detail===0||!pulled.current)setSceneryRevealed(value=>!value);pulled.current=false;}}
+    ><span className="scenery-pull-grip" aria-hidden="true"/><NotebookIcon name="chevron-down"/>{sceneryRevealed&&<span className="scenery-pull-title">{part.title}</span>}</button>
+    <div id={panelId} className="meeting-panel-content" hidden={sceneryRevealed}>{children}</div>
     <nav className="part-edge-navigation" aria-label={t('Meeting parts')}>
       <button type="button" className="part-edge-previous" disabled={partIndex===0} aria-label={t('Previous part')} title={t('Previous part')} onClick={()=>onSwipe(-1)}><NotebookIcon name="back" /></button>
       <button type="button" className="part-edge-next" aria-label={t(partIndex===totalParts-1?'Review':'Next part')} title={t(partIndex===totalParts-1?'Review':'Next part')} onClick={()=>onSwipe(1)}><NotebookIcon name="next" /></button>
     </nav>
-    <details className="part-scene-details">
+    <details className="part-scene-details" hidden={sceneryRevealed}>
       <summary><NotebookIcon name="route" /><span>{t('Scenery and companion')}</span><NotebookIcon name="chevron-down" /></summary>
       <div className={`part-story-scene chapter-${part.section.toLowerCase()}`} style={{ '--route-progress': routeProgress, '--scene-x': `${moment.x}%`, '--scene-position': scenePack.backgroundPosition, '--scene-image': `url("${sceneImage(moment.image, window.innerWidth < 600 ? 480 : 960)}")` } as CSSProperties} aria-label={tt`${moment.place}, stop ${partIndex + 1} of ${totalParts}`}>
         <div className="journey-chapter-pill"><span aria-hidden="true">{moment.symbol}</span><span>{t(moment.place)}</span></div>

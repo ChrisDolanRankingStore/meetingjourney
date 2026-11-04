@@ -3,6 +3,19 @@
 Reviewed: 3 November 2026  
 Application baseline: `c9abbe90c31dc50a484db1ef72beaade48fac7fe`
 
+## Scenery reveal (0.5.12)
+
+The main meeting background now follows the current section's location.
+A labelled 44px handle reveals scenery by tap or downward pull, retaining a
+bottom strip with the current title. Previous/Next keep the panel hidden;
+tap, upward pull or Escape restores it without changing the meeting position.
+The handle does not intercept drawing or note gestures and is hidden in tools,
+Plain and neutral modes. There is no animated transition.
+Phone browser checks confirmed hidden state across navigation, changing
+river/bridge/village backgrounds and upward-pull restoration.
+Build, 147 automated tests and packaged runtime smoke check pass.
+Physical touch-device and screen-reader validation remains outstanding.
+
 ## Home panel spacing follow-up (0.5.11)
 
 The Home action panel now explicitly keeps 12px padding on every edge as well

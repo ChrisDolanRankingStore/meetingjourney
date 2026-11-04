@@ -17,12 +17,21 @@ The full landscapes are map/Home backgrounds. Five temporary framed locations
 are derived from each matching landscape; separate location artwork is pending.
 The current week and hemisphere also select scenery for part guidance and
 offline preparation. Offline packs cache only the selected set, not all worlds.
+The main meeting background uses the current section's location, not the Home
+overview: gate, riverside, bridge, village and garden. Consecutive items within
+one section share that location; changing section changes the background.
+An optional parchment handle above the card reveals the scenery on tap or a
+downward pull. The collapsed strip keeps the current part title visible.
+Scenery stays revealed through Previous/Next navigation; tap, upward pull or
+Escape restores the panel. Content stays mounted while hidden. Pull gestures
+are limited to the handle; tools hide it. Plain and neutral modes omit it.
+No animation or automatic collapse is used.
 
 PNG masters remain in the untracked artwork directory. Run
 `node node-app/scripts/prepare-seasonal-artwork.mjs` to regenerate optimized
 WebP/JPEG delivery images from the 24 extracted masters. Map and crop outputs
 use 480/960/1600 delivery names without upscaling the native image resolution.
-This integration is not yet a refreshed upload release or a verified deployment.
+Release 0.5.12 includes this integration; deployment remains a separate step.
 
 ### Colour fill and roomier drawing paper (0.5.10)
 
