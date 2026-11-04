@@ -3,6 +3,34 @@
 Reviewed: 3 November 2026  
 Application baseline: `c9abbe90c31dc50a484db1ef72beaade48fac7fe`
 
+## Drawing and Settings follow-up (0.5.10)
+
+The drawing toolbar now offers colour fill with a translated paint-bucket
+action and a short explanation of open outlines. Fill uses the current colour,
+is one Undo/Redo action and retains its original paper bounds when the sheet
+grows. Fill-only pages appear in Discoveries and previous notes; local backup
+validation accepts valid fills and rejects malformed bounds.
+
+Zoom starts at 100% but immediately allows 25%, revealing four times the width
+and height of usable paper. Revealed paper is retained without changing the
+current fit scale. Zooming back in and two-finger panning can reach marks
+outside the original sheet rather than snapping back to its old bounds.
+
+Browser checks covered a new empty page, drawing beyond its original bounds,
+enclosed-region fill without colouring the outside, Undo/Redo, saved reload,
+PNG export, original fill bounds after paper growth, and touch pinch/cancel
+without keeping an accidental fill. The final package also passed a 25%-to-100%
+zoom check on extended paper and a measured 60px-by-70px two-finger pan;
+paper stayed solid beneath the moved ink.
+
+English/Spanish fill controls and 320px, 390px and 768px layouts were checked.
+Settings now has an 88%-opaque parchment backing rather than an empty outlined
+shell around its filled cards; the same widths show no horizontal overflow.
+Plain, Calm, neutral and high-contrast selectors remain unchanged.
+
+Production build, all 148 automated tests and packaged runtime smoke check pass.
+Physical-device, stylus and screen-reader validation remains outstanding.
+
 ## Remaining work confirmed (4 November 2026)
 
 The five approved code-delivery phases are complete, including the subsequent

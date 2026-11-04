@@ -316,10 +316,10 @@ html[data-text-size="larger"] .app .part-workspace-tabs button { flex: 1 1 90px;
 .app .story-map-footer:has(.map-companion-cursor) { gap: 8px; }
 .app .story-map-footer > p { min-width: 0; }
 html[data-theme="painted"]:not([data-neutral="true"]):not([data-palette="high-contrast"]) .app:not(.sensory-calm) :is(
-  .home-copy,.home-sources-card,.part-card,.settings-card,.settings-screen > .screen-heading,
+  .home-copy,.home-sources-card,.part-card,.settings-screen,.settings-card,.settings-screen > .screen-heading,
   .notes-timeline,.historical-notebook,.discovery-map-heading,
   .story-map-heading,.story-map-footer,.overview-section,.discovery-gallery-card
 ) { background-color: rgb(255 249 236 / 88%); }
 html[data-theme="painted"]:not([data-neutral="true"]):not([data-palette="high-contrast"]) .app:not(.sensory-calm) :is(
-  .storybook-home,.part-screen-shell,.story-map-screen,.story-map-list,.discovery-map-screen,.settings-screen
+  .storybook-home,.part-screen-shell,.story-map-screen,.story-map-list,.discovery-map-screen
 ) { background-color: transparent; }

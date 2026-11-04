@@ -1,6 +1,40 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {blendSmudgePixels,pointerSamples,smoothStrokePoints} from '../src/drawingInk.ts';
+import {blendSmudgePixels,floodFillPixels,pointerSamples,smoothStrokePoints} from '../src/drawingInk.ts';
+
+test('fill colours only the connected region and recolours it without crossing a line',()=>{
+ const pixels=new Uint8ClampedArray(5*5*4);
+ for(let y=0;y<5;y++)pixels.set([0,0,0,255],(y*5+2)*4);
+ const red=[255,0,0,255],blue=[0,0,255,255];
+ floodFillPixels(pixels,5,5,0,2,red);
+ for(let y=0;y<5;y++)for(let x=0;x<5;x++)assert.deepEqual([...pixels.slice((y*5+x)*4,(y*5+x+1)*4)],x<2?red:x===2?[0,0,0,255]:[0,0,0,0]);
+ floodFillPixels(pixels,5,5,1,1,blue);
+ assert.deepEqual([...pixels.slice(0,4)],blue);
+ floodFillPixels(pixels,5,5,4,0,red);
+ assert.deepEqual([...pixels.slice(-4)],red);
+});
+
+test('fill cannot cross diagonals or wrap a row and handles same-colour and edge taps',()=>{
+ const pixels=new Uint8ClampedArray(3*3*4);
+ for(let i=0;i<9;i++)pixels.set([0,0,0,255],i*4);
+ for(const i of [2,3,7])pixels.fill(0,i*4,i*4+4);
+ const colour=[0,100,200,255];
+ floodFillPixels(pixels,3,3,2,0,colour);
+ assert.deepEqual([...pixels.slice(8,12)],colour);
+ assert.equal(pixels[3*4+3],0);
+ assert.equal(pixels[7*4+3],0);
+ const before=pixels.slice();
+ floodFillPixels(pixels,3,3,2,0,colour);
+ floodFillPixels(pixels,3,3,-1,0,colour);
+ assert.deepEqual(pixels,before);
+});
+
+test('fill is iterative on large empty paper and leaves opaque boundaries intact',()=>{
+ const pixels=new Uint8ClampedArray(1024*1024*4);
+ floodFillPixels(pixels,1024,1024,1023,1023,[10,20,30,255]);
+ assert.deepEqual([...pixels.slice(0,4)],[10,20,30,255]);
+ assert.deepEqual([...pixels.slice(-4)],[10,20,30,255]);
+});
 
 test('fast strokes keep coalesced curve samples and the final pointer position',()=>{
  const samples=[{clientX:10,clientY:20},{clientX:20,clientY:60},{clientX:40,clientY:20}];

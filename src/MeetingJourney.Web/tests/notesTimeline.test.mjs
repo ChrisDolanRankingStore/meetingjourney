@@ -22,6 +22,8 @@ test('timeline includes saved meeting and assembly notes and study drafts, newes
   await saveDrawing('meeting-2026-10-19','old-part::page::2',[{mode:'pen',size:5,color:'#123456',points:[0,0,20,20],smooth:true}],{width:760,height:900});
   const withDrawing=await readNotesTimeline(),drawing=withDrawing.find(note=>note.kind==='drawing');
   assert.equal(drawing.meetingId,'meeting-2026-10-19');assert.equal(drawing.partId,'old-part::page::2');
+  await saveDrawing('meeting-2026-10-19','fill-only',[{mode:'fill',size:5,color:'#123456',points:[20,30],fillBounds:{width:760,height:900}}],{width:760,height:900});
+  assert.equal((await readNotesTimeline()).find(note=>note.partId==='fill-only').kind,'drawing');
   assert.equal(notes.find(note=>note.text==='Study draft').kind,'study');
   assert.equal(notes.find(note=>note.text==='John 3:16').kind,'note');
   await saveStudy({...emptyStudy('meeting-2026-11-02','part-1:connections'),pointChoices:{'An idea I heard':'Something I could try'},connectionExamples:{'An idea I heard':'A personal connection'}});

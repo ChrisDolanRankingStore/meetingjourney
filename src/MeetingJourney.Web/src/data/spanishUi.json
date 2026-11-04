@@ -1388,5 +1388,9 @@
   "african girl": "chica, ilustración alternativa 2",
   "auburn girl": "chica con pelo rojizo",
   "sandy boy": "chico con pelo rubio oscuro",
-  "This week's words could not be prepared. Familiar words are available.": "No se pudieron preparar las palabras de esta semana. Se muestran palabras conocidas."
+  "This week's words could not be prepared. Familiar words are available.": "No se pudieron preparar las palabras de esta semana. Se muestran palabras conocidas.",
+  "Fill": "Rellenar",
+  "Fill colour": "Color de relleno",
+  "Tap an enclosed area to fill it. Gaps in a line let colour spread. Undo removes the fill.": "Toca una zona cerrada para rellenarla. Si hay huecos en la línea, el color se extenderá. Deshacer elimina el relleno.",
+  "Zoom out to reveal more paper, even on a new page.": "Reduce el zoom para tener más papel, incluso en una página nueva."
 }

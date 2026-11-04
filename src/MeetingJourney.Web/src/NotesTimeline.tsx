@@ -27,7 +27,7 @@ export async function readNotesTimeline():Promise<TimelineNote[]> {
         if(text.trim())entries.push({...note,key:`study:${entry.key}`,text,kind:'study'});
       }
       for(const entry of drawings.result as {key:string;value:import('./types').Stroke[];updatedAt?:string}[]){
-        if(!entry.value.some(stroke=>(stroke.mode==='pen'||stroke.mode==='highlighter')&&stroke.points.length))continue;
+        if(!entry.value.some(stroke=>(stroke.mode==='pen'||stroke.mode==='highlighter'||stroke.mode==='fill')&&stroke.points.length))continue;
         const separator=entry.key.indexOf(':');
         if(separator<0)continue;
         entries.push({key:`drawing:${entry.key}`,meetingId:entry.key.slice(0,separator),partId:entry.key.slice(separator+1),text:t('My drawing'),updatedAt:entry.updatedAt??'',kind:'drawing'});

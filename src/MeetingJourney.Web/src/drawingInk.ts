@@ -33,6 +33,20 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
   context.lineCap = 'round'; context.lineJoin = 'round';
   for (const stroke of strokes) {
     if (stroke.points.length < 2) continue;
+    if(stroke.mode==='fill'){
+      const bounds=stroke.fillBounds??{width,height};
+      const fillWidth=Math.min(canvas.width,Math.ceil(bounds.width*scale));
+      const fillHeight=Math.min(canvas.height,Math.ceil(bounds.height*scale));
+      const pixels=context.getImageData(0,0,fillWidth,fillHeight);
+      const swatch=document.createElement('canvas');
+      swatch.width=swatch.height=1;
+      const colour=swatch.getContext('2d');
+      if(!colour)throw new Error('Drawing canvas is unavailable.');
+      colour.fillStyle=stroke.color;colour.fillRect(0,0,1,1);
+      floodFillPixels(pixels.data,fillWidth,fillHeight,Math.floor(stroke.points[0]*scale),Math.floor(stroke.points[1]*scale),colour.getImageData(0,0,1,1).data);
+      context.putImageData(pixels,0,0);
+      continue;
+    }
     const points=stroke.smooth?smoothStrokePoints(stroke.points):stroke.points;
     if (stroke.mode === 'smudge') {
       smudgeInk(context, points.map(point => point * scale), stroke.size * 3 * scale);
@@ -53,6 +67,35 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
     }
   }
   return canvas;
+}
+
+export function floodFillPixels(pixels:Uint8ClampedArray,width:number,height:number,x:number,y:number,colour:ArrayLike<number>){
+  if(x<0||y<0||x>=width||y>=height)return;
+  const start=(y*width+x)*4;
+  const target=pixels.slice(start,start+4);
+  if(target.every((value,index)=>value===colour[index]))return;
+  const seen=new Uint8Array(width*height);
+  const queue=new Int32Array(width*height);
+  let head=0,tail=0;
+  queue[tail++]=y*width+x;seen[y*width+x]=1;
+  const matches=(index:number)=>{
+    const offset=index*4;
+    if(Math.abs(pixels[offset+3]-target[3])>24)return false;
+    if(target[3]===0)return true;
+    for(let channel=0;channel<3;channel++)if(Math.abs(pixels[offset+channel]-target[channel])>24)return false;
+    return true;
+  };
+  const enqueue=(next:number)=>{
+    if(!seen[next]){seen[next]=1;if(matches(next))queue[tail++]=next;}
+  };
+  while(head<tail){
+    const index=queue[head++],offset=index*4;
+    pixels.set(colour,offset);
+    if(index%width>0)enqueue(index-1);
+    if(index%width<width-1)enqueue(index+1);
+    if(index>=width)enqueue(index-width);
+    if(index<width*(height-1))enqueue(index+width);
+  }
 }
 
 function smudgeInk(context: CanvasRenderingContext2D, points: number[], diameter: number) {

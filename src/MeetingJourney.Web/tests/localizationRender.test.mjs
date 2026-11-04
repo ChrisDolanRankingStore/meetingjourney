@@ -164,12 +164,13 @@ test('welcome, character choice and home render in Spanish and still render in E
   }));
   assert.equal((drawingToolbar.match(/role="toolbar"/g)??[]).length,1);
   assert.match(drawingToolbar,/aria-orientation="vertical"/);
-  assert.equal((drawingToolbar.match(/<button/g)??[]).length,11);
-  assert.equal((drawingToolbar.match(/aria-expanded="false"/g)??[]).length,8);
+  assert.equal((drawingToolbar.match(/<button/g)??[]).length,12);
+  assert.equal((drawingToolbar.match(/aria-expanded="false"/g)??[]).length,9);
   assert.match(drawingToolbar,/aria-label="Pen"/);
   assert.match(drawingToolbar,/aria-label="Highlighter"/);
   assert.match(drawingToolbar,/aria-label="Eraser"/);
   assert.match(drawingToolbar,/aria-label="Smudge"/);
+  assert.match(drawingToolbar,/aria-label="Fill"/);
   assert.match(drawingToolbar,/aria-label="Red"/);
   assert.match(drawingToolbar,/aria-label="Gold"/);
   assert.match(drawingToolbar,/aria-label="More colours"/);

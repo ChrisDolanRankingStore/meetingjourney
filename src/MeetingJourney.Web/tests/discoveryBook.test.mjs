@@ -50,6 +50,12 @@ test('empty or eraser-only pages do not create a treasure chest', () => {
   ]);
   assert.deepEqual(result, []);
 });
+test('a fill-only page is kept as a drawing discovery',()=>{
+ const fill={...stroke,mode:'fill',points:[20,30],fillBounds:{width:760,height:900}};
+ const result=buildDiscoveryTreasures(meeting,[],[{key:'week-a:part-1',value:[fill]}]);
+ assert.equal(result.length,1);
+ assert.deepEqual(result[0].drawings[0].strokes,[fill]);
+});
 test('a stop keeps the same terrain position when earlier stops have no saved notes', () => {
   const single = buildDiscoveryTreasures(meeting, [note('part-10', 'Later thought')], []);
   const both = buildDiscoveryTreasures(meeting, [note('part-1', 'Earlier thought'), note('part-10', 'Later thought')], []);

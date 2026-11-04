@@ -68,6 +68,18 @@ test('smudge strokes and new prepared connections survive a backup round-trip',a
  assert.throws(()=>validateBackup(backup),/Invalid listening points/);
 });
 
+test('colour fills preserve their original paper extent through backup and reject malformed operations',async()=>{
+ const strokes=[{points:[20,30],color:'#163b5c',size:5,mode:'fill',fillBounds:{width:760,height:900}}];
+ await saveDrawing('week-a','reading',strokes,{width:3040,height:3600});
+ const backup=validateBackup(await exportJournal(new MemoryStorage()));
+ globalThis.indexedDB=new IDBFactory();await importJournal(backup,false,new MemoryStorage());
+ assert.deepEqual((await readDrawingPage('week-a','reading')).strokes,strokes);
+ for(const invalid of [{width:0,height:900},{width:Infinity,height:900},{width:10,height:900},undefined]){
+   const changed=structuredClone(backup);changed.drawings[0].value[0].fillBounds=invalid;
+   assert.throws(()=>validateBackup(changed),/Invalid colour fill/);
+ }
+});
+
 test('bingo grid size and marked words survive backup without accepting invalid sizes',async()=>{
  const progress={...emptyStudy('week-a','talk:bingo:en'),bingoSize:3,bingoWords:['hope','love']};
  await saveStudy(progress);

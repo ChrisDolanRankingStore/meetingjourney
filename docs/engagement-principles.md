@@ -4,6 +4,24 @@ Meeting Journey is designed to support attention, processing and participation. 
 
 ## Product decisions
 
+### Colour fill and roomier drawing paper (0.5.10)
+
+The drawing rail includes a paint-bucket Fill tool using the selected colour.
+A tap fills one connected area; open outlines let the colour spread. Each fill
+is one Undo/Redo action and stays editable in the device journal and local
+backups. Previews and PNG exports replay the same operations. A fill remembers
+its original paper bounds so extending the sheet does not spread old colour
+into newly revealed paper.
+
+Zoom ranges from 25% to 400%, including on an empty page. Zooming out reveals
+usable paper instead of a border around a small sheet. Drawing beyond the
+original bounds grows the saved paper without changing the current coordinate
+scale or shrinking earlier marks. Two-finger gestures still roll back the
+first contact's tentative stroke or fill.
+
+Settings keeps a subtly filled parchment backing as well as its inset cards;
+the outer panel is not left as an empty border over the painted scene.
+
 ### Matching phone chrome (0.5.9)
 
 The browser theme hint, installed launch background, header, navigation and

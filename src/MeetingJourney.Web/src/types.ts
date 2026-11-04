@@ -109,5 +109,6 @@ export interface Stroke {
   points: number[];
   color: string;
   size: number;
-  mode: 'pen' | 'highlighter' | 'eraser' | 'smudge';
+  mode: 'pen' | 'highlighter' | 'eraser' | 'smudge' | 'fill';
+  fillBounds?: {width:number;height:number};
 }
