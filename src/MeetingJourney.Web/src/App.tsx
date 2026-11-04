@@ -157,7 +157,7 @@ function sectionLabel(section: MeetingPart['section'],standardRegister=false) {
 function officialPartUrl(part: MeetingPart, material: Meeting['material']) {
   const sources=partSources(part,material);
   const biblePassage=part.type==='BibleReading'?sources.scriptures[0]?.url:undefined;
-  return jwLibraryHandoffUrl(biblePassage??sources.primary.url??sources.primary.webUrl);
+  return jwLibraryHandoffUrl(biblePassage??jwLibraryUrl(sources.primary.url)??jwLibraryUrl(sources.primary.webUrl)??sources.primary.url??sources.primary.webUrl);
 }
 
 function openOfficialMaterial(url: string) {
@@ -206,6 +206,9 @@ export default function App() {
       document.documentElement.dataset.font = localStorage.getItem('mj-font') ?? 'system';
       document.documentElement.dataset.palette = localStorage.getItem('mj-palette') ?? 'journey';
       const comfort=readComfort();
+      const chromeColour=comfort.neutral?'#f7f8fa':document.documentElement.dataset.palette==='high-contrast'?'#fffdf5':'#fff5df';
+      document.documentElement.style.setProperty('--browser-chrome',chromeColour);
+      document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute('content',chromeColour);
       document.documentElement.dataset.textSize=comfort.textSize;
       document.documentElement.dataset.neutral=String(comfort.neutral);
       document.documentElement.dataset.hideCounts=String(comfort.hideCounts);
@@ -358,7 +361,7 @@ function MeetingApp({ meeting, schedule }: { meeting: Meeting; schedule: Meeting
         </div>
       </section>
       <section className="progress-card" aria-label={t("Your place in the meeting")}><div><span className="progress-label">{t("Your place")}</span><strong>{t("Part ")}{partIndex + 1}{t(" of ")}{meeting.parts.length}</strong><small>{t("No rush. You can move, pause or return whenever you need.")}</small></div><div className="progress-meter" aria-hidden="true"><span style={{ width: `${progress}%` }} /></div><span className="progress-percent">{progress}%</span></section>
-      <ProgrammeContentNotice notice={meeting.contentNotice}/>
+      <ProgrammeContentNotice notice={meeting.contentNotice} meetingId={meeting.id}/>
       <WhereAmIControl meeting={meeting} partIndex={partIndex} onSelect={setPartIndex} />
       <JourneyTrail meeting={meeting} partIndex={partIndex} standardRegister={character.ageGroup!=='child'} onSelect={setPartIndex} />
       <section className={`journey-layout ${showMap ? 'with-map' : 'focus-layout'}`}>
@@ -419,11 +422,9 @@ function AdventureHomeV2({ meeting, profile, partIndex, characterAction, onMoveC
       <p className="eyebrow">{profile.name.trim() ? tt`Welcome back, ${profile.name.trim()}` : registerText("Welcome to your adventure",profile.ageGroup)}</p>
       <h2>{profile.ageGroup === "child" ? t("Let us take the next step") : registerText("Let us take the next step",profile.ageGroup)}</h2>
       <p className="home-details">{t(({midweek:'Midweek', weekend:'Weekend', assembly:'Assembly', convention:'Convention'})[meeting.kind ?? 'midweek'])} · {meeting.bibleReading} · {new Date(`${meeting.eventDate ?? meeting.weekOf}T12:00:00`).toLocaleDateString(getLanguage(), { day: 'numeric', month: 'short' })}</p>
-      <ProgrammeContentNotice notice={meeting.contentNotice} home/>
+      <ProgrammeContentNotice notice={meeting.contentNotice} meetingId={meeting.id} home/>
       <WhereAmIControl meeting={meeting} partIndex={partIndex} onSelect={onSelectPart} compact />
       <div className="home-actions"><button className="primary-adventure-button" type="button" onClick={onStart}><NotebookIcon name="route" /><span>{t(resumeLabel)}</span><NotebookIcon name="next" /></button></div>
-      <button className="text-button comfort-shortcut" type="button" onClick={()=>window.dispatchEvent(new Event('mj-open-comfort'))}>{t('Reading comfort')}</button>
-      <button className="text-button" type="button" onClick={()=>window.dispatchEvent(new Event('mj-open-profile'))}>{t('Customise companion')}</button>
       {comfort.neutral&&<div className="neutral-notebook-actions"><button type="button" onClick={()=>onQuickAction('note')}>{t('Write a note')}</button><button type="button" onClick={()=>onQuickAction('doodle')}>{t('Draw')}</button><button type="button" onClick={()=>onQuickAction('activities')}>{t('Activities')}</button></div>}
       <div className="storybook-links">
         <button type="button" onClick={onOverview}><NotebookIcon name="route" /><span>{t('Preview the journey')}</span></button>
@@ -690,6 +691,10 @@ function PartScreen({ profile, part, weekOf, quiet, characterAction, partIndex, 
   };
   return <div className="part-screen-shell" onPointerDown={beginGesture} onPointerUp={finishGesture} onPointerCancel={() => { gestureStart.current = null; gestureTarget.current = null; }}>
     {children}
+    <nav className="part-edge-navigation" aria-label={t('Meeting parts')}>
+      <button type="button" className="part-edge-previous" disabled={partIndex===0} aria-label={t('Previous part')} title={t('Previous part')} onClick={()=>onSwipe(-1)}><NotebookIcon name="back" /></button>
+      <button type="button" className="part-edge-next" aria-label={t(partIndex===totalParts-1?'Review':'Next part')} title={t(partIndex===totalParts-1?'Review':'Next part')} onClick={()=>onSwipe(1)}><NotebookIcon name="next" /></button>
+    </nav>
     <details className="part-scene-details">
       <summary><NotebookIcon name="route" /><span>{t('Scenery and companion')}</span><NotebookIcon name="chevron-down" /></summary>
       <div className={`part-story-scene chapter-${part.section.toLowerCase()}`} style={{ '--route-progress': routeProgress, '--scene-x': `${moment.x}%`, '--scene-position': scenePack.backgroundPosition, '--scene-image': `url("${sceneImage(moment.image, window.innerWidth < 600 ? 480 : 960)}")` } as CSSProperties} aria-label={tt`${moment.place}, stop ${partIndex + 1} of ${totalParts}`}>
@@ -773,7 +778,9 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
   };
   const focusQuestion = part.id==='part-1' && meetingId==='meeting-2026-10-19' ? t('What helped Baruch regain his hope?') : t(reflection.title);
   const primary=primaryPartAction(part);
-  return <article className="part-card" data-section={part.section}><div className="part-kicker"><span>{programmePart ? t(programmePartLabel(part.type)) : sectionLabel(part.section,profile.ageGroup!=='child')}</span><span>{tt`Part ${partIndex + 1} of ${totalParts}`}</span></div><h2 id={`${part.id}-heading`} tabIndex={-1} aria-live="polite">{part.number ? part.number + '. ' : ''}{part.title}</h2><div className="part-place-row"><p className="part-duration"><NotebookIcon name="clock" />{partTiming(part)}</p><button type="button" className="find-my-place" onClick={findPlace}><NotebookIcon name="pin" /><span>{t('Find my place')}</span></button></div>
+  const titleUrl=officialPartUrl(part,material);
+  const title=<>{part.number ? part.number + '. ' : ''}{part.title}</>;
+  return <article className="part-card" data-section={part.section}><div className="part-kicker"><span>{programmePart ? t(programmePartLabel(part.type)) : sectionLabel(part.section,profile.ageGroup!=='child')}</span><span>{tt`Part ${partIndex + 1} of ${totalParts}`}</span></div><h2 id={`${part.id}-heading`} tabIndex={-1} aria-live="polite">{titleUrl?<a className="part-title-link" href={titleUrl} target="_blank" rel="noreferrer" title={t(jwLibraryUrl(titleUrl)?'Open in JW Library':'Open on JW.org')}>{title}</a>:title}</h2><div className="part-place-row"><p className="part-duration"><NotebookIcon name="clock" />{partTiming(part)}</p><button type="button" className="find-my-place" onClick={findPlace}><NotebookIcon name="pin" /><span>{t('Find my place')}</span></button></div>
     <ElapsedPart minutes={part.durationMinutes}/>
     {part.speakerName && <p className="part-speaker">{t('Speaker: {name}', {name:part.speakerName})}</p>}
     {presentation!=='reflective'&&<section className="part-single-focus">

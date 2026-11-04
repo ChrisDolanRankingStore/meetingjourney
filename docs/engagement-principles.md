@@ -4,6 +4,41 @@ Meeting Journey is designed to support attention, processing and participation. 
 
 ## Product decisions
 
+### Matching phone chrome (0.5.9)
+
+The browser theme hint, installed launch background, header, navigation and
+outer page use matching parchment. Neutral and high-contrast choices update
+the runtime theme hint and chrome colour without changing the saved journal.
+The header reserves the top safe area; navigation keeps its bottom inset and
+landscape layouts reserve side safe areas without covering the painted scene.
+iOS uses the default readable status bar rather than forcing translucent
+status-bar content. Browser/OS support determines actual system-bar tinting;
+installed launch colours may update later than the page.
+
+Slim parchment chevrons at the part view's left/right edges offer an alternative
+to swiping without restoring the bottom navigation row or stop counter. Their
+visual chevron is 24px wide and 80px tall with no panel behind it, inside a
+44px-wide, 88px-tall target. Shapes overlap the paper and background without
+narrowing the paper; a subtle outline shadow separates parchment on parchment. Previous is
+unavailable on the first part; the final Next opens Review. They use the same
+save-before-navigation path as swipes and disappear while a notebook/tool is
+open. Text receives extra side clearance.
+
+Home no longer repeats Reading comfort or Customise companion: both remain in
+Settings. Its notice, current-place control and journey actions have consistent
+12px separation. A part's title is the official-material link when a source is
+known, retaining keyboard focus and the return check-in without adding another
+text action. All official source links share the HTTPS Finder handoff where a
+publication, Bible or media identifier is available; this allows JW Library
+opening and a web fallback without app-install detection or timed redirects.
+Generic official landing pages remain ordinary web links when no precise
+Library target is known. Local talks with no source do not get invented links.
+
+Programme notices have a labelled 44px Close target. Dismissal is saved on the
+device for the meeting and notice, shared across Home, parts and the picker,
+including language changes. A different meeting or changed notice appears
+again. Storage failures are shown and do not pretend dismissal was saved.
+
 ### Optional map companion and translucent paper (0.5.8)
 
 The journey map companion can be dragged onto a stop to open it. Direct stop

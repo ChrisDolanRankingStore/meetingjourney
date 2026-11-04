@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import {t} from './i18n';
+import {NotebookIcon} from './NotebookIcon';
 
 const key='mj-programme-import-choice';
 export const PROGRAMME_IMPORT_CHANGED='mj-programme-import-changed';
@@ -9,15 +10,30 @@ export function programmeImportEnabled(){
 
 const updatedNotice='Programme titles and references updated from WOL. Listening prompts are general; reviewed activities are added separately.';
 const noticeSeenKey='mj-programme-import-notice-seen';
+const dismissedNoticeKey='mj-dismissed-programme-notice';
+const noticeDismissed='mj-programme-notice-dismissed';
 
-export function ProgrammeContentNotice({notice,home=false,className='meeting-content-notice'}:{notice?:string;home?:boolean;className?:string}){
+export function ProgrammeContentNotice({notice,meetingId,home=false,className='meeting-content-notice'}:{notice?:string;meetingId:string;home?:boolean;className?:string}){
   const [unseen]=useState(()=>localStorage.getItem(noticeSeenKey)!=='true');
+  const [dismissed,setDismissed]=useState(()=>localStorage.getItem(dismissedNoticeKey));
+  const [error,setError]=useState('');
+  const identity=JSON.stringify([meetingId,t(notice,undefined,'es')]);
+  useEffect(()=>{
+    const refresh=()=>setDismissed(localStorage.getItem(dismissedNoticeKey));
+    window.addEventListener(noticeDismissed,refresh);
+    return()=>window.removeEventListener(noticeDismissed,refresh);
+  },[]);
   const imported=notice===updatedNotice||notice===t(updatedNotice,undefined,'es');
-  const visible=Boolean(notice)&&(!imported||(home&&unseen));
+  const visible=Boolean(notice)&&dismissed!==identity&&(!imported||(home&&unseen));
   useEffect(()=>{
     if(visible&&imported) localStorage.setItem(noticeSeenKey,'true');
   },[visible,imported]);
-  return visible?<small className={className}>{notice}</small>:null;
+  return visible?<div className={`${className} dismissible-programme-notice`}><small>{notice}</small><button type="button" aria-label={t('Dismiss programme notice')} title={t('Dismiss programme notice')} onClick={()=>{
+    try{
+      localStorage.setItem(dismissedNoticeKey,identity);
+      setDismissed(identity);setError('');window.dispatchEvent(new Event(noticeDismissed));
+    }catch{setError('Could not save your preference. Please try again.');}
+  }}><NotebookIcon name="close"/></button>{error&&<p role="alert">{t(error)}</p>}</div>:null;
 }
 
 export function ProgrammeImport({home=false}:{home?:boolean}){

@@ -140,7 +140,7 @@ html[data-palette="high-contrast"] .app .find-my-place,
 html[data-palette="high-contrast"] .app .tool-find-place { background: #fffdf5; color: #172b45; border-color: #52667b; }
 html .app.journey-screen { width: 100%; max-width: none; margin: 0; background: #e8dfc7 var(--journey-background) center / cover no-repeat; box-shadow: none; }
 .app.journey-screen > .app-header, .app.journey-screen > .mobile-nav { background: #fff5dff2; box-shadow: none; }
-html[data-theme="painted"]:not([data-palette="high-contrast"]) .app > :is(.app-header, .mobile-nav) { background: #fff5dfd9; }
+html[data-theme="painted"]:not([data-palette="high-contrast"]) .app > :is(.app-header, .mobile-nav) { background: var(--browser-chrome, #fff5df); }
 html[data-theme="painted"]:not([data-palette="high-contrast"]) .app > .mobile-nav > .icon-action:not(.active),
 html[data-theme="painted"]:not([data-palette="high-contrast"]) .app > .app-header .eyebrow { color: #594f40; }
 .app.journey-screen > main.journey-stage-page { width: min(100%, 1120px); max-width: none; margin: 0 auto; padding: 12px 16px; box-sizing: border-box; background: none; }

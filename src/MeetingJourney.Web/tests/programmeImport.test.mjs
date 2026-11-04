@@ -15,7 +15,7 @@ test('import requires an explicit current-device confirmation and requests carry
   const {ProgrammeImport,programmeImportEnabled}=await server.ssrLoadModule('/src/ProgrammeImport.tsx');
   const {ProgrammeContentNotice}=await server.ssrLoadModule('/src/ProgrammeImport.tsx');
   const notice='Programme titles and references updated from WOL. Listening prompts are general; reviewed activities are added separately.';
-  const renderNotice=props=>renderToStaticMarkup(React.createElement(ProgrammeContentNotice,props));
+  const renderNotice=props=>renderToStaticMarkup(React.createElement(ProgrammeContentNotice,{meetingId:'meeting-test',...props}));
   assert.match(renderNotice({notice,home:true}),/Programme titles/);
   assert.equal(renderNotice({notice}),'');
   data.set('mj-programme-import-notice-seen','true');
@@ -25,6 +25,14 @@ test('import requires an explicit current-device confirmation and requests carry
   assert.match(renderNotice({notice:'The programme could not be refreshed. Showing the last saved programme.'}),/could not be refreshed/);
   assert.match(renderNotice({notice:'This assembly replaces both congregation meetings this week.'}),/This assembly/);
   assert.equal(renderNotice({}),'');
+  const general='General midweek outline. This week’s detailed programme has not been added; check the official workbook.';
+  assert.match(renderNotice({notice:general}),/aria-label="Dismiss programme notice"/);
+  data.set('mj-dismissed-programme-notice',JSON.stringify(['meeting-test',translate(general,undefined,'es')]));
+  assert.equal(renderNotice({notice:general,home:true}),'');
+  assert.equal(renderNotice({notice:general}),'');
+  assert.equal(renderNotice({notice:translate(general,undefined,'es')}),'');
+  assert.match(renderNotice({notice:general,meetingId:'next-week'}),/Dismiss programme notice/);
+  assert.match(renderNotice({notice:'Changed programme information'}),/Changed programme information/);
   const {loadMeeting,loadMeetingMonth}=await server.ssrLoadModule('/src/api.ts');
   assert.equal(programmeImportEnabled(),false);
   let html=renderToStaticMarkup(React.createElement(ProgrammeImport));

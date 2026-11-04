@@ -3,6 +3,47 @@
 Reviewed: 3 November 2026  
 Application baseline: `c9abbe90c31dc50a484db1ef72beaade48fac7fe`
 
+## Remaining work confirmed (4 November 2026)
+
+The five approved code-delivery phases are complete, including the subsequent
+connection styling, icon hints, editable history, map cursor and panel fixes.
+They should not be confused with the five remaining validation/maintenance
+recommendations below:
+
+- Participant co-design sessions remain outstanding.
+- Physical iPhone/iPad/Android, VoiceOver/TalkBack, stylus, orientation and
+  offline-recovery validation remain outstanding. Browser spot checks do not
+  certify those environments.
+- Fresh-install usability still needs observation, especially discovering
+  companion options and proceeding without customization.
+- A non-technical user's backup/export and merge-versus-replace rehearsal
+  remains outstanding.
+- Keeping the engagement loop optional and small is an ongoing design rule,
+  not an unfinished feature.
+
+Release 0.5.9 aligns browser/launch parchment colours and reserves phone safe
+areas. Actual system-bar tinting and installed-app launch behaviour still need
+physical-device verification; iOS retains control of its status-bar appearance.
+Home comfort/profile shortcuts are consolidated in Settings, with separated
+notice/current-place/actions. Slim edge chevrons supplement swipes without
+restoring the bottom row; title links reuse the existing official handoff.
+Programme notices can be dismissed across screens for the current meeting and
+message; a different meeting or changed notice is shown again.
+The chevrons are standalone 24px-by-80px parchment shapes overlapping paper and background,
+not rectangular tabs; invisible 44px-by-88px targets preserve touch access.
+The paper retains its original width.
+Browser checks at 320px, 390px and 768px cover horizontal overflow. Previous/Next use the saved-journal
+navigation path, Previous is hidden at the first part, the last Next opens
+Review, and tool dialogs hide the edge controls.
+
+The browser theme hint, body, header and navigation match in painted, neutral
+and high-contrast checks. Spanish Home has 12px gaps between its notice,
+current-place block and actions, with no duplicated comfort/profile buttons.
+Bilingual render regressions cover linked part titles and exact-source
+fallbacks. Production build, all 141 tests and packaged runtime checks pass.
+The browser cannot emulate nonzero native safe-area insets here; physical
+notch/status-bar/launch checks remain outstanding rather than claimed complete.
+
 ## Map and panel follow-up (0.5.8)
 
 The optional companion now acts as a draggable map cursor. Dropping on a stop

@@ -66,6 +66,7 @@ test('welcome, character choice and home render in Spanish and still render in E
   assert.match(html,/De nuevo aquí, My Own Name/);
   assert.match(html,/artwork-painted/);
   assert.match(html,/home-redesign/);
+  assert.doesNotMatch(html,/comfort-shortcut|>Personalizar compañero<\/button>/);
   assert.match(html,/home-screen" style="--scene-home-image:/);
   assert.match(html,/aria-haspopup="dialog" aria-controls="home-guide-dialog"/);
   assert.match(html,/Pregunta a tu guía/);
@@ -288,6 +289,9 @@ test('welcome, character choice and home render in Spanish and still render in E
      engagement:'quiet',presentation:'standard',onOpenMaterial:()=>{}
     }));
     const summary=detailPanel.match(/class="part-summary">([^<]+)</)?.[1];
+    assert.match(detailPanel,/class="part-title-link" href="https:\/\/www.jw.org\/finder\?/);
+    assert.doesNotMatch(detailPanel,/href="jwlibrary:/);
+    assert.match(detailPanel,language==='es'?/wtlocale=S/:/wtlocale=E/);
     assert.equal(summary,item.summary.replace(/&/g,'&amp;').replace(/'/g,'&#x27;'));
     if(id==='part-2'){
      assert.match(detailPanel,/class="spiritual-gems-question"/);
@@ -321,6 +325,9 @@ test('welcome, character choice and home render in Spanish and still render in E
    const nativeSource=renderToStaticMarkup(React.createElement(OfficialLinks,{url:'jwlibrary:///finder?bible=43003016-43003018',webUrl:'https://www.jw.org/en/library/'}));
    assert.equal((nativeSource.match(/<a /g)??[]).length,1);
    assert.match(nativeSource,/href="https:\/\/www.jw.org\/finder\?bible=43003016-43003018/);
+   const exactFallback=renderToStaticMarkup(React.createElement(OfficialLinks,{url:'https://www.jw.org/en/library/',webUrl:'https://www.jw.org/finder?docid=202026258&par=5'}));
+   assert.match(exactFallback,/href="https:\/\/www.jw.org\/finder\?docid=202026258&amp;par=5&amp;wtlocale=/);
+   assert.equal((exactFallback.match(/<a /g)??[]).length,1);
    const bibleLinks=renderToStaticMarkup(React.createElement(BibleReferenceLinks,{reference:language==='es'?'Juan 3:16–18':'John 3:16–18'}));
    assert.match(bibleLinks,/href="https:\/\/www.jw.org\/finder\?[^"]*bible=43003016-43003018/);
    assert.equal((bibleLinks.match(/<a /g)??[]).length,1);

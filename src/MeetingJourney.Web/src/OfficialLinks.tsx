@@ -3,7 +3,7 @@ import {bibleReferenceLinks, getLanguage, jwLibraryHandoffUrl, jwLibraryUrl, t} 
 export function OfficialLinks({url, webUrl = url, appLabel = 'Open in JW Library', webLabel = 'Open on JW.org'}: {
   url?: string; webUrl?: string; appLabel?: string; webLabel?: string;
 }) {
-  const app = jwLibraryUrl(url);
+  const app = jwLibraryUrl(url) ?? jwLibraryUrl(webUrl);
   const href = jwLibraryHandoffUrl(app ?? webUrl ?? url);
   return <span className="official-link-pair">
     {href && <a href={href} target="_blank" rel="noreferrer">{t(app ? appLabel : webLabel)}<span aria-hidden="true"> ↗</span></a>}

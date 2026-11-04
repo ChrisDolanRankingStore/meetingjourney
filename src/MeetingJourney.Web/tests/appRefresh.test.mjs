@@ -1,7 +1,20 @@
 ﻿import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {refreshAppFiles} from '../public/app-refresh.js';
 import {refreshedPortrait} from '../src/companions.ts';
+
+test('phone chrome and installed launch backgrounds share the parchment colour',()=>{
+ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+ const manifest=JSON.parse(readFileSync(new URL('../public/manifest.webmanifest',import.meta.url),'utf8').replace(/^\uFEFF/,''));
+ const colour=html.match(/<meta name="theme-color" content="([^"]+)"/)?.[1];
+ assert.equal(colour,'#fff5df');
+ assert.equal(manifest.theme_color,colour);
+ assert.equal(manifest.background_color,colour);
+ assert.match(html,/viewport-fit=cover/);
+ assert.match(html,/<meta name="apple-mobile-web-app-status-bar-style" content="default"/);
+ assert.equal(manifest.display,'standalone');
+});
 
 test('older default selections move to refreshed artwork and later explicit choices remain unchanged',()=>{
  assert.equal(refreshedPortrait({style:'classic-boy'}),'prepared');
