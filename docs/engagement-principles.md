@@ -14,7 +14,9 @@ hemisphere choice, defaulting to Northern; no location permission or live
 weather service is used.
 
 The full landscapes are map/Home backgrounds. Five temporary framed locations
-are derived from each matching landscape; separate location artwork is pending.
+are derived from each matching landscape; separate location artwork is pending,
+except Scene 1 spring, which now uses the six supplied preliminary standalone
+views. These are draft artwork, not the final set.
 The current week and hemisphere also select scenery for part guidance and
 offline preparation. Offline packs cache only the selected set, not all worlds.
 The main meeting background uses the current section's location, not the Home
@@ -26,12 +28,18 @@ Scenery stays revealed through Previous/Next navigation; tap, upward pull or
 Escape restores the panel. Content stays mounted while hidden. Pull gestures
 are limited to the handle; tools hide it. Plain and neutral modes omit it.
 No animation or automatic collapse is used.
+A compact Map button opens the full meeting map from either the panel or the
+revealed scenery, keeping the current meeting position.
 
 PNG masters remain in the untracked artwork directory. Run
 `node node-app/scripts/prepare-seasonal-artwork.mjs` to regenerate optimized
 WebP/JPEG delivery images from the 24 extracted masters. Map and crop outputs
 use 480/960/1600 delivery names without upscaling the native image resolution.
-Release 0.5.12 includes this integration; deployment remains a separate step.
+Standalone sources in `artwork/seasonal-views/scene-N-SEASON-VIEW.png` take
+precedence over landscape crops. To rebuild just this draft, run
+`node node-app/scripts/prepare-seasonal-artwork.mjs 1 spring`.
+Release 0.5.13 includes the spring draft and Map button; deployment remains a
+separate step.
 
 ### Colour fill and roomier drawing paper (0.5.10)
 

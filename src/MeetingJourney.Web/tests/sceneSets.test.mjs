@@ -42,3 +42,10 @@ test('all six worlds have four complete seasons with compressed maps and five lo
   assert.ok(Math.abs(image.height/image.width-1.5)<.01);
  }
 });
+test('Scene 1 spring standalone views retain full source framing and resolution',async()=>{
+ for(const view of ['map','gate','river','bridge','village','garden'])for(const width of [480,960,1600])for(const format of ['webp','jpg']){
+  const image=await sharp(fileURLToPath(new URL(`../public/assets/compact-v1/scene-1-spring-${view}-v2-${width}.${format}`,import.meta.url))).metadata();
+  assert.equal(image.width,Math.min(width,1024));
+  assert.equal(image.height,image.width*1.5);
+ }
+});

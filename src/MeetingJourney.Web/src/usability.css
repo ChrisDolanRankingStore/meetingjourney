@@ -28,6 +28,11 @@ html[data-theme] .app > :is(.app-header,.mobile-nav) { background: var(--browser
 }
 .app .part-title-link:hover { text-decoration-color: currentColor; }
 .app .part-screen-shell { position: relative; }
+.app .scenery-map-button { position: absolute; top: 0; right: 0; z-index: 4; display: flex; align-items: center; gap: 6px; width: auto; height: auto; min-height: 44px; padding: 6px 10px; white-space: nowrap; background: #fff5df; border: 1px solid #d6bc8c; border-radius: 12px; color: #31455b; }
+.app .scenery-map-button + .scenery-pull-handle { max-width: calc(100% - 160px); }
+.app .is-scenery-revealed > .scenery-map-button { position: fixed; top: calc(80px + env(safe-area-inset-top,0px)); right: max(16px,env(safe-area-inset-right,0px)); }
+.app .is-scenery-revealed > .scenery-map-button + .scenery-pull-handle { max-width: 100%; }
+.app .part-screen-shell:has(dialog[open]) > .scenery-map-button { display: none; }
 .app .journey-stage-page .part-column .part-screen-shell { grid-template-rows: auto minmax(0,1fr) auto; }
 .meeting-panel-content { min-width: 0; min-height: 0; }
 .app .journey-stage-page .part-column .part-screen-shell:has(dialog[open]) { grid-template-rows: minmax(0,1fr); }

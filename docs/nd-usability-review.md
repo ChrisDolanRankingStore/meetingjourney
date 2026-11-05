@@ -3,6 +3,17 @@
 Reviewed: 3 November 2026  
 Application baseline: `c9abbe90c31dc50a484db1ef72beaade48fac7fe`
 
+## Spring draft and overall-map access (0.5.13)
+
+Scene 1 spring now uses the supplied six standalone draft views, retaining
+their full composition instead of deriving the locations from map crops.
+Other worlds and seasons remain unchanged.
+A labelled Map icon opens the full meeting map from both the visible panel
+and revealed scenery. Browser checks at 320, 390 and 768px found no horizontal
+overflow or overlap with the reveal handle. Returning with Continue preserves
+the current part; the Map label also renders in Spanish.
+Physical touch-device and screen-reader validation remains outstanding.
+
 ## Scenery reveal (0.5.12)
 
 The main meeting background now follows the current section's location.
