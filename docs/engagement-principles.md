@@ -28,6 +28,12 @@ Scenery stays revealed through Previous/Next navigation; tap, upward pull or
 Escape restores the panel. Content stays mounted while hidden. Pull gestures
 are limited to the handle; tools hide it. Plain and neutral modes omit it.
 No animation or automatic collapse is used.
+The chosen companion appears in revealed meeting scenery and in a bounded
+Home scene area, clear of the welcome and action panels. Both reuse the same
+four-direction dragging and arrow-key controls, with English/Spanish guidance.
+Dragging never advances the programme. Companion note/drawing actions restore
+the meeting panel before opening a tool. Neutral notebook mode still hides
+the companion.
 A compact Map button opens the full meeting map from either the panel or the
 revealed scenery, keeping the current meeting position.
 
@@ -38,8 +44,9 @@ use 480/960/1600 delivery names without upscaling the native image resolution.
 Standalone sources in `artwork/seasonal-views/scene-N-SEASON-VIEW.png` take
 precedence over landscape crops. To rebuild just this draft, run
 `node node-app/scripts/prepare-seasonal-artwork.mjs 1 spring`.
-Release 0.5.13 includes the spring draft and Map button; deployment remains a
-separate step.
+Release 0.5.13 includes the spring draft and Map button; 0.5.14 adds the movable
+companion to revealed scenery and separates its Home movement area from the
+panels. Deployment remains a separate step.
 
 ### Colour fill and roomier drawing paper (0.5.10)
 

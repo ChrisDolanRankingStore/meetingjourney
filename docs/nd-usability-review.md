@@ -3,6 +3,22 @@
 Reviewed: 3 November 2026  
 Application baseline: `c9abbe90c31dc50a484db1ef72beaade48fac7fe`
 
+## Movable scenery companion (0.5.14)
+
+The chosen companion appears when meeting scenery is revealed and remains
+available across part navigation. The Home companion now moves within its own
+scene area, not behind the welcome or action panels. Both reuse the bounded
+two-axis pointer and keyboard movement, including saved local positions.
+English/Spanish instructions explain dragging and arrow keys.
+
+Browser checks exercised diagonal dragging and both keyboard axes without
+opening a guide or changing the meeting part. At 320x568, 390x844 and 768x1024,
+the companion stayed within the revealed scene and there was no horizontal
+overflow. Home bounds were also checked at 1280x900. Selecting My thought from
+revealed scenery restored the panel and opened its note dialog. Automated
+bounds and bilingual rendering tests pass.
+Physical touch-device and screen-reader validation remains outstanding.
+
 ## Spring draft and overall-map access (0.5.13)
 
 Scene 1 spring now uses the supplied six standalone draft views, retaining

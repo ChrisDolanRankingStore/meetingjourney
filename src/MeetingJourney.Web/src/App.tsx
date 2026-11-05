@@ -415,9 +415,11 @@ function AdventureHomeV2({ meeting, profile, partIndex, characterAction, onMoveC
         <span>{meeting.bibleReading}</span>
       </div>
       <div className="scene-message" aria-live="polite">{t(companionMessage(characterAction))}</div>
-      <div className="home-guide-stage" aria-hidden="true" />
+      <div className="home-guide-stage">
+        <div className="home-avatar-layer"><CompanionActionHub profile={profile} characterAction={characterAction} onMoveCharacter={onMoveCharacter} onQuickAction={onQuickAction} placement="scene" homeGuide={{open:guideOpen, hint:!guideUsed, onOpen:()=>{setGuideUsed(true);setGuideOpen(true);}}} /></div>
+        <p className="companion-drag-hint">{t('Drag in any direction, or use the arrow keys to move.')}</p>
+      </div>
     </div>
-    <div className="home-avatar-layer"><CompanionActionHub profile={profile} characterAction={characterAction} onMoveCharacter={onMoveCharacter} onQuickAction={onQuickAction} placement="scene" homeGuide={{open:guideOpen, hint:!guideUsed, onOpen:()=>{setGuideUsed(true);setGuideOpen(true);}}} /></div>
     <div className="home-copy">
       <p className="eyebrow">{profile.name.trim() ? tt`Welcome back, ${profile.name.trim()}` : registerText("Welcome to your adventure",profile.ageGroup)}</p>
       <h2>{profile.ageGroup === "child" ? t("Let us take the next step") : registerText("Let us take the next step",profile.ageGroup)}</h2>
@@ -523,7 +525,7 @@ function CompanionActionHub({ profile, characterAction, onMoveCharacter, onQuick
         event.key === 'ArrowUp' ? -companionVerticalTravel(bounds.height,portrait.height) * .12 : event.key === 'ArrowDown' ? companionVerticalTravel(bounds.height,portrait.height) * .12 : 0,
         bounds, portrait);
       placeCompanion(next.x, portrait.width / 2, bounds.width); verticalRef.current = next.y; setVerticalPosition(next.y); savePosition();
-    }} onClick={() => { if (suppressTap.current) { suppressTap.current = false; return; } if(homeGuide){homeGuide.onOpen();return;} setOpen(value => !value); setMovementOpen(false); }} aria-label={homeGuide?t('Ask your guide'):open ? t("Close companion thoughts") : t("Tap for thoughts; drag in any direction or use the arrow keys to move your companion")} aria-expanded={homeGuide?.open??open} aria-haspopup={homeGuide?'dialog':undefined} aria-controls={homeGuide?'home-guide-dialog':undefined}>{placement === 'scene' && <span className="companion-nameplate">{profileName(profile)}</span>}{homeGuide&&<span className={`home-guide-hint${homeGuide.hint?' first-visit':''}`}>{t('Ask your guide')}</span>}<CharacterAvatar profile={profile} size={placement === 'scene' ? 'hero' : 'small'} action={characterAction} /></button>
+    }} onClick={() => { if (suppressTap.current) { suppressTap.current = false; return; } if(homeGuide){homeGuide.onOpen();return;} setOpen(value => !value); setMovementOpen(false); }} aria-label={homeGuide?t('Ask your guide'):open ? t("Close companion thoughts") : t("Tap for thoughts; drag in any direction or use the arrow keys to move your companion")} aria-description={placement==='scene'?t('Drag in any direction, or use the arrow keys to move.'):undefined} aria-expanded={homeGuide?.open??open} aria-haspopup={homeGuide?'dialog':undefined} aria-controls={homeGuide?'home-guide-dialog':undefined}>{placement === 'scene' && <span className="companion-nameplate">{profileName(profile)}</span>}{homeGuide&&<span className={`home-guide-hint${homeGuide.hint?' first-visit':''}`}>{t('Ask your guide')}</span>}<CharacterAvatar profile={profile} size={placement === 'scene' ? 'hero' : 'small'} action={characterAction} /></button>
     {open && <div className="companion-action-card" role="group" aria-label={movementOpen ? t("Choose a movement") : t("Your companion thoughts")}>
       {!movementOpen && <button className="close-companion-menu" type="button" aria-label={t("Close companion actions")} onClick={() => { setOpen(false); setMovementOpen(false); }}>×</button>}{movementOpen ? <div className="movement-thoughts">{(['fidget', 'bounce', 'stretch', 'sway', 'shake', 'dance'] as const).map((action, index) => <button type="button" className={`movement-thought movement-thought-${index}`} key={action} onClick={() => onMoveCharacter(action)} aria-label={t(action[0].toUpperCase() + action.slice(1))} title={t(action[0].toUpperCase() + action.slice(1))}><MovementIcon action={action} /></button>)}</div> : <div className="companion-action-grid">
         <button className="action-bubble action-move" type="button" onClick={() => setMovementOpen(true)} aria-label={t("Choose a movement")}><span aria-hidden="true">✦</span>{t("Move")}</button>
@@ -714,6 +716,10 @@ function PartScreen({ profile, part, weekOf, quiet, characterAction, partIndex, 
       onKeyDown={event=>{if(event.key==='Escape'){event.preventDefault();setSceneryRevealed(false);}}}
       onClick={event=>{if(event.detail===0||!pulled.current)setSceneryRevealed(value=>!value);pulled.current=false;}}
     ><span className="scenery-pull-grip" aria-hidden="true"/><NotebookIcon name="chevron-down"/>{sceneryRevealed&&<span className="scenery-pull-title">{part.title}</span>}</button>
+    {sceneryRevealed&&<div className="revealed-companion-stage">
+      <CompanionActionHub profile={profile} characterAction={characterAction} onMoveCharacter={onMoveCharacter} onQuickAction={action=>{setSceneryRevealed(false);onQuickAction(action);}} placement="scene" />
+      <p className="companion-drag-hint">{t('Drag in any direction, or use the arrow keys to move.')}</p>
+    </div>}
     <div id={panelId} className="meeting-panel-content" hidden={sceneryRevealed}>{children}</div>
     <nav className="part-edge-navigation" aria-label={t('Meeting parts')}>
       <button type="button" className="part-edge-previous" disabled={partIndex===0} aria-label={t('Previous part')} title={t('Previous part')} onClick={()=>onSwipe(-1)}><NotebookIcon name="back" /></button>

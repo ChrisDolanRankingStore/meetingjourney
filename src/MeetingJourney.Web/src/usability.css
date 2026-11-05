@@ -28,6 +28,13 @@ html[data-theme] .app > :is(.app-header,.mobile-nav) { background: var(--browser
 }
 .app .part-title-link:hover { text-decoration-color: currentColor; }
 .app .part-screen-shell { position: relative; }
+.app .home-redesign .home-guide-stage { min-height: 280px; }
+.app .home-redesign .home-avatar-layer .companion-scene { --portrait-height: clamp(96px, 50cqh, 180px); }
+.companion-drag-hint { position: absolute; inset: auto 8px 0; margin: 0; padding: 4px 8px; width: fit-content; max-width: calc(100% - 16px); box-sizing: border-box; border-radius: 6px; background: #fff5dfe6; color: #31455b; font-size: .75rem; line-height: 1.4; pointer-events: none; }
+.revealed-companion-stage { position: fixed; inset: calc(120px + env(safe-area-inset-top,0px)) 44px calc(148px + env(safe-area-inset-bottom,0px)); z-index: 2; container-type: size; pointer-events: none; }
+.app .revealed-companion-stage .companion-scene { position: absolute; inset: 0; width: 100%; height: 100%; --portrait-height: clamp(80px, 45cqh, 200px); pointer-events: none; }
+.app .revealed-companion-stage .companion-trigger { left: clamp(calc(var(--portrait-height) * .335 + 8px), var(--companion-x, 50%), calc(100% - var(--portrait-height) * .335 - 8px)); }
+html[data-neutral="true"] .companion-drag-hint { display: none; }
 .app .scenery-map-button { position: absolute; top: 0; right: 0; z-index: 4; display: flex; align-items: center; gap: 6px; width: auto; height: auto; min-height: 44px; padding: 6px 10px; white-space: nowrap; background: #fff5df; border: 1px solid #d6bc8c; border-radius: 12px; color: #31455b; }
 .app .scenery-map-button + .scenery-pull-handle { max-width: calc(100% - 160px); }
 .app .is-scenery-revealed > .scenery-map-button { position: fixed; top: calc(80px + env(safe-area-inset-top,0px)); right: max(16px,env(safe-area-inset-right,0px)); }

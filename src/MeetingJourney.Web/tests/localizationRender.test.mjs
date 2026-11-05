@@ -70,6 +70,8 @@ test('welcome, character choice and home render in Spanish and still render in E
   assert.match(html,/home-screen" style="--scene-home-image:/);
   assert.match(html,/aria-haspopup="dialog" aria-controls="home-guide-dialog"/);
   assert.match(html,/Pregunta a tu guía/);
+  assert.match(html,/<div class="home-guide-stage"><div class="home-avatar-layer">/);
+  assert.match(html,/aria-description="Arrastra en cualquier dirección o usa las flechas del teclado para moverte."/);
   assert.doesNotMatch(html,/class="action-bubble/);
   assert.match(html,/Ver el recorrido/);
   assert.match(html,/compact-v1\/scene-[1-6]-(winter|spring|summer|autumn)-map-v2-960.webp/);
@@ -106,6 +108,7 @@ test('welcome, character choice and home render in Spanish and still render in E
   data.set('mj-language','en');
   html=renderToStaticMarkup(React.createElement(App));
   assert.match(html,/Start journey/);assert.match(html,/Discoveries/);assert.match(html,/Christopher/);
+  assert.match(html,/aria-description="Drag in any direction, or use the arrow keys to move."/);
   const {StudyTools}=await server.ssrLoadModule('/src/StudyTools.tsx');
   const {ComfortSettings}=await server.ssrLoadModule('/src/ComfortSettings.tsx');
   const {IconAction}=await server.ssrLoadModule('/src/IconAction.tsx');
