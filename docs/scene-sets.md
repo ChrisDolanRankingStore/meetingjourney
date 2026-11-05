@@ -1,10 +1,8 @@
 # Scene sets
 
-Meeting Journey uses only the original **painted storybook valley**. The vector scenery option, generator and generated scenery assets have been removed. Older `mj-scene-artwork` preferences are ignored, including when restoring an older backup; no journal records or saved event dates are changed. Settings retain soft/plain reading treatments, clear text and colour palettes.
+Meeting Journey uses original **painted storybook scenery** organised as six weekly worlds, each with winter, spring, summer and autumn artwork. The season follows the meeting week's date and a device-local Northern/Southern hemisphere setting, and changes the painted foliage, ground and sky rather than applying a tint. The vector scenery option, generator and generated scenery assets have been removed. Older `mj-scene-artwork` preferences are ignored, including when restoring an older backup; no journal records or saved event dates are changed. Settings retain soft/plain reading treatments, clear text and colour palettes.
 
-The painted option uses the original gate, river, bridge, village and garden paintings and the matching painted route map. The home viewpoint changes weekly; section paintings remain associated with their landmarks. It is **one painted valley**, not six newly painted countries or four sets of seasonal paintings. Images retain their proportions and are deliberately cropped rather than stretched.
-
-The week selects one of five stable home viewpoints across year boundaries; returning to an older week restores its view. Home, journey cards, discoveries and manual/automatic offline preparation share the painted pack. The three-month season identifier is retained for compatibility, but it does not claim seasonally repainted artwork.
+Each world provides six views — map, gate, river, bridge, village and garden — consumed by the home screen, journey cards and discovery map. Only the first world, the London **City riverside** scene, currently has completed standalone paintings for all four seasons (conservative source-based seasonal repaints that keep each view's composition and landmarks). Every week therefore uses the London scene for now; the weekly rotation through the other five worlds returns as their scene packs are completed, by extending the completed-worlds list in `sceneSets.ts`. Images retain their proportions and are deliberately cropped rather than stretched.
 
 Artwork is deliberately separate from navigation and local notes. Adding a new pack therefore does not change saved drawings, meeting position or the JW Library handoff.
 
@@ -12,7 +10,7 @@ Artwork is deliberately separate from navigation and local notes. Adding a new p
 
 Painted assets are delivered locally without a runtime image service. Offline preparation downloads the six distinct scene images at each delivered size. The packaged runtime check verifies that the obsolete vector scenery directory is absent.
 
-The asset preparation script retains the earlier painted artwork and generates responsive scene sizes (480, 960 and 1600 pixels wide, never enlarged) and transparent portraits (180, 360 and 720 pixels high). WebP uses the existing quality settings (76 for scenery, 82 for portraits, alpha quality 95) with maximum compression effort. JPEG fallbacks use MozJPEG at quality 76. The upload package excludes the original large PNG artwork. Regenerate derivatives with `node node-app/scripts/prepare-assets.mjs` before building and staging the client.
+Seasonal scene derivatives (480, 960 and 1600 pixels wide WebP and JPEG, never enlarged) are generated with `node node-app/scripts/prepare-seasonal-artwork.mjs [world season]`. Standalone draft paintings in `artwork/seasonal-views/scene-<world>-<season>-<view>.png` take precedence; views without a standalone painting fall back to crops of the masters in `artwork/seasonal-masters`. Companion portraits and remaining assets are prepared with `node node-app/scripts/prepare-assets.mjs`. The upload package excludes the original large PNG artwork.
 
 ## Programme maps and reference layouts
 

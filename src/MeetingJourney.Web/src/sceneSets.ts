@@ -48,12 +48,15 @@ export function sceneSeasonForWeek(weekOf:string,hemisphere:SceneHemisphere=read
 }
 
 const worldLabels=['City riverside','Savannah village','Outback creek','Coastal village','Riverside park','Mountain garden'];
+// Worlds with a completed set of standalone seasonal paintings. The weekly
+// rotation uses only these until the remaining scene packs are finished.
+const completedWorlds=[1];
 export function sceneSetForWeek(weekOf:string,hemisphere:SceneHemisphere=readSceneHemisphere()):SceneSet{
   const date=sceneDate(weekOf);
   date.setDate(date.getDate()-(date.getDay()+6)%7);
   const monday=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
   const week=Math.floor((Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())-Date.UTC(2020,0,6))/604800000);
-  const world=((week%6)+6)%6+1;
+  const world=completedWorlds[((week%completedWorlds.length)+completedWorlds.length)%completedWorlds.length];
   const season=sceneSeasonForWeek(monday,hemisphere);
   const image=(view:string)=>`/assets/scene-${world}-${season}-${view}-v2.png`;
   const moments:Record<MeetingSection,SceneMoment>={
