@@ -92,6 +92,16 @@ export function StoryJourneyMap({ meeting, current, onSelect, onBack, listView, 
     }
   };
   useEffect(() => { cancelDrag();scrollRef.current?.scrollTo(0,0); }, [session,list,comfort.neutral]);
+  const [canScroll, setCanScroll] = useState(false);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const update = () => setCanScroll(el.scrollHeight > el.clientHeight + 1);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [session, list, comfort.neutral, indices.length]);
   return <section className={`story-map-screen artwork-painted ${split ? 'has-day-sessions' : ''}`}>
     <header className="story-map-heading"><IconAction icon="back" label={t("Back to home")} onClick={onBack} /><div><p className="eyebrow">{t("Today's journey")}</p><h2>{list ? t("Meeting outline") : t("Choose your next stop")}</h2></div><IconAction icon={list ? 'route' : 'list'} label={list ? t("Map") : t("List")} aria-pressed={list} onClick={() => setList(value => !value)} /></header>
     {split && <MeetingSessionPicker value={session} onChange={setSession} />}
@@ -106,7 +116,7 @@ export function StoryJourneyMap({ meeting, current, onSelect, onBack, listView, 
         else if(!suppressClick.current)onSelect(next);
         suppressClick.current=false;
       }}>{companion}</button>}
-      <p>{t(!list&&!comfort.neutral&&companion?'Drag to a stop, or tap it.':"Pick any stop.")}<br /><small>{split ? t('Scroll to explore this session.') : t("Scroll to explore the journey.")}</small></p><button className="map-continue" type="button" onClick={() => onSelect(next)}>{t("Continue")}<NotebookIcon name="next" /></button>
+      <p>{t(!list&&!comfort.neutral&&companion?'Drag to a stop, or tap it.':"Pick any stop.")}{canScroll && <><br /><small>{split ? t('Scroll to explore this session.') : t("Scroll to explore the journey.")}</small></>}</p><button className="map-continue" type="button" onClick={() => onSelect(next)}>{t("Continue")}<NotebookIcon name="next" /></button>
     </footer>
     {cursor&&<div className="map-companion-drag-preview" aria-hidden="true" style={{left:cursor.x,top:cursor.y}}>{companion}</div>}
     <span className="visually-hidden" role="status">{dropTarget!==null?t('Release to open {title}',{title:meeting.parts[dropTarget].title}):''}</span>

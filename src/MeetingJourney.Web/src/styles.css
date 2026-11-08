@@ -619,7 +619,7 @@ body { background: #f8f4ec; }
 .part-screen-shell { display: grid; gap: 12px; }
 .part-movement-strip { display: flex; justify-content: flex-end; }
 .part-movement-strip .movement-menu { width: min(100%, 560px); margin-top: 0; padding: 10px 13px; border: 1px solid #e3dacd; border-radius: 13px; background: rgba(255,253,249,.78); }
-.part-story-scene { position: relative; min-height: 142px; overflow: hidden; border: 1px solid #d9c8a6; border-radius: 20px; background-image: linear-gradient(180deg, rgba(255,251,238,.12), rgba(255,239,190,.38)), var(--valley-art); background-position: center 66%; background-size: cover; box-shadow: 0 10px 24px rgba(70,56,38,.1); }
+.part-story-scene { position: relative; min-height: 142px; overflow: hidden; border: 1px solid #d9c8a6; border-radius: 20px; background-image: linear-gradient(180deg, rgba(255,251,238,.12), rgba(255,239,190,.38)); background-position: center 66%; background-size: cover; box-shadow: 0 10px 24px rgba(70,56,38,.1); }
 .part-story-scene::after { content: 'A new stop to explore'; position: absolute; left: 18px; bottom: 15px; padding: 6px 9px; border-radius: 99px; color: #493e3a; background: rgba(255,251,238,.9); font-size: .7rem; font-weight: 800; }
 .part-story-scene .character-avatar { position: absolute; z-index: 2; right: 14%; bottom: -8px; width: 86px; height: 112px; --character-anchor-x: 0; transform: translateX(0); }
 .part-story-scene .character-avatar { right: auto; left: calc(15% + (var(--route-progress, 0) * 70%)); transition: left .45s ease; }

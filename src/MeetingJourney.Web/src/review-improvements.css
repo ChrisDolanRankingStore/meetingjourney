@@ -277,7 +277,7 @@ html[lang=es] .storybook-part-tools button,html[lang=es] .storybook-part-tools a
 .app.scene-season-spring { --scene-season-overlay: #cfe9c21c; --scene-season-glow: #fffbe7; }
 .app.scene-season-summer { --scene-season-overlay: #ffd28a1c; --scene-season-glow: #fff2c6; }
 .app.scene-season-autumn { --scene-season-overlay: #d99b6c24; --scene-season-glow: #fff0d3; }
-.app .part-story-scene { background-image: linear-gradient(var(--scene-season-overlay), var(--scene-season-overlay)), var(--scene-image, var(--valley-art)); background-position: var(--scene-position, center 68%); }
+.app .part-story-scene { background-image: linear-gradient(var(--scene-season-overlay), var(--scene-season-overlay)); background-position: var(--scene-position, center 68%); }
 .storybook-home .home-scene { background-image: linear-gradient(var(--scene-season-overlay), var(--scene-season-overlay)), var(--scene-home-image, url('/assets/compact-v1/journey-gate-v1-960.webp')); background-position: var(--scene-position, center 48%); }
 .app.scene-season-winter .home-scene::after, .app.scene-season-spring .home-scene::after, .app.scene-season-summer .home-scene::after, .app.scene-season-autumn .home-scene::after { background: var(--scene-season-glow); opacity: .1; }
 .brand-mark { position: relative; font-size: 0; }

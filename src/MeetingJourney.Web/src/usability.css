@@ -167,9 +167,7 @@ html[data-neutral="true"] .app .home-sources-card { margin: 24px auto; max-width
 .comfort-settings label:has(input[type="checkbox"]) { display: flex; gap: 10px; align-items: flex-start; min-height: 44px; }
 .comfort-settings input[type="checkbox"] { flex: 0 0 20px; width: 20px; height: 20px; margin: 2px 0; }
 .comfort-settings p:empty { display: none; }
-.app .settings-page { display: block; overflow: auto; }
-.app .settings-screen { display: block; height: auto; min-height: 100%; overflow: visible; }
-.app .settings-screen .settings-grid { height: auto; overflow: visible; min-width: 0; }
+.app .settings-screen .settings-grid { min-width: 0; }
 .app .settings-screen > .settings-grid,
 .app .programme-settings > .settings-grid { grid-template-columns: repeat(auto-fit,minmax(min(100%,300px),1fr)); align-items: start; }
 .app .programme-settings { grid-column: 1 / -1; }
