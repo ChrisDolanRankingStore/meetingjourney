@@ -150,12 +150,12 @@ html[lang=es] .storybook-part-tools button,html[lang=es] .storybook-part-tools a
 .app .companion-scene .companion-trigger,
 .app .part-story-scene .companion-scene .companion-trigger,
 .app .part-screen-shell:has(.journey-tool-backdrop) .companion-scene .companion-trigger {
-  bottom:calc(8px + var(--companion-y,0) * max(0px,100% - var(--portrait-height) - 72px));
+  bottom:calc(8px + var(--companion-y,0) * max(0px,100% - var(--portrait-height) - var(--companion-top-clearance,64px) - 8px));
 }
 .companion-nameplate {position:absolute;z-index:9;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);display:block;width:max-content;max-width:145px;padding:4px 11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:1px solid #ded2bd;border-radius:99px;background:#fffdf5ed;color:#35456b;font-size:.7rem;line-height:1.2;box-shadow:0 2px 6px #35456b12;pointer-events:none;}
 .app .companion-scene.is-open .companion-action-card,
 .app .part-screen-shell:has(.journey-tool-backdrop) .companion-scene.is-open .companion-action-card {
-  top:clamp(38px,calc(100% - 8px - var(--companion-y,0) * max(0px,100% - var(--portrait-height) - 72px) - var(--portrait-height) - 135px),max(38px,calc(100% - 176px)));
+  top:clamp(38px,calc(100% - 8px - var(--companion-y,0) * max(0px,100% - var(--portrait-height) - var(--companion-top-clearance,64px) - 8px) - var(--portrait-height) - 135px),max(38px,calc(100% - 176px)));
   height:166px;width:min(292px,calc(100% - 12px));overflow:visible;
 }
 .app .companion-scene .companion-action-grid .action-bubble {width:104px;height:66px;min-height:60px;padding:12px 10px 10px;border:0;border-radius:0;box-shadow:none;background:transparent;font-size:.73rem;line-height:1.1;isolation:isolate;filter:drop-shadow(0 3px 5px #35456b22);}

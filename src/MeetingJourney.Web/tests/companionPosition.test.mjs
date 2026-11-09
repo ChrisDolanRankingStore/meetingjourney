@@ -20,3 +20,13 @@ test('a shallow phone scene disables vertical travel without invalid coordinates
  assert.equal(companionVerticalTravel(84,70),0);
  assert.deepEqual(moveCompanionPosition({x:50,y:1},0,-200,{width:390,height:84},{width:46,height:70}),{x:50,y:0});
 });
+
+test('revealed scenery allows movement to the nameplate clearance without reserving a chapter heading',()=>{
+ const stage={width:302,height:366,topClearance:32},portrait={width:110,height:165};
+ const top=moveCompanionPosition({x:50,y:0},0,-10000,stage,portrait);
+ assert.deepEqual(top,{x:50,y:1});
+ const travel=companionVerticalTravel(stage.height,portrait.height,stage.topClearance);
+ assert.equal(stage.height-8-travel-portrait.height,32);
+ assert.equal(travel-companionVerticalTravel(stage.height,portrait.height),32);
+ assert.deepEqual(moveCompanionPosition(top,0,travel,stage,portrait),{x:50,y:0});
+});

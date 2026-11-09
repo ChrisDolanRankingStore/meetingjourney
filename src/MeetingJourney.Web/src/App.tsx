@@ -453,7 +453,7 @@ function MovementMenu({ onMoveCharacter }: { onMoveCharacter: (action: Exclude<C
   return <details className="movement-menu"><summary>{t("Need to move?")}</summary><p>{t("Choose whatever your body feels like. Nothing is scored, and you can stop whenever you want.")}</p><div className="movement-options"><button type="button" onClick={() => onMoveCharacter('fidget')}>{t("Fidget")}</button><button type="button" onClick={() => onMoveCharacter('bounce')}>{t("Bounce / jump")}</button><button type="button" onClick={() => onMoveCharacter('stretch')}>{t("Stretch")}</button><button type="button" onClick={() => onMoveCharacter('sway')}>{t("Sway / rock")}</button><button type="button" onClick={() => onMoveCharacter('shake')}>{t("Shake it out")}</button><button type="button" onClick={() => onMoveCharacter('dance')}>{t("Dance")}</button></div></details>;
 }
 
-function CompanionActionHub({ profile, characterAction, onMoveCharacter, onQuickAction, placement, homeGuide }: { profile: CharacterProfile; characterAction: CharacterAction; onMoveCharacter: (action: Exclude<CharacterAction, 'steady'>) => void; onQuickAction: (action: CompanionQuickAction) => void; placement: 'scene' | 'dock'; homeGuide?: {open:boolean; hint:boolean; onOpen:()=>void} }) {
+function CompanionActionHub({ profile, characterAction, onMoveCharacter, onQuickAction, placement, homeGuide, topClearance = 64 }: { profile: CharacterProfile; characterAction: CharacterAction; onMoveCharacter: (action: Exclude<CharacterAction, 'steady'>) => void; onQuickAction: (action: CompanionQuickAction) => void; placement: 'scene' | 'dock'; homeGuide?: {open:boolean; hint:boolean; onOpen:()=>void}; topClearance?: number }) {
   const verticalStorageKey = homeGuide ? 'mj-home-companion-y' : 'mj-companion-y';
   const hubRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ startX: number; startY: number; origin: number; originY: number; width: number; height: number; half: number; portraitHeight: number; moved: boolean } | null>(null);
@@ -477,7 +477,7 @@ function CompanionActionHub({ profile, characterAction, onMoveCharacter, onQuick
     event.stopPropagation(); suppressTap.current = false;
     const bounds = hubRef.current!.getBoundingClientRect();
     const portrait = event.currentTarget.getBoundingClientRect();
-    const travel = companionVerticalTravel(bounds.height, portrait.height);
+    const travel = companionVerticalTravel(bounds.height, portrait.height, topClearance);
     dragRef.current = { startX: event.clientX, startY: event.clientY,
       origin: (portrait.left + portrait.width / 2 - bounds.left) / bounds.width * 100,
       originY: travel ? Math.max(0, Math.min(1, (bounds.bottom - portrait.bottom - 8) / travel)) : 0,
@@ -492,7 +492,7 @@ function CompanionActionHub({ profile, characterAction, onMoveCharacter, onQuick
     if (drag.moved) {
       setOpen(false); setMovementOpen(false);
       const next = moveCompanionPosition({x:drag.origin,y:drag.originY}, event.clientX - drag.startX, event.clientY - drag.startY,
-        {width:drag.width,height:drag.height}, {width:drag.half * 2,height:drag.portraitHeight});
+        {width:drag.width,height:drag.height,topClearance}, {width:drag.half * 2,height:drag.portraitHeight});
       placeCompanion(next.x, drag.half, drag.width);
       verticalRef.current = next.y; setVerticalPosition(next.y);
     }
@@ -515,15 +515,15 @@ function CompanionActionHub({ profile, characterAction, onMoveCharacter, onQuick
     return () => { document.removeEventListener('pointerdown', dismiss); document.removeEventListener('keydown', escape); };
   }, [open]);
   const choose = (action: CompanionQuickAction) => { setOpen(false); setMovementOpen(false); onQuickAction(action); };
-  return <div ref={hubRef} className={`companion-action-hub companion-${placement} ${open ? 'is-open' : ''} ${movementOpen ? 'choosing-movement' : ''}`} style={{ ...(position !== null ? {'--companion-x': `${position}%`} : {}), '--companion-y': verticalPosition } as CSSProperties}>
+  return <div ref={hubRef} className={`companion-action-hub companion-${placement} ${open ? 'is-open' : ''} ${movementOpen ? 'choosing-movement' : ''}`} style={{ ...(position !== null ? {'--companion-x': `${position}%`} : {}), '--companion-y': verticalPosition, '--companion-top-clearance': `${topClearance}px` } as CSSProperties}>
     <button className="companion-trigger" type="button" onPointerDown={startDrag} onPointerMove={dragCompanion} onPointerUp={finishDrag} onPointerCancel={finishDrag} onKeyDown={event => {
       if (placement !== 'scene' || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
       event.preventDefault();
       const bounds = hubRef.current!.getBoundingClientRect(), portrait = event.currentTarget.getBoundingClientRect();
       const next = moveCompanionPosition({x:(portrait.left + portrait.width / 2 - bounds.left) / Math.max(1, bounds.width) * 100,y:verticalPosition},
         event.key === 'ArrowLeft' ? -bounds.width * .08 : event.key === 'ArrowRight' ? bounds.width * .08 : 0,
-        event.key === 'ArrowUp' ? -companionVerticalTravel(bounds.height,portrait.height) * .12 : event.key === 'ArrowDown' ? companionVerticalTravel(bounds.height,portrait.height) * .12 : 0,
-        bounds, portrait);
+        event.key === 'ArrowUp' ? -companionVerticalTravel(bounds.height,portrait.height,topClearance) * .12 : event.key === 'ArrowDown' ? companionVerticalTravel(bounds.height,portrait.height,topClearance) * .12 : 0,
+        {width:bounds.width,height:bounds.height,topClearance}, portrait);
       placeCompanion(next.x, portrait.width / 2, bounds.width); verticalRef.current = next.y; setVerticalPosition(next.y); savePosition();
     }} onClick={() => { if (suppressTap.current) { suppressTap.current = false; return; } if(homeGuide){homeGuide.onOpen();return;} setOpen(value => !value); setMovementOpen(false); }} aria-label={homeGuide?t('Ask your guide'):open ? t("Close companion thoughts") : t("Tap for thoughts; drag in any direction or use the arrow keys to move your companion")} aria-description={placement==='scene'?t('Drag in any direction, or use the arrow keys to move.'):undefined} aria-expanded={homeGuide?.open??open} aria-haspopup={homeGuide?'dialog':undefined} aria-controls={homeGuide?'home-guide-dialog':undefined}>{placement === 'scene' && <span className="companion-nameplate">{profileName(profile)}</span>}{homeGuide&&<span className={`home-guide-hint${homeGuide.hint?' first-visit':''}`}>{t('Ask your guide')}</span>}<CharacterAvatar profile={profile} size={placement === 'scene' ? 'hero' : 'small'} action={characterAction} /></button>
     {open && <div className="companion-action-card" role="group" aria-label={movementOpen ? t("Choose a movement") : t("Your companion thoughts")}>
@@ -717,7 +717,7 @@ function PartScreen({ profile, part, weekOf, quiet, characterAction, partIndex, 
       onClick={event=>{if(event.detail===0||!pulled.current)setSceneryRevealed(value=>!value);pulled.current=false;}}
     ><span className="scenery-pull-grip" aria-hidden="true"/><NotebookIcon name="chevron-down"/>{sceneryRevealed&&<span className="scenery-pull-title">{part.title}</span>}</button>
     {sceneryRevealed&&<div className="revealed-companion-stage">
-      <CompanionActionHub profile={profile} characterAction={characterAction} onMoveCharacter={onMoveCharacter} onQuickAction={action=>{setSceneryRevealed(false);onQuickAction(action);}} placement="scene" />
+      <CompanionActionHub profile={profile} characterAction={characterAction} onMoveCharacter={onMoveCharacter} onQuickAction={action=>{setSceneryRevealed(false);onQuickAction(action);}} placement="scene" topClearance={32} />
       <p className="companion-drag-hint">{t('Drag in any direction, or use the arrow keys to move.')}</p>
     </div>}
     <div id={panelId} className="meeting-panel-content" hidden={sceneryRevealed}>{children}</div>

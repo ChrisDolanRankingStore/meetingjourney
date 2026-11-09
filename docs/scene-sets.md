@@ -30,6 +30,8 @@ The discovery mission keeps its reveal-all action and optional scripture links i
 
 The home avatar has a full-scene drag layer behind the welcome plaque and journey controls. Those foreground objects remain clickable and cover the avatar when it passes behind them. The transparent drag layer does not intercept other controls; tapping the visible avatar still opens the guide and positions remain saved locally.
 
+Revealed part scenery lets the companion move upward to just below the app header, leaving 32px for its nameplate rather than reserving space for an absent chapter heading. Pointer and arrow-key movement share the same bounds; other companion stages retain their existing heading clearance.
+
 Drawing supports two-finger pinch/spread zoom from 100% to 400%, with two-finger panning. Beginning a two-finger gesture discards its initial accidental stroke; returning to one finger does not draw until a new gesture starts. Paper options also provide a zoom slider and reset. Zoom is view-only and does not alter saved coordinates or crop PNG exports.
 
 The left drawing rail includes a smudge brush with a size flyout. It carries and blends existing ink, leaving the paper untouched. Smudges are editable stroke records, supported by undo/redo, local saving, backups, PNG exports and discovery previews.
