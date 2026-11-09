@@ -199,8 +199,8 @@ test('welcome, character choice and home render in Spanish and still render in E
    assert.match(general.contentNotice,language==='es'?/añadido/:/not been added/);
   }
   const regularMap=renderToStaticMarkup(React.createElement(StoryJourneyMap,{meeting:getMeeting('midweek','2026-10-19'),current:0,onSelect:()=>{},onBack:()=>{},listView:()=>null}));
+  assert.doesNotMatch(regularMap,/--map-image|compact-v1\/scene-/);
   assert.match(regularMap,/artwork-painted/);
-  assert.match(regularMap,/scene-[1-6]-(winter|spring|summer|autumn)-map-v2-960.webp/);
   for(const language of ['en','es']){
    data.set('mj-language',language);
    const props={meeting:getMeeting('midweek','2026-10-19'),current:0,onSelect:()=>{},onBack:()=>{},listView:()=>null,companion:React.createElement('span',null,'Companion')};

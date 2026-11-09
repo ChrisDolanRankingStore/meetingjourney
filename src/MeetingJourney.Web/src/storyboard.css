@@ -20,7 +20,7 @@
 .story-map-heading .eyebrow { margin: 0 0 3px; font-size: .62rem; }
 .story-map-heading button { min-width: 42px; min-height: 42px; padding: 6px; border: 1px solid #dfcfb9; border-radius: 12px; color: #394c78; background: #fffdf5; font-size: .76rem; }
 .story-map-heading button:last-child { margin-left: auto; }
-.illustrated-journey-map { position: relative; min-height: 0; overflow: hidden; background: linear-gradient(#fff5d926, #fff5d954), var(--valley-art) center 65% / cover; }
+.illustrated-journey-map { position: relative; min-height: 0; overflow: hidden; background: transparent; }
 .map-path-art { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .illustrated-stop { --section-colour: #a96057; position: absolute; left: var(--stop-x); top: var(--stop-y); transform: translate(-50%, -50%); display: flex; align-items: center; gap: 5px; width: 43%; max-width: 255px; min-height: 44px; padding: 4px 7px 4px 4px; border: 1px solid #fff8d6; border-radius: 16px; color: #263552; background: #fffcf2f5; box-shadow: 0 3px 9px #4d403122; text-align: left; }
 .illustrated-stop.section-treasures { --section-colour: #8061b1; }
@@ -49,7 +49,7 @@
 .app .companion-scene .companion-action-grid .action-feelings::before { content: ''; position: absolute; z-index: -1; inset: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 90'%3E%3Cpath d='M50 86C37 73 4 53 4 29C4 2 37-3 50 19C63-3 96 2 96 29C96 53 63 73 50 86Z' fill='%23ffe1e8' stroke='%23dca2b0'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
 .app .companion-scene .companion-action-grid .action-bubble { min-width: 44px; }
 .app .companion-scene .companion-trigger:focus-visible { outline: 3px solid #fff4b5; outline-offset: 5px; border-radius: 50%; }
-.app.sensory-calm .illustrated-journey-map { background-image: linear-gradient(#fffcf2b8, #fffcf2b8), var(--valley-art); }
+.app.sensory-calm .illustrated-journey-map { background-image: linear-gradient(#fffcf2b8, #fffcf2b8); }
 .notebook-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 15px; }
 .notebook-tabs button, .drawing-pages button { min-height: 40px; padding: 6px 12px; border: 1px solid #dfcfb9; border-radius: 99px; color: #475477; background: #fffaf0; font-size: .78rem; }
 .notebook-tabs button[aria-pressed="true"], .drawing-pages button[aria-pressed="true"] { color: white; background: #465781; border-color: #465781; }
