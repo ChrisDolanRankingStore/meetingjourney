@@ -41,7 +41,8 @@ html[data-neutral="true"] .companion-drag-hint { display: none; }
 .app .is-scenery-revealed > .scenery-map-button + .scenery-pull-handle { max-width: 100%; }
 .app .part-screen-shell:has(dialog[open]) > .scenery-map-button { display: none; }
 .app .journey-stage-page .part-column .part-screen-shell { grid-template-rows: auto minmax(0,1fr) auto; }
-.meeting-panel-content { min-width: 0; min-height: 0; }
+.meeting-panel-content { min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
+.meeting-panel-content > .part-card { height: 100%; }
 .app .journey-stage-page .part-column .part-screen-shell:has(dialog[open]) { grid-template-rows: minmax(0,1fr); }
 .app .journey-stage-page .part-column .part-screen-shell.is-scenery-revealed { border: 0; box-shadow: none; background: transparent; }
 .app .scenery-pull-handle {
