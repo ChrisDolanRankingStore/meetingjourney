@@ -1,13 +1,14 @@
-import {useEffect, useRef, useState, type CSSProperties} from 'react';
+import {useEffect, useRef, useState, type CSSProperties, type ReactNode} from 'react';
 import {getLanguage, t, tt} from './i18n';
 import {IllustratedIcon} from './IllustratedIcon';
-import {bingoLineCells, bingoSize, bingoWords} from './bingoBoard';
+import {bingoLineCells, bingoSize, bingoWords, bingoSurprise, type BingoSurprise} from './bingoBoard';
+import {NotebookIcon} from './NotebookIcon';
 import {emptyStudy, readStudy, saveStudy, type StudyProgress} from './studyStorage';
 import type {MeetingPart} from './types';
 import './wordBingo.css';
 import {useComfort} from './ComfortSettings';
 
-export function WordBingo({meetingId, part, older, onClue, onWrite, onDraw}: {meetingId: string; part: MeetingPart; older: boolean; onClue?: () => void; onWrite?: () => void; onDraw?: () => void}) {
+export function WordBingo({meetingId, part, older, companion, onClue, onWrite, onDraw}: {meetingId: string; part: MeetingPart; older: boolean; companion?: ReactNode; onClue?: () => void; onWrite?: () => void; onDraw?: () => void}) {
   const language = getLanguage();
   const comfort=useComfort();
   // A separate engagement record prevents the comment builder from overwriting taps.
@@ -16,11 +17,14 @@ export function WordBingo({meetingId, part, older, onClue, onWrite, onDraw}: {me
   const size = value.bingoSize ?? bingoSize(older);
   const board = bingoWords(part, size, language);
   const [loaded, setLoaded] = useState(false), [status, setStatus] = useState('');
+  const [surprise, setSurprise] = useState<BingoSurprise | null>(null);
+  useEffect(() => { setSurprise(null); }, [comfort.hideCounts, comfort.neutral]);
   const current = useRef(value);
   const saves = useRef(Promise.resolve());
   useEffect(() => {
     let active = true;
     setLoaded(false);
+    setSurprise(null);
     void readStudy(meetingId, recordId).then(saved => {
       if (!active) return;
       current.current = saved ?? emptyStudy(meetingId, recordId);
@@ -38,13 +42,25 @@ export function WordBingo({meetingId, part, older, onClue, onWrite, onDraw}: {me
   };
   const toggle = (word: string) => {
     const previous = current.current, marked = previous.bingoWords ?? [];
-    persist({...previous, bingoWords: marked.includes(word) ? marked.filter(item => item !== word) : [...marked, word], updatedAt: new Date().toISOString()});
+    const next = marked.includes(word) ? marked.filter(item => item !== word) : [...marked, word];
+    const kind = !comfort.hideCounts ? bingoSurprise(board, marked, next, Boolean(companion) && !comfort.neutral) : null;
+    setSurprise(kind);
+    persist({...previous, bingoWords: next, updatedAt: new Date().toISOString()});
   };
   return <section className="word-bingo" aria-label={t('Word bingo')} aria-busy={!loaded}>
-    <div className="bingo-size-picker" role="group" aria-label={t('Bingo grid size')}>{([3,4] as const).map(option=><button type="button" key={option} disabled={!loaded} aria-pressed={size===option} onClick={()=>persist({...current.current,bingoSize:option,updatedAt:new Date().toISOString()})}>{option} × {option}</button>)}</div>
+    <div className="bingo-size-picker" role="group" aria-label={t('Bingo grid size')}>{([3,4] as const).map(option=><button type="button" key={option} disabled={!loaded} aria-pressed={size===option} onClick={()=>{setSurprise(null);persist({...current.current,bingoSize:option,updatedAt:new Date().toISOString()});}}>{option} × {option}</button>)}</div>
     <p className="bingo-instruction">{t('Tap a word when you hear it. Tap again to undo.')}</p>
     <div className="bingo-legend"><span>{t('From this week')}</span><span>{t('Familiar')}</span></div>
     {part.activityNotice&&<p role="status">{t(part.activityNotice)}</p>}
+    {surprise && !comfort.hideCounts && <div className={`bingo-surprise bingo-surprise-${surprise}`} role="status">
+      <div className="bingo-surprise-art" aria-hidden="true">
+        {surprise === 'sparkle' && <svg viewBox="0 0 100 80" fill="none" stroke="currentColor" strokeWidth="2"><path d="m50 10 8 22 22 8-22 8-8 22-8-22-22-8 22-8Z" /><path d="m18 8 3 9 9 3-9 3-3 9-3-9-9-3 9-3Zm64 42 3 9 9 3-9 3-3 9-3-9-9-3 9-3Z" /></svg>}
+        {surprise === 'companion' && !comfort.neutral && companion}
+        {surprise === 'discovery' && <IllustratedIcon name="discover" />}
+      </div>
+      <div><strong>{t('Every word is ticked.')}</strong><p>{t(surprise === 'discovery' ? 'A little discovery for your journey.' : surprise === 'companion' ? 'Your companion shares a little celebration.' : 'A little sparkle for your journey.')}</p><small>{t('Keep listening at your own pace.')}</small></div>
+      <button type="button" className="bingo-surprise-close" aria-label={t('Dismiss surprise')} onClick={()=>setSurprise(null)}><NotebookIcon name="close" /></button>
+    </div>}
     <div className="bingo-workspace">
     <div className="word-bingo-board" style={{'--bingo-size': size} as CSSProperties}>
       {board.map(word => <button type="button" key={word} disabled={!loaded} data-source={part.bingoWords?.some(item=>item.word===word&&item.source==='passage')?'passage':'familiar'} aria-label={`${word} · ${t(part.bingoWords?.some(item=>item.word===word&&item.source==='passage')?'From this week':'Familiar')}`} aria-pressed={selected.includes(word)} className={!comfort.hideCounts&&line.has(word) ? 'is-line' : ''} onClick={() => toggle(word)}><span>{word}</span>{selected.includes(word) && <span className="bingo-check" aria-hidden="true">✓</span>}</button>)}

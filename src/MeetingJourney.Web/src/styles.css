@@ -1036,7 +1036,7 @@ img.character-backpack { display: block; top: 31%; right: auto; bottom: auto; le
   .quick-capture button { flex: 1; }
   .quick-notes-card { margin-bottom: 12px; }
 }
-.tool-screen { display: grid; gap: 14px; }
+.tool-screen { display: grid; grid-auto-rows: max-content; align-content: start; gap: 14px; }
 .tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .tool-card { padding: 20px; border: 1px solid #e1c9a8; border-radius: 20px; background: #fffdf8; box-shadow: 0 10px 24px rgba(73,67,53,.06); }
 .tool-card h3 { margin: 7px 0 8px; color: #263552; }

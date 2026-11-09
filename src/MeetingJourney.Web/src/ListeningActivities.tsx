@@ -1,5 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {t} from './i18n';
+import {BibleReferenceLinks} from './OfficialLinks';
 import {lensPrompts, readListeningPreferences} from './listeningPreferences';
 import {emptyStudy, readStudy, saveStudy, type StudyProgress} from './studyStorage';
 import type {MeetingPart} from './types';
@@ -25,7 +26,7 @@ export function ListeningActivities({meetingId, part}: {meetingId: string; part:
     saves.current = saves.current.catch(() => undefined).then(() => saveStudy(next)).then(() => setStatus('Saved on this device')).catch(() => setStatus('Could not save'));
   };
   return <div className="listening-activities"><InterestPrompts part={part}/>{part.type === 'BibleReading' && <section><h4>{t('Before the reading')}</h4><p>{t('What do you think you might notice? Choose one, or just listen.')}</p>
-    {part.textReference && <p>{part.textReference}</p>}
+    <BibleReferenceLinks reference={part.textReference} />
     <div className="listening-chips">{['A person', 'A place', 'A helpful choice'].map(choice => <button type="button" key={choice} disabled={!loaded} aria-pressed={value.prediction === choice} onClick={() => update({prediction: choice, predictionChecked: undefined})}>{t(choice)}</button>)}</div>
     {value.prediction && <><h4>{t('After the reading')}</h4><p>{t('Did you notice what you expected? There is no wrong answer.')}</p><div className="listening-chips">{['I noticed that', 'Something different', 'I am not sure'].map(choice => <button type="button" key={choice} disabled={!loaded} aria-pressed={value.predictionChecked === choice} onClick={() => update({predictionChecked: choice})}>{t(choice)}</button>)}</div></>}
     <small role="status">{t(status)}</small>

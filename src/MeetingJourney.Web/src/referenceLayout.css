@@ -188,11 +188,11 @@ html[data-palette="high-contrast"] .app > .mobile-nav > .icon-action.active { co
 .part-thought-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 10px 0; }
 .app .part-thought-tiles button {
   position: relative; flex-direction: column; justify-content: flex-start; gap: 5px; min-height: 88px;
-  padding: 8px 4px; border-radius: 7px; text-align: center; font-size: .66rem; line-height: 1.3;
+  padding: 8px 4px; border-radius: 7px; text-align: center; font-size: .75rem; line-height: 1.3;
   background: linear-gradient(145deg, #fffcf3, #f6e8c9); box-shadow: inset 0 1px #fff, 0 2px 3px #826b4414;
 }
 .app .part-thought-tiles .illustrated-icon { flex-basis: auto; width: 30px; height: 30px; }
-.app .part-thought-tiles button > svg:not(.illustrated-icon) { position: absolute; top: 5px; right: 5px; width: 16px; height: 16px; color: #2f6c56; }
+.app .part-thought-tiles button > svg:not(.illustrated-icon) { position: static; flex: 0 0 30px; align-self: center; margin-top: auto; width: 30px; height: 30px; color: #2f6c56; }
 .app .part-thought-tiles button[aria-pressed="true"] { border-color: #5d8d77; background: #e5eddc; box-shadow: inset 0 0 0 1px #5d8d77; }
 .app .need-a-clue { min-height: 44px; border-radius: 7px; background: linear-gradient(90deg, #f8e4ae, #fcf1d8); box-shadow: inset 0 1px #fff9e6; font-weight: 600; }
 .need-a-clue > .illustrated-icon { width: 26px; height: 26px; }

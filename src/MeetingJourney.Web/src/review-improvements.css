@@ -35,6 +35,9 @@ html[data-theme=soft] .home-scene,html[data-theme=soft] .part-story-scene,html[d
 .meeting-details-form small {line-height: 1.5;}
 .meeting-details-form [role=alert] {color: #8c3434;}
 .meeting-details-form [role=status]:empty {display: none;}
+.part-talk-details {margin-block: 10px;}
+.part-talk-details > summary {min-height: 44px; padding: 10px 0; cursor: pointer;}
+.part-talk-details .settings-action-row button {font: inherit;}
 .song-details-fields {display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px;}
 .song-details-dialog button {
   min-height: 44px; padding: 8px 12px; border: 1px solid #d5c7b1;

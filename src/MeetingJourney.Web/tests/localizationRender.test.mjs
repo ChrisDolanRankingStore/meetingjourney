@@ -183,6 +183,22 @@ test('welcome, character choice and home render in Spanish and still render in E
   const {PartReferenceLinks}=await server.ssrLoadModule('/src/PartReferenceLinks.tsx');
   const {HomeGuidePanel}=await server.ssrLoadModule('/src/HomeGuidePanel.tsx');
   const {StoryJourneyMap}=await server.ssrLoadModule('/src/StoryJourneyMap.tsx');
+  const {TalkDetails}=await server.ssrLoadModule('/src/MeetingDetails.tsx');
+  const publicTalk=getMeeting('weekend','2026-10-25').parts.find(part=>part.type==='PublicTalk');
+  const localNeeds={...publicTalk,id:'part-7',type:'Talk',section:'Living',title:'Our local theme',localNeeds:true};
+  for(const language of ['en','es']){
+   data.set('mj-language',language);
+   const talk=renderToStaticMarkup(React.createElement(TalkDetails,{meetingId:'weekend-2026-10-25',part:publicTalk}));
+   assert.match(talk,language==='es'?/Detalles del discurso/:/Talk details/);
+   assert.match(talk,language==='es'?/Tema del discurso/:/Talk theme/);
+   assert.match(talk,language==='es'?/Nombre del orador \(opcional\)/:/Speaker name \(optional\)/);
+   const local=renderToStaticMarkup(React.createElement(TalkDetails,{meetingId:'meeting-2026-10-26',part:localNeeds}));
+   assert.match(local,language==='es'?/Tema del discurso/:/Talk theme/);
+   assert.doesNotMatch(local,/Speaker name|Nombre del orador/);
+  }
+  for(const part of [{...localNeeds,localNeeds:false,title:'A prepared talk'}, {...publicTalk,id:'co-service'}, {...publicTalk,section:'Programme'}]){
+   assert.equal(renderToStaticMarkup(React.createElement(TalkDetails,{meetingId:'test-meeting',part})), '');
+  }
   const {DiscoveriesMap,savedDiscoveryLabel}=await server.ssrLoadModule('/src/DiscoveriesMap.tsx');
   const {localizeMeeting}=await server.ssrLoadModule('/src/meetingLocale.ts');
   for(const language of ['en','es']){
@@ -392,6 +408,13 @@ test('welcome, character choice and home render in Spanish and still render in E
    const reading=getMeeting('midweek','2026-10-28').parts.find(part=>part.type==='BibleReading');
    const prediction=renderToStaticMarkup(React.createElement(ListeningActivities,{meetingId:'meeting-2026-10-26',part:reading}));
    assert.match(prediction,language==='es'?/Antes de la lectura/:/Before the reading/);
+   const readingHref=prediction.match(/href="([^"]+)"/)?.[1];
+   assert.ok(readingHref);
+   const readingUrl=new URL(readingHref.replaceAll('&amp;','&'));
+   assert.equal(readingUrl.origin,'https://www.jw.org');
+   assert.equal(readingUrl.pathname,'/finder');
+   assert.equal(readingUrl.searchParams.get('bible'),'24048001-24048013');
+   assert.equal(readingUrl.searchParams.get('wtlocale'),language==='es'?'S':'E');
   }
   const today=new Date(),dateKey=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   for(const language of ['en','es']){

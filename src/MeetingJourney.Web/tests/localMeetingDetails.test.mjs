@@ -46,6 +46,24 @@ test('speaker details preserve legacy titles and songs, limit input and propagat
   assert.equal(storage.getItem(`mj-part-titles:${meeting.id}`), before);
 });
 
+test('a Local Needs theme keeps its editable identity after saving, changing language and restoring the title', () => {
+  const storage = makeStorage();
+  const localPart = {...meeting.parts[1], id: 'part-7', type: 'Talk', section: 'Living', title: 'Local needs'};
+  const midweek = {...meeting, id: 'meeting-2026-10-26', kind: 'midweek', parts: [localPart]};
+  saveLocalTalkDetails(midweek.id, localPart.id, 'Our congregation theme', '', storage);
+  for (const language of ['en', 'es']) {
+    const part = personalizeMeeting(midweek, storage, language).parts[0];
+    assert.equal(part.title, 'Our congregation theme');
+    assert.equal(part.localNeeds, true);
+    assert.equal(part.speakerName, undefined);
+  }
+  assert.equal(localPart.localNeeds, undefined);
+  assert.notEqual(personalizeMeeting({...midweek, id: 'meeting-2026-11-02'}, storage).parts[0].title, 'Our congregation theme');
+  saveLocalTalkDetails(midweek.id, localPart.id, '', '', storage);
+  assert.equal(personalizeMeeting(midweek, storage).parts[0].title, 'Local needs');
+  assert.equal(personalizeMeeting(midweek, storage).parts[0].localNeeds, true);
+});
+
 test('assembly and convention speakers never override published programme titles', () => {
   const storage = makeStorage();
   for (const kind of ['assembly', 'convention']) {

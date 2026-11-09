@@ -55,6 +55,7 @@ export interface MeetingPart {
   songNumber?: number;
   songTitle?: string;
   speakerName?: string;
+  localNeeds?: boolean;
   studyGuide?: StudyGuide;
   id: string;
   number?: number;

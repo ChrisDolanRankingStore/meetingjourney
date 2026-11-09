@@ -6,7 +6,7 @@ import {lookupSong, songbookUrl} from './songs';
 import {useEffect, useId, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import type {Meeting, MeetingPart} from './types';
-import {DETAILS_UPDATED, readMeetingDetails, saveLocalTalkDetails, saveLocalTitle, saveSongDetails, songDraft} from './localMeetingDetails';
+import {DETAILS_UPDATED, isLocalNeeds, readMeetingDetails, saveLocalTalkDetails, saveLocalTitle, saveSongDetails, songDraft} from './localMeetingDetails';
 
 function SongDetailsForm({meetingId, part}: {meetingId: string; part: MeetingPart}) {
   const language = useLanguage();
@@ -67,7 +67,7 @@ export function SongDetailsButton({meetingId, part}: {meetingId: string; part: M
   </>;
 }
 
-function LocalTitleForm({meetingId, part, published = false}: {meetingId: string; part: MeetingPart; published?: boolean}) {
+function LocalTitleForm({meetingId, part, published = false, theme = false, showSpeaker = true}: {meetingId: string; part: MeetingPart; published?: boolean; theme?: boolean; showSpeaker?: boolean}) {
   const entry = readMeetingDetails(meetingId, localStorage)[part.id];
   const [text, setText] = useState(typeof entry === 'string' ? entry : entry && 'title' in entry ? entry.title : '');
   const [speakerName, setSpeakerName] = useState(typeof entry === 'object' && 'speakerName' in entry ? entry.speakerName : '');
@@ -82,14 +82,23 @@ function LocalTitleForm({meetingId, part, published = false}: {meetingId: string
       setMessage('Saved for this meeting on this device.');
     } catch {setMessage(''); setError('Could not save on this device. Your changes are still here; please try again.');}
   }}>
-    {!published && <><label>{t("Local title")}<input maxLength={120} value={text} onChange={event => {setText(event.target.value); setMessage(''); setError('');}} placeholder={t("Title announced at your congregation")} /></label>
+    {!published && <><label>{t(theme ? 'Talk theme' : 'Local title')}<input maxLength={120} value={text} onChange={event => {setText(event.target.value); setMessage(''); setError('');}} placeholder={t("Title announced at your congregation")} /></label>
     <small>{t("Leave this blank to restore the programme title.")}</small></>}
-    <label>{t('Speaker name (optional)')}<input maxLength={120} value={speakerName} onChange={event => {setSpeakerName(event.target.value); setMessage(''); setError('');}} /></label>
-    <small>{t('Names stay as you enter them, in either app language.')}</small>
+    {showSpeaker && <><label>{t('Speaker name (optional)')}<input maxLength={120} value={speakerName} onChange={event => {setSpeakerName(event.target.value); setMessage(''); setError('');}} /></label>
+    <small>{t('Names stay as you enter them, in either app language.')}</small></>}
     <div className="settings-action-row"><button type="submit">{t("Save meeting details")}</button></div>
     {error && <p role="alert">{t(error)}</p>}
     <p role="status">{t(message)}</p>
   </form>;
+}
+
+export function TalkDetails({meetingId, part}: {meetingId: string; part: MeetingPart}) {
+  const publicTalk = part.type === 'PublicTalk' && part.section === 'PublicTalk';
+  if (part.id.startsWith('co-') || (!publicTalk && !isLocalNeeds(part))) return null;
+  return <details className="part-talk-details" key={`${meetingId}:${part.id}`}>
+    <summary>{t('Talk details')}</summary>
+    <LocalTitleForm meetingId={meetingId} part={part} theme showSpeaker={publicTalk} />
+  </details>;
 }
 
 export function LocalPartTitles({meeting}: {meeting: Meeting}) {

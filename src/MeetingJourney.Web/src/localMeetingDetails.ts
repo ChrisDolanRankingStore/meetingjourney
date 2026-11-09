@@ -12,6 +12,11 @@ export type TalkDetails = {title: string; speakerName: string};
 type Details = Record<string, string | SongDetails | TalkDetails>;
 const keyFor = (meetingId: string) => `mj-part-titles:${meetingId}`;
 
+export function isLocalNeeds(part: MeetingPart): boolean {
+  return part.type === 'Talk' && part.section === 'Living' &&
+    (part.localNeeds === true || part.title === 'Local needs' || part.title === t('Local needs', undefined, 'es'));
+}
+
 export function readMeetingDetails(meetingId: string, storage: Reader): Details {
   try {
     const raw: unknown = JSON.parse(storage.getItem(keyFor(meetingId)) ?? '{}');
@@ -80,7 +85,8 @@ export function saveLocalTalkDetails(meetingId: string, partId: string, title: s
 
 export function personalizeMeeting(meeting: Meeting, storage: Reader, language: Language = 'en'): Meeting {
   const publishedProgramme = meeting.kind === 'assembly' || meeting.kind === 'convention';
-  const localized = applyCircuitVisit(localizeMeeting(meeting, language),storage,language);
+  const source = publishedProgramme ? meeting : {...meeting, parts: meeting.parts.map(part => isLocalNeeds(part) ? {...part, localNeeds: true} : part)};
+  const localized = applyCircuitVisit(localizeMeeting(source, language),storage,language);
   const entries = readMeetingDetails(meeting.id, storage);
   return {...localized, parts: localized.parts.map(part => {
     if (part.id.startsWith('co-')) return part;

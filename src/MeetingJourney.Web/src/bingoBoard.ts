@@ -27,6 +27,14 @@ export function bingoLineCells(board: string[], selected: readonly string[], siz
     lines.push(Array.from({length: size}, (_, j) => i * size + j));
     lines.push(Array.from({length: size}, (_, j) => j * size + i));
   }
+
   lines.push(Array.from({length: size}, (_, i) => i * size + i), Array.from({length: size}, (_, i) => i * size + size - 1 - i));
   return new Set(lines.filter(line => line.every(index => board[index] && selected.includes(board[index]))).flatMap(line => line.map(index => board[index])));
+}
+
+export type BingoSurprise = 'sparkle' | 'companion' | 'discovery';
+export function bingoSurprise(board: readonly string[], previous: readonly string[], selected: readonly string[], companionAvailable: boolean, random = Math.random): BingoSurprise | null {
+  if (!board.length || board.every(word => previous.includes(word)) || !board.every(word => selected.includes(word))) return null;
+  const choices: BingoSurprise[] = companionAvailable ? ['sparkle', 'companion', 'discovery'] : ['sparkle', 'discovery'];
+  return choices[Math.floor(random() * choices.length)];
 }

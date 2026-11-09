@@ -6,6 +6,19 @@
 .app .bingo-size-picker button[aria-pressed="true"] { background: #294d60; color: #fff3d1; }
 .word-bingo > small { display: block; color: var(--muted); line-height: 1.4; margin-top: 7px; font-size: .73rem; }
 .bingo-workspace { display: grid; gap: 10px; align-items: start; }
+.bingo-surprise { display: flex; align-items: center; gap: 10px; position: relative; margin-bottom: 10px; padding: 10px 48px 10px 10px; border: 1px solid #cfad78; border-radius: 12px; background: #fff3d7; color: var(--navy); }
+.bingo-surprise p { margin: 4px 0; font-size: .82rem; }
+.bingo-surprise small { font-size: .75rem; }
+.bingo-surprise-art { display: grid; place-items: center; flex: 0 0 64px; height: 80px; color: #94702b; }
+.bingo-surprise-art > svg, .bingo-surprise-art > .illustrated-icon { width: 64px; height: 64px; }
+.bingo-surprise-art .character-avatar { position: static; width: 54px; height: 80px; margin: 0; border: 0; background: none; box-shadow: none; }
+.bingo-surprise-sparkle .bingo-surprise-art { animation: bingo-sparkle 1.4s ease-out; }
+.bingo-surprise-discovery .bingo-surprise-art { animation: bingo-discovery 1s ease-out; }
+.app .bingo-surprise-close { position: absolute; top: 4px; right: 4px; display: grid; place-items: center; min-width: 44px; min-height: 44px; padding: 8px; }
+@keyframes bingo-sparkle { 0% { opacity: 0; transform: scale(.7); } 50% { opacity: 1; transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes bingo-discovery { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.app.sensory-calm .bingo-surprise-art, .app.sensory-calm .bingo-surprise-art * { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .bingo-surprise-art, .bingo-surprise-art * { animation: none !important; } }
 .word-bingo-board { display: grid; grid-template-columns: repeat(var(--bingo-size), minmax(0, 1fr)); gap: 5px; padding: 7px; border: 1px solid #c7a46d; border-radius: 12px 9px 13px 10px; background: #e8c58f; box-shadow: inset 0 0 10px #ba854b38; }
 .app .word-bingo-board button { position: relative; min-width: 0; min-height: 62px; padding: 9px 2px; border: 1px solid #cda66e; border-radius: 10px 8px 11px 8px; background: radial-gradient(ellipse at 40% 30%, #fff9e8, #f3ddb1); color: #233750; font: inherit; font-family: Georgia, serif; font-weight: 700; font-size: clamp(.75rem, 2.5vw, 1rem); overflow-wrap: anywhere; box-shadow: inset 0 0 7px #c79b5426, 0 1px 2px #86653730; }
 .app .word-bingo-board button[aria-pressed="true"] { border-color: #6b854c; background: radial-gradient(ellipse, #edf0c7, #bdce8a); color: #254c34; padding-top: 17px; }
