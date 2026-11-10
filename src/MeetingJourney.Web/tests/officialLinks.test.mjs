@@ -32,6 +32,18 @@ test('Spanish Philippians shorthand in notes links to the exact passage without 
   assert.deepEqual(codes('perfil 4:6; wifi 4:6; fili; fl 5:1','es'),[]);
 });
 
+test('English Ph shorthand resolves Philippians without changing Philemon references',()=>{
+  for(const input of ['Ph 4:6','PH.4.6','ph4:6']){
+    const links=bibleReferenceLinks(`My note: ${input}`,'en');
+    assert.equal(links.length,1,input);
+    const url=new URL(links[0].url);
+    assert.equal(url.searchParams.get('bible'),'50004006',input);
+    assert.equal(url.searchParams.get('wtlocale'),'E',input);
+  }
+  assert.deepEqual(codes('Ph 4:6-7; Phm 1:6; Philemon 1:7'),['50004006-50004007','57001006','57001007']);
+  assert.deepEqual(codes('graph 4:6; Ph; Ph 5:1'),[]);
+});
+
 test('Bible links preserve single verses, ranges, separate verses and cross-chapter passages',()=>{
   assert.deepEqual(codes('John 3:16'),['43003016']);
   assert.deepEqual(codes('Jeremiah 45:3, 5'),['24045003','24045005']);

@@ -46,6 +46,8 @@ Typed scriptures in notebook and listening drafts produce exact-passage links to
 
 Spanish Philippians references also accept `Fi`, `Fili` and `Fl`, including compact forms such as `Fi4:6` and dotted forms such as `Fl. 4:6`. A chapter or passage is required; ordinary words containing these letters do not become links.
 
+English Philippians references also accept `Ph` (for example, `Ph 4:6`); `Phm` and `Philemon` continue to identify Philemon.
+
 The Bible reading's Listen view also links its passage directly, including the full verse range, using the same language-aware JW Library/JW.org handoff as References.
 
 Personal Study and Meeting Prep keep their card rows at natural content height inside their scrolling workspace, so notes and source links do not overlap on short screens or with enlarged text.

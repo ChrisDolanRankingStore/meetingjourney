@@ -72,7 +72,7 @@ const bibleAbbreviations = [
   'ps psa sal', 'prov pr pro', 'eccl ecc ec', 'song sos cant can', 'isa is', 'jer je', 'lam la', 'ezek eze ez', 'dan da dn',
   'hos ho os', 'jl', 'am', 'obad ob abd ab', 'jon jnh jonás', 'mic mi', 'nah na', 'hab', 'zeph zep sof', 'hag hág ag', 'zech zec zac', 'mal',
   'matt mt mat', 'mark mk mr mar', 'luke lk lu lc', 'jn joh jn juan', 'ac act hch hech', 'rom ro rm',
-  '1 cor co', '2 cor co', 'gal ga gál', 'eph ep ef', 'phil php flp fi fili fl', 'col', '1 thess th tes', '2 thess th tes',
+  '1 cor co', '2 cor co', 'gal ga gál', 'eph ep ef', 'phil php ph flp fi fili fl', 'col', '1 thess th tes', '2 thess th tes',
   '1 tim ti', '2 tim ti', 'tit', 'philem phm flm', 'heb he', 'jas jam sant stg', '1 pet pe ped', '2 pet pe ped',
   '1 jn joh', '2 jn joh', '3 jn joh', 'jud jd', 'rev re ap apoc'
 ];
