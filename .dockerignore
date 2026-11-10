@@ -11,3 +11,16 @@ src/MeetingJourney.Infrastructure/
 **/obj/
 **/node_modules/
 **/dist/
+
+# Git history, private data and local staging are not build inputs.
+.git/
+.github/
+.admin-data/
+.env
+.env.*
+publish-node/
+node-app/public/
+preview/
+artwork/
+Scene*/
+**/*.log
