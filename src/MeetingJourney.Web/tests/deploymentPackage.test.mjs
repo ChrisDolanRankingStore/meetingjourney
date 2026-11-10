@@ -9,8 +9,13 @@ import {spawn} from 'node:child_process';
 const root=resolve(fileURLToPath(new URL('../../../',import.meta.url)));
 test('filtered Railpack output starts independently with its admin dependencies and only one public client',async()=>{
   const config=JSON.parse(readFileSync(join(root,'railpack.json'),'utf8'));
-  const outputs=config.steps?.build?.deployOutputs;
-  assert.ok(outputs?.length,'Railpack must explicitly filter runtime output instead of shipping the build workspace.');
+  const inputs=config.deploy?.inputs;
+  assert.ok(inputs?.length,'Replace the provider deploy.inputs; step deployOutputs does not replace the default whole-workspace layer.');
+  assert.ok(inputs.every(input=>typeof input==='object'&&input.include?.length),'Do not retain default layers with a spread or an unfiltered input.');
+  const outputs=inputs.filter(input=>input.step==='build');
+  assert.ok(outputs.length,'The final image must include the filtered application build.');
+  assert.ok(inputs.some(input=>input.step==='packages:mise'&&input.include.includes('/mise/installs')&&input.include.includes('/mise/shims')),
+    'Keep the Node runtime when replacing the provider deployment inputs.');
   const directory=mkdtempSync(join(tmpdir(),'mj-runtime-package-'));
   let server;
   try{
