@@ -52,6 +52,8 @@ The Bible reading's Listen view also links its passage directly, including the f
 
 Personal Study and Meeting Prep keep their card rows at natural content height inside their scrolling workspace, so notes and source links do not overlap on short screens or with enlarged text.
 
+Meeting Prep checklist labels follow the selected interface language without changing saved checks or the user's own preparation notes.
+
 Public Talk and Local Needs cards include an optional **Talk details** disclosure to enter the locally announced theme. Public Talk also offers an optional speaker name. These reuse the meeting-details storage in Settings, stay local to the selected meeting and survive language changes and backups without changing notebook IDs. Clearing the theme restores the programme title. Circuit overseer visit details remain in their existing Settings controls; published assembly and convention titles are not editable here.
 
 Spot the clue choices place a 30px icon below the label, centred at the bottom of each tile rather than overlapping its text in a corner. Labels use at least 12px at the default text size, and tiles grow for longer translations.

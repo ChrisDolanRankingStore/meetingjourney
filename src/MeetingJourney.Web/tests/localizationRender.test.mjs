@@ -20,7 +20,7 @@ test('welcome, character choice and home render in Spanish and still render in E
  globalThis.sessionStorage={getItem:()=>null,setItem:()=>{}};
  globalThis.window={innerWidth:1024,matchMedia:()=>({matches:false})};
  try{
-  const {default:App,MeetingPartView}=await server.ssrLoadModule('/src/App.tsx');
+  const {default:App,MeetingPartView,MeetingPrepScreen}=await server.ssrLoadModule('/src/App.tsx');
   data.set('mj-language','es');
   let html=renderToStaticMarkup(React.createElement(App));
   assert.match(html,/Una pequeña ayuda para seguir la reunión/);
@@ -186,8 +186,23 @@ test('welcome, character choice and home render in Spanish and still render in E
   const {TalkDetails}=await server.ssrLoadModule('/src/MeetingDetails.tsx');
   const publicTalk=getMeeting('weekend','2026-10-25').parts.find(part=>part.type==='PublicTalk');
   const localNeeds={...publicTalk,id:'part-7',type:'Talk',section:'Living',title:'Our local theme',localNeeds:true};
+  const prepLabels=[
+   ['I have opened the meeting material','He abierto las publicaciones de la reunión'],
+   ['I know where I would like to begin','Sé por dónde me gustaría empezar'],
+   ['I have thought of one comment or question','He pensado en un comentario o pregunta'],
+   ['I know what will help me feel comfortable','Sé qué me ayudará a estar a gusto']
+  ];
+  data.set('mj-prep-checks-midweek-2026-10-19',JSON.stringify([true,false,true,false]));
   for(const language of ['en','es']){
    data.set('mj-language',language);
+   const prep=renderToStaticMarkup(React.createElement(MeetingPrepScreen,{meeting:{...getMeeting('midweek','2026-10-19'),id:'midweek-2026-10-19'},onBack:()=>{}}));
+   const checklist=prep.match(/<div class="prep-items">([\s\S]*?)<\/div>/)?.[1];
+   assert.ok(checklist);
+   for(const [english,spanish] of prepLabels){
+    assert.ok(checklist.includes(language==='es'?spanish:english));
+    assert.ok(!checklist.includes(language==='es'?english:spanish));
+   }
+   assert.equal((checklist.match(/checked=""/g)??[]).length,2);
    const talk=renderToStaticMarkup(React.createElement(TalkDetails,{meetingId:'weekend-2026-10-25',part:publicTalk}));
    assert.match(talk,language==='es'?/Detalles del discurso/:/Talk details/);
    assert.match(talk,language==='es'?/Tema del discurso/:/Talk theme/);
