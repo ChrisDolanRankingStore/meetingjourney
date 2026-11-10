@@ -16,7 +16,7 @@ import {LanguageSelector, useLanguage} from './LanguageSelector';
 import {localizeMeeting} from './meetingLocale';
 import {bibleReferenceLinks, getLanguage, jwLibraryHandoffUrl, jwLibraryUrl, officialUrl} from './i18n';
 import {BibleReferenceLinks, OfficialLinks} from './OfficialLinks';
-import {ScriptureLookup} from './ScriptureLookup';
+import {NoteEditor} from './NoteEditor';
 import {PartReferenceLinks} from './PartReferenceLinks';
 import {partSources} from './partSources';
 import {IllustratedIcon} from './IllustratedIcon';
@@ -889,7 +889,7 @@ export function MeetingPartView({ meetingId, part, partIndex, songPart, material
           <button type="button" className="skip-button" onClick={findPlace}>{t("Back to the journey")}</button></div>
         </div>)}
         {toolOpen === 'feelings' && <PartFeedbackCard part={part} value={feedback} choices={feedbackChoices} savedAt={savedAt} onChange={updateFeedback} onToggleChoice={toggleFeedbackChoice} />}
-        {toolOpen === 'note' && <div className="modal-note-editor"><p>{t("A word, question or feeling is enough.")}</p><textarea aria-label={t('My thought')} autoFocus disabled={!noteLoaded} id={`${part.id}-modal-note`} value={note} onChange={event => updateNote(event.target.value)} placeholder={t("Write or dictate a thought...")} rows={5} /><ScriptureLookup text={note}/><small role="status">{t(savedAt) || (noteLoaded ? t("Saved on this device automatically") : t("Opening your notes…"))}</small></div>}
+        {toolOpen === 'note' && <NoteEditor value={note} onChange={updateNote} autoFocus disabled={!noteLoaded} id={`${part.id}-modal-note`}><small role="status">{t(savedAt) || (noteLoaded ? t("Saved on this device automatically") : t("Opening your notes…"))}</small></NoteEditor>}
         {toolOpen === 'doodle' && <Suspense fallback={<p role="status">{t("Opening your drawing page…")}</p>}><DrawingPad meetingId={meetingId} partId={part.id} /></Suspense>}
       </dialog>
     </div>}

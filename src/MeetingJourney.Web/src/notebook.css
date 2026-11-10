@@ -39,6 +39,7 @@
 .drawing-more-actions button { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 6px 9px; border: 0; border-radius: 9px; color: #4b5c7e; background: #f5efdf; font-size: .76rem; text-align: left; }
 .notebook-tabs > button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
 .notebook-tabs > button svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.drawing-save-changes { align-self: flex-end; flex: 0 0 auto; min-height: 44px; margin-bottom: 4px; }
 
 @media (max-width: 759px) {
   /* The title, four notebook modes and close button share one short header. */
@@ -74,7 +75,8 @@
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(120px, 1fr) auto auto;
+  overflow-y: auto;
 }
 .app .part-card .journey-tool-modal[data-tool="note"] .modal-note-editor textarea {
   box-sizing: border-box;

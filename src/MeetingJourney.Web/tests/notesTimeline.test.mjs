@@ -34,5 +34,15 @@ test('timeline includes saved meeting and assembly notes and study drafts, newes
   assert.match(html,/bible=43003016/);assert.match(html,/bible=19037004/);
   assert.doesNotMatch(html,/biblesupersearch|bible-api|King James|Reina-Valera/);
   assert.equal(renderToStaticMarkup(React.createElement(ScriptureLookup,{text:'Just a personal thought'})),'');
+  const {NoteEditor}=await server.ssrLoadModule('/src/NoteEditor.tsx');
+  const editor=text=>renderToStaticMarkup(React.createElement(NoteEditor,{value:text,onChange:()=>{}}));
+  const original=editor('My thought: Ph 4:6');
+  assert.match(original,/class="modal-note-editor"/);
+  assert.match(original,/aria-label="My thought"/);
+  assert.match(original,/bible=50004006/);
+  const changed=editor('My updated thought: Jn 3:16');
+  assert.match(changed,/bible=43003016/);
+  assert.doesNotMatch(changed,/bible=50004006/);
+  assert.doesNotMatch(editor('Just my own words'),/class="scripture-lookup"/);
  }finally{await server.close();}
 });

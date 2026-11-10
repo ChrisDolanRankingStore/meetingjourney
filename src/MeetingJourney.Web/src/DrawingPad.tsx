@@ -186,6 +186,16 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   const clear = () => {
     if (!strokes.length || window.confirm(t("Clear this drawing page?"))) { setRedoStack([]); setStrokes([]); }
   };
+  const saveChanges = async () => {
+    const latest=latestDrawing.current;
+    if(!latest.loaded||!latest.paper)return;
+    setSaving(true);
+    try{
+      await saveDrawing(meetingId,partId,latest.strokes,latest.paper);
+      setSaveError(false);onSaved?.();
+    }catch{setSaveError(true);}
+    finally{setSaving(false);}
+  };
   const exportPng = () => {
     const exportInk = renderDrawingInk(strokes, sheet.width, sheet.height, 4096, 2);
     const output = document.createElement('canvas'); output.width = exportInk.width; output.height = exportInk.height;
@@ -204,6 +214,7 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
 
   return <section className="drawing-card" aria-labelledby={`${partId}-drawing-title`}>
     <div className="drawing-heading"><div><h3 id={`${partId}-drawing-title`}>{t("Doodle notes")}</h3><p>{t("Draw, write or sketch a thought.")}</p></div></div><span className={`save-state notebook-save-state ${saveError ? 'has-error' : ''}`} aria-live="polite">{saveError ? t("Could not load or save this drawing on this device.") : !loaded ? t("Opening your drawing…") : saving ? t("Saving…") : t("Saved on this device")}</span>
+    <button className="drawing-save-changes" type="button" disabled={!loaded||!paper||saving} onClick={()=>void saveChanges()}>{t('Save changes')}</button>
     <div className="drawing-paper-workspace">
     <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={brushSize} onSize={tool === 'smudge' ? setSmudgeSize : setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} onUndo={undo} onRedo={redo} onClear={clear} onExport={exportPng} zoom={zoom.scale} onZoom={value=>changeZoom(zoomDrawing(zoomRef.current,{x:width/2,y:height/2},{x:width/2,y:height/2},value/zoomRef.current.scale,width,height,extent))} onResetZoom={()=>changeZoom(initialDrawingZoom)} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:visiblePaper.width, y:visiblePaper.height}) : createDrawingPaper(width, height))} pages={pages} />
     <div className="canvas-shell" ref={canvasRef} onContextMenu={event => event.preventDefault()} onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} data-zoom={zoom.scale}>

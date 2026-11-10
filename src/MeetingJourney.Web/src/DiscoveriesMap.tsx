@@ -14,6 +14,7 @@ import {renderDrawingInk} from './drawingInk';
 import {NotesTimeline} from './NotesTimeline';
 import {HistoricalNotebook, type HistoricalTarget} from './HistoricalNotebook';
 import {MeetingStamps} from './MeetingStamps';
+import {ScriptureLookup} from './ScriptureLookup';
 
 function TreasureChest({ open }: { open: boolean }) {
   const shade = `chest-${useId().replace(/:/g, '')}`;
@@ -51,6 +52,7 @@ function TreasureContents({ treasure, onReturn, onEdit }: { treasure: DiscoveryT
   return <div className="treasure-contents">
     {note?.text?.trim() && <section><h4>{t("My thought")}</h4><p className="treasure-own-words">{note.text}</p></section>}
     {(note?.feedback?.trim() || Boolean(note?.feedbackChoices?.length)) && <section><h4>{t("What I noticed")}</h4>{Boolean(note?.feedbackChoices?.length) && <div className="treasure-feeling-tags">{note!.feedbackChoices!.map(choice => <span key={choice}>{t(choice)}</span>)}</div>}{note?.feedback?.trim() && <p className="treasure-own-words">{note.feedback}</p>}</section>}
+    {note&&<ScriptureLookup text={[note.text,note.feedback].filter(Boolean).join('\n')}/>}
     {drawing && <section><h4>{t("My drawing")}</h4>{treasure.drawings.length > 1 && <div className="treasure-page-tabs" aria-label={t("Saved drawing pages")}>{treasure.drawings.map((item, index) => <button type="button" key={item.page} aria-pressed={index === page} onClick={() => setPage(index)}>{t("Page ")}{item.page + 1}</button>)}</div>}<SavedDrawingPreview drawing={drawing} /></section>}
     {note&&<button type="button" className="treasure-return" onClick={()=>onEdit('note')}>{t('Edit note')}</button>}
     {drawing&&<button type="button" className="treasure-return" onClick={()=>onEdit('drawing',drawing.page)}>{t('Edit drawing')}</button>}
