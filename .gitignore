@@ -3,6 +3,8 @@
 **/*.tsbuildinfo
 src/MeetingJourney.Web/node_modules/
 src/MeetingJourney.Web/dist/
+node_modules/
+.admin-data/
 node-app/public/
 publish-node/
 *.user

@@ -190,6 +190,28 @@ async function retrieve(kind,date,fetcher){
 
 export function cachedWolMeeting(kind,date){return cache.get(`${kind}:${weekOfDate(date)}`)?.meeting;}
 
+export async function loadArtworkSubjects(date,{fetcher=fetch}={}) {
+ const week=weekOfDate(date),index=await fetchHtml(wolWeekUrl(week),fetcher);
+ const shownDate=index.match(/id="todayDate"[^>]*value="([\d/]+)"/)?.[1]?.replaceAll('/','-');
+ if(shownDate!==week)throw Error('WOL returned a different meeting week.');
+ const subjects=[],missing=[];
+ for(const [kind,publication] of [['midweek','mwb'],['weekend','w']]){
+  const card=[...index.matchAll(/<li\b[^>]*class="([^"]+)"[^>]*>([\s\S]*?)<\/li>/gi)].find(match=>new RegExp(`\\bpub-${publication}\\b`).test(match[1])&&/\btodayItem\b/.test(match[1]));
+  const docid=card?.[1].match(/\bdocId-(\d+)\b/)?.[1];
+  if(!docid){missing.push(kind);continue;}
+  const html=await fetchHtml(`https://wol.jw.org/en/wol/d/${languages.en}/${docid}`,fetcher);
+  const metadata=kind==='midweek'?parseWorkbookMetadata(html,'en'):parseStudyMetadata(html,'en');
+  const part=kind==='midweek'?metadata.parts.find(part=>part.section==='Treasures'&&part.number===1):metadata;
+  if(!part)throw Error('WOL Treasures theme is missing.');
+  subjects.push({meetingId:`${kind==='midweek'?'meeting':'weekend'}-${week}`,weekOf:week,kind,
+   partId:kind==='midweek'?part.id:'watchtower-study',title:part.title,
+   reference:part.references.map(reference=>reference.label).join('; ').slice(0,2000),
+   context:kind==='midweek'?`Weekly Bible reading: ${metadata.bibleReading}`:'Watchtower study theme; references are source citations, not a full article outline.',
+   sourceUrl:finder(docid,'en',kind==='midweek'?part.pid:undefined),sourceStatus:'discovered',automatable:true});
+ }
+ return {subjects,missing};
+}
+
 export async function loadWolMeeting(kind,date,{fetcher=fetch,now=Date.now}={}){
  const base=getMeeting(kind,date);
  if(base.contentStatus==='dated')return base;

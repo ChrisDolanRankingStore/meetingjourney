@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {wolWeekUrl,parseWorkbookMetadata,parseStudyMetadata,studyParagraphCount,loadWolMeeting} from '../../../node-app/wol-metadata.js';
+import {wolWeekUrl,parseWorkbookMetadata,parseStudyMetadata,studyParagraphCount,loadWolMeeting,loadArtworkSubjects} from '../../../node-app/wol-metadata.js';
 import {localizeMeeting} from '../src/meetingLocale.ts';
 
 const workbook=language=>`<article id="article"><header><h2><a href="/${language}/wol/bc/r1/lp-e/555/0/0">Test reading 1-2</a></h2></header>
@@ -39,6 +39,19 @@ test('workbook import retains only headings, timings and official reference meta
 test('study import excludes paragraphs and requires a real song and title',()=>{
  assert.deepEqual(parseStudyMetadata(study,'en'),{title:'A test study title',songNumber:4,references:[{label:'Test 2:3',url:'https://wol.jw.org/en/wol/bc/r1/lp-e/556/0/0'}]});
  assert.throws(()=>parseStudyMetadata(study.replace('SONG 4','No song'),'en'));
+});
+test('artwork discovery reads only dated English Treasures and Watchtower metadata and flags missing publications',async()=>{
+ const seen=[],result=await loadArtworkSubjects('2026-12-07',{fetcher:source('2026-12-07',seen)});
+ assert.equal(seen.length,3);assert.equal(result.subjects.length,2);
+ assert.equal(result.subjects[0].title,'en item 1');
+ assert.equal(result.subjects[1].title,'A test study title');
+ assert.equal(result.subjects[1].partId,'watchtower-study');
+ assert.equal(result.subjects[0].weekOf,'2026-12-07');
+ assert.deepEqual(result.missing,[]);
+ assert.doesNotMatch(JSON.stringify(result),/NEVER COPY|evil\.example/);
+ await assert.rejects(loadArtworkSubjects('2026-12-07',{fetcher:source('2026-11-30',[])}),/different meeting week/);
+ const unavailable=await loadArtworkSubjects('2026-12-07',{fetcher:async()=>new Response('<input id="todayDate" value="2026/12/07">')});
+ assert.equal(unavailable.subjects.length,0);assert.deepEqual(unavailable.missing,['midweek','weekend']);
 });
 test('study paragraph totals use numbered prose or wcg prose, not review question counts',()=>{
  assert.equal(studyParagraphCount('<article id="article"><p data-pid="1">1 First</p><p data-pid="2">2 Second</p></article>'),2);

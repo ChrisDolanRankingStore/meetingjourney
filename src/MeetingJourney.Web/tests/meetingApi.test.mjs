@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 
 test('Node API serves the selected type/week and rejects bad calendar inputs', async () => {
   const process = spawn(globalThis.process.execPath, [new URL('../../../node-app/server.js', import.meta.url).pathname.replace(/^\/(?:([A-Za-z]):)/, '$1:')], {
-    env: { ...globalThis.process.env, PORT: '0' }, stdio: ['ignore', 'pipe', 'pipe']
+    env: { ...globalThis.process.env, PORT: '0', MJ_ADMIN_ENABLED:'false' }, stdio: ['ignore', 'pipe', 'pipe']
   });
   try {
     const port = await new Promise((resolve, reject) => {
@@ -21,6 +21,12 @@ test('Node API serves the selected type/week and rejects bad calendar inputs', a
       });
     });
     const base = `http://127.0.0.1:${port}`;
+    for(const path of ['/admin','/admin/app.js','/api/admin/session','/api/%61dmin/artwork']){
+      const response=await fetch(base+path);
+      assert.equal(response.status,503,path);
+      assert.match(response.headers.get('cache-control'),/no-store/);
+    }
+    assert.equal((await fetch(base+'/api/admin/artwork',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})).status,503);
     for(const path of ['/api/meetings/current?type=midweek&date=2026-11-02','/api/meetings/meeting-2026-11-02','/api/meetings/current?type=midweek&date=2026-11-02&import=false']){
       const general=await fetch(base+path).then(response=>response.json());
       assert.equal(general.contentStatus,'general');

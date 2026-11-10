@@ -6,6 +6,7 @@ import { currentMeeting } from './meeting.js';
 import { getMeeting } from './meeting-catalog.js';
 import { readPublishedMeeting } from './published-content.js';
 import {cachedWolMeeting,loadWolMeeting} from './wol-metadata.js';
+import {createAdminHandler} from './admin.js';
 const meetingFor = (kind, date, personalImport=false) => { try { return readPublishedMeeting(kind, date) ?? (personalImport?cachedWolMeeting(kind,date):undefined) ?? getMeeting(kind, date); } catch (error) { if (error instanceof RangeError) throw error; console.error(JSON.stringify({ level: 'error', message: 'Published outline could not be loaded', error: error.message })); return getMeeting(kind, date); } };
 async function onlineMeetingFor(kind,date,personalImport=false){
   try { const published=readPublishedMeeting(kind,date);if(published)return published; }
@@ -17,6 +18,7 @@ import { localDateKey, suggestedMeeting, monthWeeks } from './meeting-schedule.j
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 const appVersion=JSON.parse(readFileSync(join(root,'package.json'),'utf8')).version;
 const publicDir = join(root, 'public');
+const adminHandler=createAdminHandler({publicDir});
 const port = Number(process.env.PORT || 3000);
 const host = '0.0.0.0';
 
@@ -67,6 +69,8 @@ async function handle(request, response) {
   const url = new URL(request.url || '/', `http://${request.headers.host || 'localhost'}`);
   const pathname = decodeURIComponent(url.pathname);
   const personalImport=url.searchParams.get('import')==='personal';
+
+  if(await adminHandler(request,response,pathname))return;
 
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return json(response, 405, { error: 'Method not allowed' });
@@ -216,4 +220,5 @@ server.on('error', (error) => {
 
 server.listen(port, host, () => {
   console.log(JSON.stringify({ level: 'info', message: 'Meeting Journey Node server started', host, port: server.address().port }));
+  adminHandler.start();
 });

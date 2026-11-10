@@ -6,6 +6,10 @@
   "engines": {
     "node": ">=24"
   },
+  "dependencies": {
+    "jose": "6.2.17",
+    "sharp": "0.35.5"
+  },
   "scripts": {
     "build": "node node-app/scripts/build-web.mjs",
     "start": "node server.js"
