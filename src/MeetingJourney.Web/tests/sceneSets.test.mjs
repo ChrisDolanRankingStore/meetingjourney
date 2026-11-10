@@ -12,11 +12,11 @@ test('four seasons reverse in the Southern hemisphere',()=>{
  assert.equal(readSceneHemisphere({getItem:()=>null}),'north');
  assert.equal(readSceneHemisphere({getItem:()=>'south'}),'south');
 });
-test('every week uses one of the four completed scenes until the other worlds are finished',()=>{
+test('every week uses one of the five completed scenes until the final world is finished',()=>{
  const maps=new Set();
  const labels=new Set();
- const completedLabels=['City riverside','Savannah village','Outback creek','Coastal village'];
- for(let week=0;week<8;week++){
+ const completedLabels=['City riverside','Savannah village','Outback creek','Coastal village','Riverside park'];
+ for(let week=0;week<10;week++){
   const date=new Date(Date.UTC(2026,11,14+week*7)).toISOString().slice(0,10);
   const pack=sceneSetForWeek(date,'north');
   maps.add(pack.discoveryImage.replace(/-(winter|spring|summer|autumn)-/,'-'));
@@ -27,9 +27,9 @@ test('every week uses one of the four completed scenes until the other worlds ar
   const world=completedLabels.indexOf(pack.label)+1;
   for(const moment of Object.values(pack.moments))assert.match(moment.image,new RegExp(`/assets/scene-${world}-${pack.season}-`));
  }
- assert.equal(labels.size,4);
- assert.equal(maps.size,4);
- assert.equal(sceneSetForWeek('2026-12-14').id,sceneSetForWeek('2027-02-08').id);
+ assert.equal(labels.size,5);
+ assert.equal(maps.size,5);
+ assert.equal(sceneSetForWeek('2026-12-14').id,sceneSetForWeek('2027-01-18').id);
  assert.deepEqual(sceneSetForWeek('2026-10-19'),sceneSetForWeek('2026-10-25'));
  assert.equal(sceneSetForWeek('2026-10-19').season,sceneSetForWeek('2026-10-26').season);
  for(const invalid of ['invalid','2026-02-30','2026-13-01'])assert.throws(()=>sceneSetForWeek(invalid),/valid date/);
@@ -48,10 +48,12 @@ test('all six worlds have four complete seasons with compressed maps and five lo
   assert.ok(Math.abs(image.height/image.width-1.5)<.01);
  }
 });
-test('Scenes 1 through 4 standalone views retain full source framing and resolution in all four seasons',async()=>{
- for(const world of [1,2,3,4])for(const season of ['winter','spring','summer','autumn'])for(const view of ['map','gate','river','bridge','village','garden'])for(const width of [480,960,1600])for(const format of ['webp','jpg']){
+test('Scenes 1 through 5 standalone views retain full source framing and resolution in all four seasons',async()=>{
+ for(const world of [1,2,3,4,5])for(const season of ['winter','spring','summer','autumn'])for(const view of ['map','gate','river','bridge','village','garden'])for(const width of [480,960,1600])for(const format of ['webp','jpg']){
   const image=await sharp(fileURLToPath(new URL(`../public/assets/compact-v1/scene-${world}-${season}-${view}-v2-${width}.${format}`,import.meta.url))).metadata();
-  const sourceWidth=world===4&&season==='spring'&&view==='gate'?512:1024;
+  const smallerSource=world===4&&season==='spring'&&view==='gate'
+    ||world===5&&season==='summer'&&['bridge','garden','village'].includes(view);
+  const sourceWidth=smallerSource?512:1024;
   assert.equal(image.width,Math.min(width,sourceWidth));
   assert.equal(image.height,image.width*1.5);
  }
