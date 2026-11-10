@@ -44,6 +44,8 @@ Future content should carry `connections` on the meeting part: a `reviewedAt` da
 
 Typed scriptures in notebook and listening drafts produce exact-passage links to JW.org/JW Library. No note text is uploaded, no alternate Bible translation is used, and no JW.org text is scraped or embedded.
 
+Spanish Philippians references also accept `Fi`, `Fili` and `Fl`, including compact forms such as `Fi4:6` and dotted forms such as `Fl. 4:6`. A chapter or passage is required; ordinary words containing these letters do not become links.
+
 The Bible reading's Listen view also links its passage directly, including the full verse range, using the same language-aware JW Library/JW.org handoff as References.
 
 Personal Study and Meeting Prep keep their card rows at natural content height inside their scrolling workspace, so notes and source links do not overlap on short screens or with enlarged text.

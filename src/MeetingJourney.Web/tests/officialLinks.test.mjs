@@ -17,6 +17,21 @@ test('typed scriptures accept common abbreviations, compact spacing and dot sepa
   assert.deepEqual(codes('projectJn3.16; Jn0.1; Jn99.16; Jn3.0'),[]);
 });
 
+test('Spanish Philippians shorthand in notes links to the exact passage without matching inside words',()=>{
+  for(const alias of ['fi','fili','fl']){
+    for(const input of [`${alias} 4:6`,`${alias.toUpperCase()}.4.6`,`${alias}4:6`]){
+      const links=bibleReferenceLinks(`Mi nota: ${input}`,'es');
+      assert.equal(links.length,1,input);
+      const url=new URL(links[0].url);
+      assert.equal(url.searchParams.get('bible'),'50004006',input);
+      assert.equal(url.searchParams.get('wtlocale'),'S',input);
+    }
+    assert.deepEqual(codes(`${alias} 4:6-7`,'es'),['50004006-50004007']);
+  }
+  assert.deepEqual(codes('Fi 4:6; Fili 4:6; Fl 4:6; Filipenses 4:6','es'),['50004006']);
+  assert.deepEqual(codes('perfil 4:6; wifi 4:6; fili; fl 5:1','es'),[]);
+});
+
 test('Bible links preserve single verses, ranges, separate verses and cross-chapter passages',()=>{
   assert.deepEqual(codes('John 3:16'),['43003016']);
   assert.deepEqual(codes('Jeremiah 45:3, 5'),['24045003','24045005']);
