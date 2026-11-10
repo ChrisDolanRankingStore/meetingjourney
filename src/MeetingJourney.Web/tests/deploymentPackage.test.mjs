@@ -7,7 +7,8 @@ import {fileURLToPath} from 'node:url';
 import {spawn} from 'node:child_process';
 
 const root=resolve(fileURLToPath(new URL('../../../',import.meta.url)));
-test('filtered Railpack output starts independently with its admin dependencies and only one public client',async()=>{
+for(const configuration of ['no env file','private env file','host overrides env file'])
+test(`filtered Railpack output starts independently: ${configuration}`,async()=>{
   const config=JSON.parse(readFileSync(join(root,'railpack.json'),'utf8'));
   const inputs=config.deploy?.inputs;
   assert.ok(inputs?.length,'Replace the provider deploy.inputs; step deployOutputs does not replace the default whole-workspace layer.');
@@ -29,7 +30,21 @@ test('filtered Railpack output starts independently with its admin dependencies 
     writeFileSync(join(publicDir,'index.html'),'Runtime client fixture');
     const image='journey-river-v1-480.webp';
     cpSync(join(root,'src','MeetingJourney.Web','public','assets','compact-v1',image),join(publicDir,'assets',image));
-    server=spawn(process.execPath,['server.js'],{cwd:directory,env:{...process.env,PORT:'0',MJ_ADMIN_ENABLED:'false',MJ_ARTWORK_AUTOMATION_ENABLED:'false'},stdio:['ignore','pipe','pipe']});
+    const env={...process.env,PORT:'0',MJ_ADMIN_ENABLED:'false',MJ_ARTWORK_AUTOMATION_ENABLED:'false'};
+    for(const key of Object.keys(env))if(key.startsWith('MJ_ADMIN_'))delete env[key];
+    if(configuration!=='no env file'){
+      writeFileSync(join(directory,'.env'),[
+        'MJ_ADMIN_ENABLED=true',
+        'MJ_ADMIN_ACCESS_ISSUER=https://test-team.cloudflareaccess.com',
+        `MJ_ADMIN_ACCESS_AUD=${'a'.repeat(64)}`,
+        'MJ_ADMIN_ORIGIN=https://meetingjourney.example',
+        'MJ_ADMIN_EMAILS=admin@example.com',
+        `MJ_ADMIN_DATA_DIR=${join(directory,'private-admin')}`,
+        'PORT=1'
+      ].join('\n'));
+    }
+    if(configuration!=='private env file')env.MJ_ADMIN_ENABLED='false';
+    server=spawn(process.execPath,['server.js'],{cwd:directory,env,stdio:['ignore','pipe','pipe']});
     let stderr='';server.stderr.on('data',data=>{stderr+=data;});
     const port=await new Promise((resolvePort,reject)=>{
       const timer=setTimeout(()=>reject(Error('Packaged server startup timed out: '+stderr)),10000);
@@ -52,7 +67,7 @@ test('filtered Railpack output starts independently with its admin dependencies 
     assert.equal(await fetch(base+'/').then(response=>response.text()),'Runtime client fixture');
     const artwork=await fetch(`${base}/assets/${image}`);
     assert.equal(artwork.status,200);assert.equal(artwork.headers.get('content-type'),'image/webp');
-    assert.equal((await fetch(base+'/api/admin/session')).status,503);
+    assert.equal((await fetch(base+'/api/admin/session')).status,configuration==='private env file'?401:503);
   }finally{
     if(server&&server.exitCode===null){const exited=new Promise(resolveExit=>server.once('exit',resolveExit));server.kill();await exited;}
     rmSync(directory,{recursive:true,force:true});

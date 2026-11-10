@@ -17,6 +17,8 @@ In SmarterASP, open the `meetingjourney` website and configure the Node.js runti
 
 The application folder must be the repository root, not `src/MeetingJourney.Api`. The root `package.json`, `server.js`, `railpack.json` and `.dockerignore` configure the Node.js build. Enter `npm run build` as the build command and `npm start` as the start command in the Git deployment panel. After deploying, confirm the log detects Node, not Dotnet.
 
+The root startup file loads an optional host-managed `.env` beside `server.js` before importing the application. Existing process environment variables take precedence, including an explicit `MJ_ADMIN_ENABLED=false`. SmarterASP can save settings as this file without injecting them into Node's environment. Keep it private, outside `node-app/public` and all public aliases; never commit or bundle it. Restart Node after saving changes. A missing file is allowed; an unreadable file fails startup rather than silently ignoring settings.
+
 ## Deploy from GitHub
 
 1. Connect the SmarterASP website to `ChrisDolanRankingStore/meetingjourney`.
