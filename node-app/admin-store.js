@@ -57,12 +57,12 @@ export function openAdminStore(directory, publicDir) {
       checkCapacity(1);return insert(data,actor);
     }),
     update:(...args)=>transaction(()=>update(...args)),
-    regenerateDrafts:(targets,concepts)=>transaction(()=>{
-      for(const target of targets)update(target.id,target.revision,'automation:gemini','regenerate-concept',current=>{
+    regenerateDrafts:(targets,concepts,actor='automation:gemini')=>transaction(()=>{
+      for(const target of targets)update(target.id,target.revision,actor,'regenerate-concept',current=>{
         if(!isUnapprovedArtworkDraft(current.data)||current.image)
-          throw new AdminError(409,'A draft was approved or changed while Gemini was working. No drafts for this subject were replaced.');
+          throw new AdminError(409,'A draft was approved or changed while AI was working. No drafts for this subject were replaced.');
         const replacement=concepts.find(concept=>concept.meetingId===current.data.meetingId&&concept.partId===current.data.partId&&concept.style===current.data.style);
-        if(!replacement)throw new AdminError(409,'Gemini did not return a matching style. No drafts for this subject were replaced.');
+        if(!replacement)throw new AdminError(409,'AI did not return a matching style. No drafts for this subject were replaced.');
         return {data:{...replacement,createdAt:current.data.createdAt},image:null};
       });
       return targets.length;
@@ -80,10 +80,10 @@ export function openAdminStore(directory, publicDir) {
     },
     savePlannerReview:(key,issue)=>db.prepare('INSERT INTO planner_reviews (batch_key,data) VALUES (?,?) ON CONFLICT(batch_key) DO UPDATE SET data=excluded.data')
       .run(key,JSON.stringify(issue)),
-    createPlanned:(key,concepts)=>transaction(()=>{
+    createPlanned:(key,concepts,actor='automation:gemini')=>transaction(()=>{
       if(db.prepare('SELECT batch_key FROM planner_batches WHERE batch_key=?').get(key))return false;
       checkCapacity(concepts.length);
-      for(const concept of concepts)insert(concept,'automation:gemini','generate-concept');
+      for(const concept of concepts)insert(concept,actor,'generate-concept');
       db.prepare('INSERT INTO planner_batches (batch_key) VALUES (?)').run(key);
       return true;
     }),

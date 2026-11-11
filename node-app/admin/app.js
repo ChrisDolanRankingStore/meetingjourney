@@ -40,7 +40,7 @@ function choose(entry){
   review.hidden=!entry;
   $('#safe').checked=false;$('#accurate').checked=false;
   $('#prompt').value=entry?.prompt??'';
-  $('#state').textContent=entry?`${entry.state} - revision ${entry.revision}${entry.generation?' - Gemini suggestion (human review required)':''}`:'';
+  $('#state').textContent=entry?`${entry.state} - revision ${entry.revision}${entry.generation?` - ${entry.generation.provider} suggestion (human review required)`:''}`:'';
   $('#preview').hidden=!entry?.imageHash;
   if(entry?.imageHash)$('#preview').src=`/api/admin/artwork/${entry.id}/image?revision=${entry.revision}`;
   else $('#preview').removeAttribute('src');
@@ -74,8 +74,16 @@ async function loadItems(){
 async function updatePlanner(){
   clearTimeout(plannerTimer);
   planner=await api('/api/admin/planner');
+  if(planner.enabled&&!$('#planning-provider').options.length){
+    for(const provider of planner.providers){
+      const option=document.createElement('option');option.value=provider.id;option.textContent=provider.id==='openrouter'?'OpenRouter':'Google Gemini';
+      $('#planning-provider').append(option);
+    }
+    $('#planning-provider').value=planner.provider;
+    $('#planning-model').value=planner.model;
+  }
   $('#planner-status').textContent=!planner.enabled?planner.message:
-    `${planner.running?'Running saved instructions...':'Manual generation. Review the instructions and run when ready; refresh the queue after completion.'} Model: ${planner.model}. Weeks: ${planner.weeks.join(', ')}. Last completed: ${planner.lastCheckedAt??'not yet'}. Regenerated drafts last run: ${planner.regenerated??0}. Gemini calls today: ${planner.callsToday}/${planner.maxCallsPerDay}.`;
+    `${planner.running?'Running saved instructions...':'Manual generation. Review the instructions and run when ready; refresh the queue after completion.'} Last/default provider: ${planner.provider}. Model: ${planner.model}. Weeks: ${planner.weeks.join(', ')}. Last completed: ${planner.lastCheckedAt??'not yet'}. Regenerated drafts last run: ${planner.regenerated??0}. Shared AI calls today: ${planner.callsToday}/${planner.maxCallsPerDay}.`;
   $('#planner-issues').replaceChildren();
   for(const issue of planner.issues??[]){
     const row=document.createElement('li');row.textContent=`${issue.week??''} ${issue.title??''}: ${issue.message}`;$('#planner-issues').append(row);
@@ -150,6 +158,9 @@ $('#new').addEventListener('click',()=>{choose(null);message('New draft. Blank d
 form.elements.meetingItem.addEventListener('change',showSource);
 $('#refresh').addEventListener('click',()=>void run(async()=>{await loadItems();await refresh();await updatePlanner();message('Queue refreshed.');}));
 $('#planning-text').addEventListener('input',applyState);
+$('#planning-provider').addEventListener('change',()=>{
+  $('#planning-model').value=planner.providers.find(provider=>provider.id===$('#planning-provider').value)?.model??'';
+});
 $('#planning-instructions').addEventListener('submit',event=>{
   event.preventDefault();
   void run(async()=>{
@@ -161,12 +172,18 @@ $('#planning-instructions').addEventListener('submit',event=>{
     message('Planning instructions saved. Nothing has been generated; run them when ready.');
   });
 });
-$('#plan-now').addEventListener('click',()=>void run(async()=>{
-  await api('/api/admin/planner/run',jsonOptions({instructionsRevision:planningInstructions.revision}));await updatePlanner();message('Upcoming-theme check requested. Suggestions remain private and unapproved.');
-}));
-$('#plan-regenerate').addEventListener('click',()=>void run(async()=>{
-  if(!confirm('Run the saved instructions using Gemini quota to replace outdated unapproved Gemini drafts? Approved concepts and images will not change.'))return;
-  await api('/api/admin/planner/regenerate',jsonOptions({instructionsRevision:planningInstructions.revision}));await updatePlanner();message('Draft regeneration requested. Refresh the queue after it finishes; review any source-context issues.');
+for(const [button,path,regenerate] of [
+  ['#plan-now','/api/admin/planner/run',false],
+  ['#plan-regenerate','/api/admin/planner/regenerate',true]
+])$(button).addEventListener('click',()=>void run(async()=>{
+  const provider=$('#planning-provider').value,model=$('#planning-model').value.trim();
+  if(!model)throw Error('Choose a model ID before running.');
+  const paid=provider==='openrouter'&&model!=='openrouter/free'&&!model.endsWith(':free');
+  const warnings=[...(paid?[`Use PAID OpenRouter model ${model}? This run can incur charges at the provider's current rates.`]:[]),
+    ...(regenerate?['Replace outdated unapproved AI drafts? Approved concepts and images will not change.']:[])];
+  if(warnings.length&&!confirm(warnings.join('\n\n')))return;
+  await api(path,jsonOptions({instructionsRevision:planningInstructions.revision,provider,model,allowPaid:paid}));
+  await updatePlanner();message('AI planning requested. Refresh the queue after it finishes; review any source-context issues.');
 }));
 $('#copy').addEventListener('click',()=>void run(async()=>{
   if(!selected?.conceptApproval)throw Error('Approve the safe concept before copying the generation prompt.');

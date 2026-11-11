@@ -3,7 +3,7 @@ import {createAdminHandler} from '../admin.js';
 
 const handler=createAdminHandler({publicDir:fileURLToPath(new URL('../public/',import.meta.url))});
 try{
-  const result=await handler.runPlanner();
+  const result=await handler.runPlanner({allowPaid:process.argv.includes('--allow-paid')});
   console.log(JSON.stringify(result,null,2));
   if(result.issues?.length)process.exitCode=1;
 }catch(error){

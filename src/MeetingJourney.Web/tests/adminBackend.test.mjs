@@ -168,7 +168,7 @@ test('artwork decoding strips metadata, rejects non-raster content and enforces 
 test('only authenticated same-origin admins can trigger planning; discovered drafts still need source and image review',async()=>{
   const directory=mkdtempSync(join(tmpdir(),'mj-admin-planning-')),publicDir=join(directory,'public'),meetingsDirectory=join(directory,'content');
   mkdirSync(publicDir);mkdirSync(meetingsDirectory);
-  const env={...envFor(directory),MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_GEMINI_API_KEY:'not-a-real-api-key-for-tests'};
+  const env={...envFor(directory),MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_GEMINI_API_KEY:'not-a-real-api-key-for-tests',MJ_OPENROUTER_API_KEY:'not-a-real-openrouter-key'};
   const keys=await tokens(readAdminConfig(env,publicDir));
   let providerCalls=0;
   const handler=createAdminHandler({env,publicDir,meetingsDirectory,verifyAccess:keys.verify,plannerOptions:{
@@ -199,6 +199,11 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     assert.equal(providerCalls,0,'Loading admin and saving instructions must not call Gemini.');
     assert.equal((await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:mutation,body:'{}'})).status,428);
     assert.equal((await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:mutation,body:'{"instructionsRevision":0}'})).status,409);
+    const requestRun=input=>fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:mutation,body:JSON.stringify({instructionsRevision:1,...input})});
+    assert.equal((await requestRun({provider:'unconfigured'})).status,400);
+    assert.equal((await requestRun({provider:'openrouter',model:'example/paid-model'})).status,400);
+    assert.equal((await requestRun({provider:'openrouter',model:'example/paid-model',allowPaid:'true'})).status,400);
+    assert.equal(providerCalls,0,'Invalid or unconfirmed provider selections must not call a provider.');
     assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST'})).status,401);
     assert.equal((await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:{...mutation,Origin:'https://evil.example'}})).status,403);
     assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST',headers:{...mutation,Origin:'https://evil.example'}})).status,403);
@@ -206,13 +211,19 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     assert.equal(triggered.status,202);
     await handler.runPlanner();
     const state=await fetch(server.base+'/api/admin/planner',{headers:auth}).then(r=>r.text());
-    assert.doesNotMatch(state,/not-a-real-api-key/);
+    assert.doesNotMatch(state,/not-a-real-api-key|not-a-real-openrouter-key/);
+    assert.equal(JSON.parse(state).maxCallsPerDay,50);
+    assert.deepEqual(JSON.parse(state).providers.map(provider=>provider.id),['gemini','openrouter']);
     const items=await fetch(server.base+'/api/admin/meetings',{headers:auth}).then(r=>r.json());
     assert.equal(items.length,4);assert.equal(items[0].sourceStatus,'discovered');
     const drafts=await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json());
     assert.equal(drafts.length,12);assert.ok(drafts.every(draft=>draft.state==='draft'&&!draft.conceptApproval));
     assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST',headers:mutation,body:'{"instructionsRevision":1}'})).status,202);
     await handler.runPlanner();
+    assert.deepEqual(await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json()),drafts);
+    assert.equal((await requestRun({provider:'openrouter',model:'example/paid-model',allowPaid:true})).status,202);
+    await handler.runPlanner();
+    assert.equal(providerCalls,4,'Switching provider/model must not duplicate existing subject suggestions.');
     assert.deepEqual(await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json()),drafts);
     const draft=drafts[0],path=`/api/admin/artwork/${draft.id}/actions`;
     const action=data=>fetch(server.base+path,{method:'POST',headers:{...mutation,'If-Match':String(draft.revision)},body:JSON.stringify(data)});

@@ -99,7 +99,7 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
   try{if(config)plannerConfig=readPlannerConfig(env);}
   catch(error){plannerError=error.message;console.error('Artwork automation disabled: '+plannerError);}
   const planner=plannerConfig?createArtworkPlanner({...plannerOptions,config:plannerConfig,database,reviewedItems}):null;
-  const plannerStatus=()=>planner?planner.status():{enabled:false,running:false,message:plannerError??'Enable artwork automation and configure a Gemini key in private server settings.'};
+  const plannerStatus=()=>planner?planner.status():{enabled:false,running:false,message:plannerError??'Enable artwork planning and configure a Gemini or OpenRouter key in private server settings.'};
   const planningInstructions=()=>database().plannerInstructions()??{instructions:defaultArtworkInstructions,revision:0};
   const matchesCurrentSource=data=>data.conceptApproval?.sourceHash===data.sourceHash&&availableItems().some(item=>item.meetingId===data.meetingId&&item.partId===data.partId&&item.sourceHash===data.sourceHash);
   const rates=new Map();
@@ -169,7 +169,8 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
           throw new AdminError(409,'Planning instructions changed. Reload and review them before running.');
         if(plannerStatus().running)
           throw new AdminError(409,'Artwork planning is already running. Wait for it to finish before requesting regeneration.');
-        void planner.run({force:true,regenerateDrafts:path.endsWith('/regenerate')}).catch(error=>console.error('Artwork planning check failed.',error));
+        void planner.run({force:true,regenerateDrafts:path.endsWith('/regenerate'),provider:input.provider,model:input.model,allowPaid:input.allowPaid})
+          .catch(error=>console.error('Artwork planning check failed.',error));
         send(response,202,plannerStatus());return true;
       }
       if(path==='/api/admin/artwork'&&request.method==='POST'){
@@ -237,9 +238,9 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
       return true;
     }
   };
-  handler.runPlanner=()=>{
+  handler.runPlanner=(options={})=>{
     if(!planner)throw new AdminError(503,plannerStatus().message);
-    return planner.run({force:true});
+    return planner.run({...options,force:true});
   };
   handler.close=async()=>{await planner?.stop();store?.close();};
   return handler;

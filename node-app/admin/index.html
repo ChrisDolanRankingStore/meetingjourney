@@ -14,17 +14,24 @@
   <main hidden>
     <section id="planner">
       <h2>Four-week artwork planning</h2>
-      <p>Checks the next four meeting weeks, prioritising the furthest week ahead. Gemini suggests a source-linked Bible scene in simple, detailed and manga-inspired styles for each Treasures theme and Watchtower study. Insufficient scene context is flagged for manual review instead of generating an unrelated analogy. It does not generate images or approve anything.</p>
+      <p>Checks the next four meeting weeks, prioritising the furthest week ahead. Your selected AI provider suggests a source-linked Bible scene in simple, detailed and manga-inspired styles for each Treasures theme and Watchtower study. Insufficient scene context is flagged for manual review instead of generating an unrelated analogy. It does not generate images or approve anything.</p>
       <p id="planner-status"></p>
-      <p>Generation is manual: opening this page or restarting the server does not call Gemini. Review and save the instructions below, then run them when you are ready.</p>
+      <p>Generation is manual: opening this page or restarting the server does not call an AI provider. Review and save the instructions below, then run them when you are ready.</p>
+      <fieldset>
+        <legend>Provider for the next run</legend>
+        <label>AI provider<select id="planning-provider"></select></label>
+        <label>Model ID<input id="planning-model" maxlength="203" required></label>
+        <p>Only providers with private server keys are listed. For OpenRouter, use <code>openrouter/free</code> or a model ID ending in <code>:free</code> for free models; other IDs require paid-usage confirmation for each run. There is no automatic provider or paid-model fallback. Models must support structured JSON output. Provider safety filters and data policies vary; always review the results.</p>
+        <a href="https://openrouter.ai/models?supported_parameters=structured_outputs" target="_blank" rel="noopener noreferrer">Find OpenRouter models with structured output support</a>
+      </fieldset>
       <form id="planning-instructions">
-        <label>Instructions sent to Gemini to write the image prompts<textarea id="planning-text" rows="18" maxlength="6000" required></textarea></label>
-        <p>These are the actual system instructions, not an example. Edit them to clarify your requirements, then save. Saving does not run Gemini or change existing artwork. Instructions are sent to Google: do not enter credentials or private personal information. Provider safety filters and structured-output validation still apply.</p>
+        <label>Instructions sent to the AI provider to write the image prompts<textarea id="planning-text" rows="18" maxlength="6000" required></textarea></label>
+        <p>These are the actual system instructions, not an example. Edit them to clarify your requirements, then save. Saving does not call AI or change existing artwork. Instructions and source metadata are sent to the selected provider (and its upstream provider when using OpenRouter): do not enter credentials or private personal information. Structured-output validation still applies.</p>
         <button type="submit">Save planning instructions</button>
       </form>
       <button id="plan-now" type="button" disabled>Run saved instructions for new subjects</button>
       <button id="plan-regenerate" type="button" disabled>Run saved instructions for outdated drafts</button>
-      <p>Both actions use Gemini quota. The second replaces only unapproved Gemini drafts created with older or different instructions. Approved concepts, uploaded images, published artwork, rejected entries and manual concepts stay unchanged. Source-context issues require review. Re-running unchanged instructions does not request fresh alternatives for rejected entries.</p>
+      <p>Both actions use the shared daily AI request allowance. The second replaces only unapproved AI drafts created with older or different instructions, provider or model. Approved concepts, uploaded images, published artwork, rejected entries and manual concepts stay unchanged. Switching providers does not duplicate existing suggestions. Source-context issues require review. Re-running unchanged settings does not request fresh alternatives for rejected entries.</p>
       <ul id="planner-issues"></ul>
     </section>
     <aside>

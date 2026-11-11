@@ -5,9 +5,9 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {openAdminStore} from '../../../node-app/admin-store.js';
 import {artworkConcept,artworkStyles} from '../../../node-app/artwork-concepts.js';
-import {artworkLookahead,createArtworkPlanner,defaultArtworkInstructions,generateArtworkConcepts,readPlannerConfig} from '../../../node-app/artwork-planner.js';
+import {artworkLookahead,createArtworkPlanner,defaultArtworkInstructions,generateArtworkConcepts,readPlannerConfig,selectPlannerConfig} from '../../../node-app/artwork-planner.js';
 
-const config={key:'not-a-real-api-key-for-tests',model:'gemini-3.1-flash-lite'};
+const config=readPlannerConfig({MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_GEMINI_API_KEY:'not-a-real-api-key-for-tests',MJ_ARTWORK_MAX_CALLS_PER_DAY:'12'});
 const subjects=week=>['midweek','weekend'].map(kind=>({
   meetingId:`${kind==='midweek'?'meeting':'weekend'}-${week}`,weekOf:week,kind,
   partId:kind==='midweek'?'part-1':'watchtower-study',title:kind==='midweek'?'Showing patience':'Showing gratitude',
@@ -31,6 +31,82 @@ test('four-week lookahead is calendar-week based across Sundays and year boundar
   assert.throws(()=>readPlannerConfig({MJ_ARTWORK_AUTOMATION_ENABLED:'true'}));
   assert.throws(()=>readPlannerConfig({MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_GEMINI_API_KEY:config.key,MJ_GEMINI_MODEL:'https://untrusted.example'}));
   assert.throws(()=>readPlannerConfig({MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_GEMINI_API_KEY:config.key,MJ_GEMINI_MODEL:'gemini-3.1-flash-image'}));
+});
+test('provider configuration supports OpenRouter alone, explicit paid consent and a configurable shared cap',()=>{
+  const env={MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_OPENROUTER_API_KEY:'not-a-real-openrouter-key'};
+  const settings=readPlannerConfig(env);
+  assert.equal(settings.provider,'openrouter');assert.equal(settings.maxCallsPerDay,50);
+  assert.equal(selectPlannerConfig(settings).model,'openrouter/free');
+  assert.equal(selectPlannerConfig(settings,{model:'example/model:free'}).model,'example/model:free');
+  assert.throws(()=>selectPlannerConfig(settings,{model:'example/model'}),/Confirm paid/);
+  assert.equal(selectPlannerConfig(settings,{model:'example/model',allowPaid:true}).model,'example/model');
+  assert.throws(()=>selectPlannerConfig(settings,{provider:'gemini'}),/private server API key/);
+  assert.throws(()=>selectPlannerConfig(settings,{provider:'__proto__'}),/private server API key/);
+  assert.throws(()=>selectPlannerConfig(settings,{model:'https://example.invalid'}),/model ID/);
+  for(const cap of ['0','-1','1.5','NaN','']){
+    assert.throws(()=>readPlannerConfig({...env,MJ_ARTWORK_MAX_CALLS_PER_DAY:cap}),/positive whole number/);
+  }
+  assert.equal(readPlannerConfig({...env,MJ_ARTWORK_MAX_CALLS_PER_DAY:'75'}).maxCallsPerDay,75);
+});
+test('OpenRouter sends the reviewed instructions and strict schema without paid fallback and rejects unsafe responses',async()=>{
+  const item={...subjects('2026-12-07')[0],sourceHash:'test-hash',notebook:'PRIVATE NOTE MUST NEVER BE SENT'};
+  const settings={provider:'openrouter',key:'not-a-real-openrouter-key',model:'openrouter/free',instructions:defaultArtworkInstructions+'\nKeep plants natural.'};
+  const reply=output=>new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify(output)}}]}));
+  const result=await generateArtworkConcepts(item,settings,{fetcher:async(url,options)=>{
+    assert.equal(url,'https://openrouter.ai/api/v1/chat/completions');
+    assert.equal(options.headers.Authorization,`Bearer ${settings.key}`);assert.equal(options.redirect,'error');
+    const payload=JSON.parse(options.body);
+    assert.equal(payload.model,'openrouter/free');
+    assert.equal(payload.messages[0].content,settings.instructions);
+    assert.deepEqual(JSON.parse(payload.messages[1].content),{title:item.title,reference:item.reference,context:item.context});
+    assert.equal(payload.response_format.json_schema.strict,true);
+    assert.equal(payload.response_format.type,'json_schema');assert.equal(payload.provider.require_parameters,true);
+    assert.equal(payload.models,undefined);assert.equal(payload.route,undefined);
+    assert.doesNotMatch(options.body,/PRIVATE NOTE|not-a-real-openrouter-key/);
+    return reply({needsReview:false,reason:'',concepts:suggestions()});
+  }});
+  assert.equal(result.concepts.length,3);
+  for(const response of [
+    {choices:[{finish_reason:'length',message:{content:'{}'}}]},
+    {choices:[{finish_reason:'stop',message:{refusal:'Refused',content:'{}'}}]},
+    {error:{message:settings.key}},
+    {choices:[{finish_reason:'stop',message:{content:'not JSON'}}]}
+  ])await assert.rejects(generateArtworkConcepts(item,settings,{fetcher:async()=>new Response(JSON.stringify(response))}),/OpenRouter returned blocked/);
+  await assert.rejects(generateArtworkConcepts(item,settings,{fetcher:async()=>reply({needsReview:false,reason:'',concepts:suggestions().slice(0,2)})}),/three distinct/);
+  await assert.rejects(generateArtworkConcepts(item,settings,{fetcher:async()=>new Response(settings.key,{status:429})}),
+    error=>/OpenRouter returned HTTP 429/.test(error.message)&&!error.message.includes(settings.key));
+  await assert.rejects(generateArtworkConcepts(item,settings,{fetcher:async()=>new Response('x'.repeat(65537))}),/size limit/);
+});
+test('switching providers shares quota, preserves approved work and never duplicates existing suggestions',async()=>{
+  const f=fixture(),item={...subjects('2026-12-07')[0],sourceHash:'fixture-hash'};
+  const settings={...config,maxCallsPerDay:1,providers:{...config.providers,openrouter:{key:'not-a-real-openrouter-key',model:'openrouter/free'}}};
+  let date=new Date('2026-11-10T12:00:00Z'),calls=0;
+  const planner=createArtworkPlanner({config:settings,database:f.database,reviewedItems:()=>[item],now:()=>date,
+    discover:async()=>({subjects:[],missing:[]}),generate:async(subject,selected)=>{calls++;assert.ok(['gemini','openrouter'].includes(selected.provider));return generated(subject);}
+  });
+  try{
+    await planner.run({force:true,provider:'openrouter'});
+    const draft=f.database().list()[0];
+    assert.equal(draft.generation.provider,'openrouter');
+    assert.equal(f.database().audit(draft.id)[0].actor,'automation:openrouter');
+    const approved=f.database().update(draft.id,draft.revision,'administrator','approve-concept',entry=>({
+      ...entry,data:{...entry.data,state:'concept-approved',conceptApproval:{actor:'administrator'}}
+    }));
+    await planner.run({force:true,provider:'gemini'});
+    assert.equal(calls,1);assert.equal(f.database().list().length,3);
+    const capped=await planner.run({force:true,provider:'gemini',regenerateDrafts:true});
+    assert.equal(calls,1);assert.equal(capped.callsToday,1);assert.equal(capped.maxCallsPerDay,1);
+    assert.match(capped.issues[0].message,/Shared daily AI request cap/);
+    f.reopen();
+    date=new Date('2026-11-11T12:00:00Z');
+    const refreshed=await planner.run({force:true,provider:'gemini',regenerateDrafts:true});
+    assert.equal(calls,2);assert.equal(refreshed.regenerated,2);
+    assert.equal(f.database().list().length,3);assert.deepEqual(f.database().get(approved.id).data,approved);
+    const replaced=f.database().list().find(entry=>entry.state==='draft');
+    assert.equal(replaced.generation.provider,'gemini');assert.equal(f.database().audit(replaced.id)[0].actor,'automation:gemini');
+    const state=JSON.stringify(planner.status());
+    assert.doesNotMatch(state,/not-a-real|API_KEY/);
+  }finally{f.close();}
 });
 test('Gemini requests source-linked scene variants while keeping safety exclusions out of image prompts',async()=>{
   const item={...subjects('2026-12-07')[0],sourceHash:'test-hash',notebook:'PRIVATE NOTE MUST NEVER BE SENT'};
