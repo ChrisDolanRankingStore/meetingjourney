@@ -6,6 +6,7 @@ import {validatePublishedWeek} from './published-content.js';
 
 export const artworkHash=value=>createHash('sha256').update(value).digest('hex');
 export const artworkStyles=['simple','detailed','manga'];
+export const isUnapprovedArtworkDraft=entry=>entry.state==='draft'&&!entry.conceptApproval&&!entry.imageHash&&!entry.imageApproval&&!entry.publishedAt;
 export function reviewedArtworkItems(directory) {
   return readdirSync(directory).filter(name=>/^(midweek|weekend)-\d{4}-\d{2}-\d{2}\.json$/.test(name)).sort().flatMap(name=>{
     const meeting=validatePublishedWeek(JSON.parse(readFileSync(join(directory,name),'utf8').replace(/^\uFEFF/,'')));

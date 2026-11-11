@@ -98,6 +98,91 @@ test('planning catches up four future weeks, survives restarts and never overwri
     assert.equal(f.database().sources().find(item=>item.weekOf==='2026-12-07'&&item.kind==='midweek').title,'Updated Treasures theme');
   }finally{f.close();}
 });
+test('explicit regeneration replaces only older unapproved Gemini drafts without duplicating or rewriting approved artwork',async()=>{
+  const f=fixture();let calls=0,date=new Date('2026-11-10T12:00:00Z');
+  const options={config,database:f.database,reviewedItems:()=>[],now:()=>date,
+    discover:async week=>({subjects:subjects(week),missing:[]}),
+    generate:async item=>{calls++;return generated(item);}};
+  try{
+    await createArtworkPlanner(options).run();
+    const drafts=f.database().list();
+    for(const draft of drafts)f.database().update(draft.id,draft.revision,'fixture','old-instructions',entry=>{
+      const {promptVersion,...generation}=entry.data.generation;
+      return {...entry,data:{...entry.data,safeTheme:'Old generic theme',scene:'Old unrelated garden',generation}};
+    });
+    const protectedStates=['published','image-ready','concept-approved','rejected'],protectedEntries=[];
+    for(const [index,state] of protectedStates.entries()){
+      const current=f.database().get(drafts[index*3].id);
+      f.database().update(current.data.id,current.data.revision,'fixture','review',entry=>({
+        data:{...entry.data,state,conceptApproval:state==='rejected'?null:{promptHash:'approved-prompt'},
+          imageHash:['published','image-ready'].includes(state)?'approved-image':null},
+        image:['published','image-ready'].includes(state)?Buffer.from('existing approved image'):null
+      }));
+      protectedEntries.push(f.database().get(current.data.id));
+    }
+    const manual=f.database().create(generated({...subjects('2026-11-16')[0],sourceHash:'manual-source'}).concepts[0],'administrator');
+    const planner=createArtworkPlanner(options);
+    const normal=await planner.run({force:true});
+    assert.equal(calls,8,'Normal checks must not replay old batches.');
+    const capped=await planner.run({force:true,regenerateDrafts:true});
+    assert.equal(calls,12);assert.equal(capped.callsToday,12);
+    assert.match(capped.issues[0].message,/Run draft regeneration again on another UTC day/);
+    date=new Date('2026-11-11T13:00:00Z');
+    const result=await planner.run({force:true,regenerateDrafts:true});
+    assert.equal(capped.regenerated+result.regenerated,20);assert.equal(calls,16);
+    assert.equal(result.nextCheckAt,normal.nextCheckAt,'Refreshing drafts must not postpone the normal daily check.');
+    assert.equal(f.database().list().length,25,'Regeneration updates existing IDs rather than adding duplicate entries.');
+    for(const entry of protectedEntries)assert.deepEqual(f.database().get(entry.data.id),entry);
+    assert.deepEqual(f.database().get(manual.id).data,manual);
+    const refreshed=f.database().list().find(entry=>entry.generation?.promptVersion===2);
+    assert.equal(refreshed.safeTheme,'Showing patience');
+    assert.equal(refreshed.revision,3);
+    assert.equal(f.database().audit(refreshed.id)[0].action,'regenerate-concept');
+    f.reopen();
+    await createArtworkPlanner(options).run({force:true,regenerateDrafts:true});
+    assert.equal(calls,16,'Already refreshed drafts must not be billed again.');
+  }finally{f.close();}
+});
+test('regeneration rolls back a subject if a draft is approved while Gemini is working',async()=>{
+  const f=fixture(),item={...subjects('2026-12-07')[0],sourceHash:'fixture-hash'};
+  try{
+    f.database().createPlanned('old-batch',generated(item).concepts.map(concept=>({...concept,generation:{provider:'gemini'}})));
+    const drafts=f.database().list(),concurrent=drafts[1];
+    let reviewed;
+    const result=await createArtworkPlanner({config,database:f.database,reviewedItems:()=>[item],
+      now:()=>new Date('2026-11-10T12:00:00Z'),discover:async()=>({subjects:[],missing:[]}),
+      generate:async()=>{
+        reviewed=f.database().update(concurrent.id,concurrent.revision,'administrator','approve-concept',entry=>({
+          ...entry,data:{...entry.data,state:'concept-approved',conceptApproval:{promptHash:'reviewed'}}}));
+        return generated(item);
+      }
+    }).run({force:true,regenerateDrafts:true});
+    assert.equal(result.regenerated,0);assert.match(result.issues[0].message,/draft changed/i);
+    assert.deepEqual(f.database().get(concurrent.id).data,reviewed);
+    for(const draft of drafts.filter(draft=>draft.id!==concurrent.id)){
+      assert.deepEqual(f.database().get(draft.id).data,draft);
+      assert.equal(f.database().audit(draft.id).length,1,'Partial regeneration and its audit must roll back together.');
+    }
+  }finally{f.close();}
+});
+test('regeneration leaves drafts intact when source context is insufficient and does not repeatedly bill for it',async()=>{
+  const f=fixture(),item={...subjects('2026-12-07')[0],sourceHash:'fixture-hash'};
+  let calls=0;
+  try{
+    f.database().createPlanned('old-batch',generated(item).concepts.map(concept=>({...concept,generation:{provider:'gemini'}})));
+    const original=f.database().list();
+    const planner=createArtworkPlanner({config,database:f.database,reviewedItems:()=>[item],
+      now:()=>new Date('2026-11-10T12:00:00Z'),discover:async()=>({subjects:[],missing:[]}),
+      generate:async()=>{calls++;return {needsReview:true,reason:'The source does not identify a Bible scene.',concepts:[]};}
+    });
+    for(let attempt=0;attempt<2;attempt++){
+      const result=await planner.run({force:true,regenerateDrafts:true});
+      assert.equal(result.regenerated,0);assert.match(result.issues[0].message,/does not identify a Bible scene/);
+      assert.deepEqual(f.database().list(),original);
+    }
+    assert.equal(calls,1);
+  }finally{f.close();}
+});
 test('persistent leases and daily call caps bound concurrent runs and retries',async()=>{
   const f=fixture();let release,calls=0,revision=0;
   const options={config,database:f.database,reviewedItems:()=>[],now:()=>new Date('2026-11-10T12:00:00Z'),

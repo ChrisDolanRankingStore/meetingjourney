@@ -149,9 +149,11 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
         if(path==='/api/admin/planner'){send(response,200,plannerStatus());return true;}
         if(path==='/api/admin/artwork'){send(response,200,database().list());return true;}
       }
-      if(path==='/api/admin/planner/run'&&request.method==='POST'){
+      if(['/api/admin/planner/run','/api/admin/planner/regenerate'].includes(path)&&request.method==='POST'){
         if(!planner)throw new AdminError(503,plannerStatus().message);
-        void planner.run({force:true}).catch(error=>console.error('Artwork planning check failed.',error));
+        if(path.endsWith('/regenerate')&&plannerStatus().running)
+          throw new AdminError(409,'Artwork planning is already running. Wait for it to finish before requesting regeneration.');
+        void planner.run({force:true,regenerateDrafts:path.endsWith('/regenerate')}).catch(error=>console.error('Artwork planning check failed.',error));
         send(response,202,plannerStatus());return true;
       }
       if(path==='/api/admin/artwork'&&request.method==='POST'){

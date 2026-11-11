@@ -3,6 +3,7 @@ import {join, resolve} from 'node:path';
 import {DatabaseSync} from 'node:sqlite';
 import {randomUUID} from 'node:crypto';
 import {AdminError,outsidePublicDirectory} from './admin-auth.js';
+import {isUnapprovedArtworkDraft} from './artwork-concepts.js';
 
 export function openAdminStore(directory, publicDir) {
   mkdirSync(directory,{recursive:true,mode:0o700});
@@ -38,6 +39,14 @@ export function openAdminStore(directory, publicDir) {
     db.prepare('INSERT INTO artwork (id,revision,data) VALUES (?,?,?)').run(entry.id,entry.revision,JSON.stringify(entry));
     record(entry.id,action,actor,entry);return entry;
   };
+  const update=(id,revision,actor,action,change)=>{
+    const current=get(id);
+    if(current.data.revision!==revision)throw new AdminError(409,'This draft changed. Reload it before continuing.');
+    const next=change(current);
+    next.data={...next.data,id,revision:revision+1};
+    db.prepare('UPDATE artwork SET revision=?,data=?,image=? WHERE id=?').run(next.data.revision,JSON.stringify(next.data),next.image,id);
+    record(id,action,actor,next.data);return next.data;
+  };
   return {
     close:()=>db.close(),
     list:()=>db.prepare('SELECT data FROM artwork ORDER BY rowid DESC LIMIT 500').all().map(row=>JSON.parse(row.data)),
@@ -46,13 +55,16 @@ export function openAdminStore(directory, publicDir) {
     create:(data,actor)=>transaction(()=>{
       checkCapacity(1);return insert(data,actor);
     }),
-    update:(id,revision,actor,action,change)=>transaction(()=>{
-      const current=get(id);
-      if(current.data.revision!==revision)throw new AdminError(409,'This draft changed. Reload it before continuing.');
-      const next=change(current);
-      next.data={...next.data,id,revision:revision+1};
-      db.prepare('UPDATE artwork SET revision=?,data=?,image=? WHERE id=?').run(next.data.revision,JSON.stringify(next.data),next.image,id);
-      record(id,action,actor,next.data);return next.data;
+    update:(...args)=>transaction(()=>update(...args)),
+    regenerateDrafts:(targets,concepts)=>transaction(()=>{
+      for(const target of targets)update(target.id,target.revision,'automation:gemini','regenerate-concept',current=>{
+        if(!isUnapprovedArtworkDraft(current.data)||current.image)
+          throw new AdminError(409,'A draft was approved or changed while Gemini was working. No drafts for this subject were replaced.');
+        const replacement=concepts.find(concept=>concept.meetingId===current.data.meetingId&&concept.partId===current.data.partId&&concept.style===current.data.style);
+        if(!replacement)throw new AdminError(409,'Gemini did not return a matching style. No drafts for this subject were replaced.');
+        return {data:{...replacement,createdAt:current.data.createdAt},image:null};
+      });
+      return targets.length;
     }),
     audit:id=>db.prepare('SELECT action,actor,recorded_at AS recordedAt,revision FROM audit WHERE artwork_id=? ORDER BY sequence DESC LIMIT 100').all(id),
     sources:()=>db.prepare('SELECT data FROM artwork_sources ORDER BY source_key').all().map(row=>JSON.parse(row.data)),

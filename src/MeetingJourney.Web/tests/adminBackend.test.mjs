@@ -181,7 +181,9 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
   const auth={'cf-access-jwt-assertion':await keys.sign()},mutation={...auth,Origin:origin,'X-MJ-Admin':'1','Content-Type':'application/json'};
   try{
     assert.equal((await fetch(server.base+'/api/admin/planner')).status,401);
+    assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST'})).status,401);
     assert.equal((await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:{...mutation,Origin:'https://evil.example'}})).status,403);
+    assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST',headers:{...mutation,Origin:'https://evil.example'}})).status,403);
     const triggered=await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:mutation,body:'{}'});
     assert.equal(triggered.status,202);
     await handler.runPlanner();
@@ -191,6 +193,9 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     assert.equal(items.length,4);assert.equal(items[0].sourceStatus,'discovered');
     const drafts=await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json());
     assert.equal(drafts.length,12);assert.ok(drafts.every(draft=>draft.state==='draft'&&!draft.conceptApproval));
+    assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST',headers:mutation,body:'{}'})).status,202);
+    await handler.runPlanner();
+    assert.deepEqual(await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json()),drafts);
     const draft=drafts[0],path=`/api/admin/artwork/${draft.id}/actions`;
     const action=data=>fetch(server.base+path,{method:'POST',headers:{...mutation,'If-Match':String(draft.revision)},body:JSON.stringify(data)});
     assert.equal((await action({action:'publish'})).status,409);

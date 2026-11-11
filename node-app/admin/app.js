@@ -21,6 +21,7 @@ async function run(operation){
 }
 function applyState(){
   $('#plan-now').disabled=!planner?.enabled||planner.running;
+  $('#plan-regenerate').disabled=!planner?.enabled||planner.running;
   const state=selected?.state;
   $('#approve-concept').hidden=state!=='draft';
   $('#upload').hidden=!selected?.conceptApproval;
@@ -72,7 +73,7 @@ async function updatePlanner(){
   clearTimeout(plannerTimer);
   planner=await api('/api/admin/planner');
   $('#planner-status').textContent=!planner.enabled?planner.message:
-    `${planner.running?'Checking themes and preparing drafts...':'Ready. Refresh the queue after a completed check to load new drafts.'} Model: ${planner.model}. Weeks: ${planner.weeks.join(', ')}. Last completed: ${planner.lastCheckedAt??'not yet'}. Next automatic check: ${planner.nextCheckAt??'on startup'}. Gemini calls today: ${planner.callsToday}/${planner.maxCallsPerDay}.`;
+    `${planner.running?'Checking themes and preparing drafts...':'Ready. Refresh the queue after a completed check to load new drafts.'} Model: ${planner.model}. Weeks: ${planner.weeks.join(', ')}. Last completed: ${planner.lastCheckedAt??'not yet'}. Regenerated drafts last run: ${planner.regenerated??0}. Next automatic check: ${planner.nextCheckAt??'on startup'}. Gemini calls today: ${planner.callsToday}/${planner.maxCallsPerDay}.`;
   $('#planner-issues').replaceChildren();
   for(const issue of planner.issues??[]){
     const row=document.createElement('li');row.textContent=`${issue.week??''} ${issue.title??''}: ${issue.message}`;$('#planner-issues').append(row);
@@ -148,6 +149,10 @@ form.elements.meetingItem.addEventListener('change',showSource);
 $('#refresh').addEventListener('click',()=>void run(async()=>{await loadItems();await refresh();await updatePlanner();message('Queue refreshed.');}));
 $('#plan-now').addEventListener('click',()=>void run(async()=>{
   await api('/api/admin/planner/run',jsonOptions({}));await updatePlanner();message('Upcoming-theme check requested. Suggestions remain private and unapproved.');
+}));
+$('#plan-regenerate').addEventListener('click',()=>void run(async()=>{
+  if(!confirm('Use Gemini quota to replace older unapproved Gemini themes, scenes and prompts? Approved concepts and images will not change.'))return;
+  await api('/api/admin/planner/regenerate',jsonOptions({}));await updatePlanner();message('Draft regeneration requested. Refresh the queue after it finishes; review any source-context issues.');
 }));
 $('#copy').addEventListener('click',()=>void run(async()=>{
   if(!selected?.conceptApproval)throw Error('Approve the safe concept before copying the generation prompt.');
