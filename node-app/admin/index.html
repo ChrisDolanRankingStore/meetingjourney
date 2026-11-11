@@ -16,9 +16,15 @@
       <h2>Four-week artwork planning</h2>
       <p>Checks the next four meeting weeks, prioritising the furthest week ahead. Gemini suggests a source-linked Bible scene in simple, detailed and manga-inspired styles for each Treasures theme and Watchtower study. Insufficient scene context is flagged for manual review instead of generating an unrelated analogy. It does not generate images or approve anything.</p>
       <p id="planner-status"></p>
-      <button id="plan-now" type="button" disabled>Check upcoming themes now</button>
-      <button id="plan-regenerate" type="button" disabled>Regenerate older unapproved drafts</button>
-      <p>Regeneration uses Gemini quota to replace older Gemini drafts for the next four weeks. Approved concepts, uploaded images, published artwork and manually created concepts stay unchanged. Subjects without enough source context are flagged for manual review.</p>
+      <p>Generation is manual: opening this page or restarting the server does not call Gemini. Review and save the instructions below, then run them when you are ready.</p>
+      <form id="planning-instructions">
+        <label>Instructions sent to Gemini to write the image prompts<textarea id="planning-text" rows="18" maxlength="6000" required></textarea></label>
+        <p>These are the actual system instructions, not an example. Edit them to clarify your requirements, then save. Saving does not run Gemini or change existing artwork. Instructions are sent to Google: do not enter credentials or private personal information. Provider safety filters and structured-output validation still apply.</p>
+        <button type="submit">Save planning instructions</button>
+      </form>
+      <button id="plan-now" type="button" disabled>Run saved instructions for new subjects</button>
+      <button id="plan-regenerate" type="button" disabled>Run saved instructions for outdated drafts</button>
+      <p>Both actions use Gemini quota. The second replaces only unapproved Gemini drafts created with older or different instructions. Approved concepts, uploaded images, published artwork, rejected entries and manual concepts stay unchanged. Source-context issues require review. Re-running unchanged instructions does not request fresh alternatives for rejected entries.</p>
       <ul id="planner-issues"></ul>
     </section>
     <aside>
@@ -34,6 +40,7 @@
       <form id="concept">
         <label>Meeting item<select name="meetingItem" required></select></label>
         <p id="source"></p>
+        <details><summary>Source message sent with the planning instructions for this item</summary><label>Exact metadata payload<textarea id="planning-source" rows="6" readonly></textarea></label></details>
         <label>Drawing style<select name="style"><option value="simple">Simple outlines</option><option value="detailed">Detailed outlines</option><option value="manga">Manga-inspired outlines</option></select></label>
         <label>Child-safe positive theme<input name="safeTheme" maxlength="300" required></label>
         <label>Safe scene description<textarea name="scene" rows="5" maxlength="1500" required></textarea></label>

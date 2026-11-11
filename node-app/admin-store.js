@@ -17,6 +17,7 @@ export function openAdminStore(directory, publicDir) {
     CREATE TABLE IF NOT EXISTS planner_batches (batch_key TEXT PRIMARY KEY);
     CREATE TABLE IF NOT EXISTS planner_reviews (batch_key TEXT PRIMARY KEY, data TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS planner_usage (day TEXT PRIMARY KEY, calls INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS planner_instructions (id INTEGER PRIMARY KEY CHECK(id=1), revision INTEGER NOT NULL, instructions TEXT NOT NULL, actor TEXT NOT NULL, updated_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS planner_state (id INTEGER PRIMARY KEY CHECK(id=1), data TEXT NOT NULL, lease_owner TEXT, lease_until INTEGER NOT NULL DEFAULT 0);
     INSERT OR IGNORE INTO planner_state (id,data) VALUES (1,'{}');`);
   const record=(id,action,actor,data)=>db.prepare('INSERT INTO audit (artwork_id,action,actor,recorded_at,revision,details) VALUES (?,?,?,?,?,?)')
@@ -87,6 +88,13 @@ export function openAdminStore(directory, publicDir) {
       return true;
     }),
     plannerCalls:day=>db.prepare('SELECT calls FROM planner_usage WHERE day=?').get(day)?.calls??0,
+    plannerInstructions:()=>db.prepare('SELECT revision,instructions,actor,updated_at AS updatedAt FROM planner_instructions WHERE id=1').get()??null,
+    savePlannerInstructions:(instructions,revision,actor)=>transaction(()=>{
+      const current=db.prepare('SELECT revision FROM planner_instructions WHERE id=1').get();
+      if((current?.revision??0)!==revision)throw new AdminError(409,'Planning instructions changed. Reload them before saving.');
+      db.prepare('INSERT INTO planner_instructions (id,revision,instructions,actor,updated_at) VALUES (1,?,?,?,?) ON CONFLICT(id) DO UPDATE SET revision=excluded.revision,instructions=excluded.instructions,actor=excluded.actor,updated_at=excluded.updated_at')
+        .run(revision+1,instructions,actor,new Date().toISOString());
+    }),
     reservePlannerCall:(day,max)=>transaction(()=>{
       const count=db.prepare('SELECT calls FROM planner_usage WHERE day=?').get(day)?.calls??0;
       if(count>=max)return false;

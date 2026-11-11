@@ -33,6 +33,7 @@ Theme: ${safeTheme}
 Scene: ${scene}
 Use a calm, reassuring composition suitable for children, with modest, fully clothed characters wherever people appear.
 Use original character designs, clean closed outlines, generous open colouring areas and a plain white background.
+Do not depict anything that could be seen as a false god, including faces or human qualities on the sun, plants or other natural objects.
 Keep the artwork unlettered and unshaded.`;
   return {meetingId:item.meetingId,weekOf:item.weekOf,partId:item.partId,partTitle:item.title,sourceHash:item.sourceHash,
     sourceUrl:item.sourceUrl,sourceStatus:item.sourceStatus,style:input.style,safeTheme,scene,prompt,

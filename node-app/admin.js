@@ -6,7 +6,7 @@ import {AdminError,createAccessVerifier,readAdminConfig,requireAdminMutation} fr
 import {openAdminStore} from './admin-store.js';
 import {contentDirectory} from './published-content.js';
 import {artworkConcept as concept,artworkHash as hash,reviewedArtworkItems} from './artwork-concepts.js';
-import {createArtworkPlanner,readPlannerConfig} from './artwork-planner.js';
+import {createArtworkPlanner,defaultArtworkInstructions,readPlannerConfig} from './artwork-planner.js';
 
 const assets=fileURLToPath(new URL('./admin/',import.meta.url));
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
@@ -100,6 +100,7 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
   catch(error){plannerError=error.message;console.error('Artwork automation disabled: '+plannerError);}
   const planner=plannerConfig?createArtworkPlanner({...plannerOptions,config:plannerConfig,database,reviewedItems}):null;
   const plannerStatus=()=>planner?planner.status():{enabled:false,running:false,message:plannerError??'Enable artwork automation and configure a Gemini key in private server settings.'};
+  const planningInstructions=()=>database().plannerInstructions()??{instructions:defaultArtworkInstructions,revision:0};
   const matchesCurrentSource=data=>data.conceptApproval?.sourceHash===data.sourceHash&&availableItems().some(item=>item.meetingId===data.meetingId&&item.partId===data.partId&&item.sourceHash===data.sourceHash);
   const rates=new Map();
   const send=(response,status,value,type='application/json; charset=utf-8')=>{
@@ -147,11 +148,26 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
         if(path==='/api/admin/session'){send(response,200,{email:actor.email});return true;}
         if(path==='/api/admin/meetings'){send(response,200,availableItems());return true;}
         if(path==='/api/admin/planner'){send(response,200,plannerStatus());return true;}
+        if(path==='/api/admin/planner/instructions'){send(response,200,planningInstructions());return true;}
         if(path==='/api/admin/artwork'){send(response,200,database().list());return true;}
+      }
+      if(path==='/api/admin/planner/instructions'&&request.method==='POST'){
+        const input=await jsonBody(request),revision=Number(request.headers['if-match']);
+        if(!Number.isSafeInteger(revision)||revision<0||request.headers['if-match']===undefined)
+          throw new AdminError(428,'Send the current planning instruction revision in If-Match.');
+        if(typeof input.instructions!=='string'||!input.instructions.trim()||input.instructions.length>6000)
+          throw new AdminError(400,'Enter planning instructions between 1 and 6000 characters.');
+        database().savePlannerInstructions(input.instructions.trim(),revision,actor.subject);
+        send(response,200,planningInstructions());return true;
       }
       if(['/api/admin/planner/run','/api/admin/planner/regenerate'].includes(path)&&request.method==='POST'){
         if(!planner)throw new AdminError(503,plannerStatus().message);
-        if(path.endsWith('/regenerate')&&plannerStatus().running)
+        const input=await jsonBody(request);
+        if(!Number.isSafeInteger(input.instructionsRevision)||input.instructionsRevision<0)
+          throw new AdminError(428,'Review and save planning instructions before running them.');
+        if(input.instructionsRevision!==planningInstructions().revision)
+          throw new AdminError(409,'Planning instructions changed. Reload and review them before running.');
+        if(plannerStatus().running)
           throw new AdminError(409,'Artwork planning is already running. Wait for it to finish before requesting regeneration.');
         void planner.run({force:true,regenerateDrafts:path.endsWith('/regenerate')}).catch(error=>console.error('Artwork planning check failed.',error));
         send(response,202,plannerStatus());return true;
@@ -221,7 +237,6 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
       return true;
     }
   };
-  handler.start=()=>planner?.start();
   handler.runPlanner=()=>{
     if(!planner)throw new AdminError(503,plannerStatus().message);
     return planner.run({force:true});

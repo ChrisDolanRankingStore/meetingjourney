@@ -220,5 +220,4 @@ server.on('error', (error) => {
 
 server.listen(port, host, () => {
   console.log(JSON.stringify({ level: 'info', message: 'Meeting Journey Node server started', host, port: server.address().port }));
-  adminHandler.start();
 });

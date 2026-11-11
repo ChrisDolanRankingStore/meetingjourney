@@ -1,6 +1,6 @@
 const $=selector=>document.querySelector(selector);
 const form=$('#concept'),review=$('#review'),status=$('#status');
-let items=[],entries=[],selected=null,planner=null,plannerTimer;
+let items=[],entries=[],selected=null,planner=null,plannerTimer,planningInstructions=null;
 function message(text){status.textContent=text;}
 async function api(path,options={}){
   const response=await fetch(path,{...options,cache:'no-store',credentials:'same-origin',headers:{'X-MJ-Admin':'1',...options.headers}});
@@ -20,8 +20,9 @@ async function run(operation){
   finally{buttons.forEach((button,index)=>button.disabled=previous[index]);applyState();}
 }
 function applyState(){
-  $('#plan-now').disabled=!planner?.enabled||planner.running;
-  $('#plan-regenerate').disabled=!planner?.enabled||planner.running;
+  const unsaved=!planningInstructions||$('#planning-text').value!==planningInstructions.instructions;
+  $('#plan-now').disabled=!planner?.enabled||planner.running||unsaved;
+  $('#plan-regenerate').disabled=!planner?.enabled||planner.running||unsaved;
   const state=selected?.state;
   $('#approve-concept').hidden=state!=='draft';
   $('#upload').hidden=!selected?.conceptApproval;
@@ -48,6 +49,7 @@ function choose(entry){
 function showSource(){
   const item=items[Number(form.elements.meetingItem.value)],host=$('#source');
   host.replaceChildren();
+  $('#planning-source').value=item?JSON.stringify({title:item.title,reference:item.reference,context:item.context?.slice(0,1000)},null,2):'';
   if(!item)return;
   const label=document.createElement('span');
   label.textContent=`${item.sourceStatus==='reviewed'?'Reviewed outline':'Discovered metadata - source review required'}. ${item.reference??''} `;
@@ -73,7 +75,7 @@ async function updatePlanner(){
   clearTimeout(plannerTimer);
   planner=await api('/api/admin/planner');
   $('#planner-status').textContent=!planner.enabled?planner.message:
-    `${planner.running?'Checking themes and preparing drafts...':'Ready. Refresh the queue after a completed check to load new drafts.'} Model: ${planner.model}. Weeks: ${planner.weeks.join(', ')}. Last completed: ${planner.lastCheckedAt??'not yet'}. Regenerated drafts last run: ${planner.regenerated??0}. Next automatic check: ${planner.nextCheckAt??'on startup'}. Gemini calls today: ${planner.callsToday}/${planner.maxCallsPerDay}.`;
+    `${planner.running?'Running saved instructions...':'Manual generation. Review the instructions and run when ready; refresh the queue after completion.'} Model: ${planner.model}. Weeks: ${planner.weeks.join(', ')}. Last completed: ${planner.lastCheckedAt??'not yet'}. Regenerated drafts last run: ${planner.regenerated??0}. Gemini calls today: ${planner.callsToday}/${planner.maxCallsPerDay}.`;
   $('#planner-issues').replaceChildren();
   for(const issue of planner.issues??[]){
     const row=document.createElement('li');row.textContent=`${issue.week??''} ${issue.title??''}: ${issue.message}`;$('#planner-issues').append(row);
@@ -147,12 +149,24 @@ $('#upload').addEventListener('submit',event=>{
 $('#new').addEventListener('click',()=>{choose(null);message('New draft. Blank drawing pages remain available to users.');});
 form.elements.meetingItem.addEventListener('change',showSource);
 $('#refresh').addEventListener('click',()=>void run(async()=>{await loadItems();await refresh();await updatePlanner();message('Queue refreshed.');}));
+$('#planning-text').addEventListener('input',applyState);
+$('#planning-instructions').addEventListener('submit',event=>{
+  event.preventDefault();
+  void run(async()=>{
+    planningInstructions=await api('/api/admin/planner/instructions',{
+      method:'POST',headers:{'Content-Type':'application/json','If-Match':String(planningInstructions.revision)},
+      body:JSON.stringify({instructions:$('#planning-text').value})
+    });
+    $('#planning-text').value=planningInstructions.instructions;
+    message('Planning instructions saved. Nothing has been generated; run them when ready.');
+  });
+});
 $('#plan-now').addEventListener('click',()=>void run(async()=>{
-  await api('/api/admin/planner/run',jsonOptions({}));await updatePlanner();message('Upcoming-theme check requested. Suggestions remain private and unapproved.');
+  await api('/api/admin/planner/run',jsonOptions({instructionsRevision:planningInstructions.revision}));await updatePlanner();message('Upcoming-theme check requested. Suggestions remain private and unapproved.');
 }));
 $('#plan-regenerate').addEventListener('click',()=>void run(async()=>{
-  if(!confirm('Use Gemini quota to replace older unapproved Gemini themes, scenes and prompts? Approved concepts and images will not change.'))return;
-  await api('/api/admin/planner/regenerate',jsonOptions({}));await updatePlanner();message('Draft regeneration requested. Refresh the queue after it finishes; review any source-context issues.');
+  if(!confirm('Run the saved instructions using Gemini quota to replace outdated unapproved Gemini drafts? Approved concepts and images will not change.'))return;
+  await api('/api/admin/planner/regenerate',jsonOptions({instructionsRevision:planningInstructions.revision}));await updatePlanner();message('Draft regeneration requested. Refresh the queue after it finishes; review any source-context issues.');
 }));
 $('#copy').addEventListener('click',()=>void run(async()=>{
   if(!selected?.conceptApproval)throw Error('Approve the safe concept before copying the generation prompt.');
@@ -181,6 +195,8 @@ void run(async()=>{
   await requirePrivateNetwork();
   const session=await api('/api/admin/session');
   $('#identity').textContent=`Signed in as ${session.email}`;
+  planningInstructions=await api('/api/admin/planner/instructions');
+  $('#planning-text').value=planningInstructions.instructions;
   await loadItems();await refresh();await updatePlanner();
   $('main').hidden=false;message('Protected admin workspace. Drafts are not public.');
 });

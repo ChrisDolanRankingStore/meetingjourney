@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {openAdminStore} from '../../../node-app/admin-store.js';
 import {artworkConcept,artworkStyles} from '../../../node-app/artwork-concepts.js';
-import {artworkLookahead,createArtworkPlanner,generateArtworkConcepts,readPlannerConfig} from '../../../node-app/artwork-planner.js';
+import {artworkLookahead,createArtworkPlanner,defaultArtworkInstructions,generateArtworkConcepts,readPlannerConfig} from '../../../node-app/artwork-planner.js';
 
 const config={key:'not-a-real-api-key-for-tests',model:'gemini-3.1-flash-lite'};
 const subjects=week=>['midweek','weekend'].map(kind=>({
@@ -50,12 +50,15 @@ test('Gemini requests source-linked scene variants while keeping safety exclusio
   assert.match(instructions,/Never replace the subject with an unrelated everyday analogy/);
   assert.match(instructions,/does not support a clear, child-appropriate Bible scene, set needsReview=true/);
   assert.match(instructions,/No sexual content/);
+  assert.match(instructions,/false god/);
+  assert.match(instructions,/sun, moon, stars, plants/);
   assert.equal(request.body.safetySettings.length,4);
   for(const entry of result.concepts){
     assert.equal(entry.state,'draft');assert.equal(entry.conceptApproval,null);assert.equal(entry.imageApproval,null);
     assert.match(entry.prompt,/fully clothed characters/);
     assert.ok(entry.prompt.includes(`Theme: ${entry.safeTheme}\nScene: ${entry.scene}\n`));
-    assert.doesNotMatch(entry.prompt,/sexual|nudity|requires administrator approval|Do not depict|Do not copy/);
+    assert.doesNotMatch(entry.prompt,/sexual|nudity|requires administrator approval|Do not copy/);
+    assert.match(entry.prompt,/false god.*sun, plants/);
   }
   for(const output of [
     {needsReview:false,reason:'',concepts:suggestions().slice(0,2)},
@@ -68,6 +71,11 @@ test('Gemini requests source-linked scene variants while keeping safety exclusio
     error=>/HTTP 429/.test(error.message)&&!error.message.includes(config.key));
   const review=await generateArtworkConcepts(item,config,{fetcher:async()=>reply({needsReview:true,reason:'Insufficient context',concepts:[]})});
   assert.equal(review.needsReview,true);assert.equal(review.concepts.length,0);
+  const editedInstructions=instructions+'\nKeep all plants natural.';
+  await generateArtworkConcepts(item,{...config,instructions:editedInstructions},{fetcher:async(url,options)=>{
+    assert.equal(JSON.parse(options.body).systemInstruction.parts[0].text,editedInstructions);
+    return reply({needsReview:true,reason:'Insufficient context',concepts:[]});
+  }});
 });
 test('planning catches up four future weeks, survives restarts and never overwrites reviewed work',async()=>{
   const f=fixture();let calls=0,discoveryCalls=0,changed=false;
@@ -134,13 +142,47 @@ test('explicit regeneration replaces only older unapproved Gemini drafts without
     assert.equal(f.database().list().length,25,'Regeneration updates existing IDs rather than adding duplicate entries.');
     for(const entry of protectedEntries)assert.deepEqual(f.database().get(entry.data.id),entry);
     assert.deepEqual(f.database().get(manual.id).data,manual);
-    const refreshed=f.database().list().find(entry=>entry.generation?.promptVersion===2);
+    const refreshed=f.database().list().find(entry=>entry.generation?.promptVersion!==undefined);
     assert.equal(refreshed.safeTheme,'Showing patience');
     assert.equal(refreshed.revision,3);
     assert.equal(f.database().audit(refreshed.id)[0].action,'regenerate-concept');
     f.reopen();
     await createArtworkPlanner(options).run({force:true,regenerateDrafts:true});
     assert.equal(calls,16,'Already refreshed drafts must not be billed again.');
+  }finally{f.close();}
+});
+test('saved instructions persist without generating and permit retry after clarification',async()=>{
+  const f=fixture(),item={...subjects('2026-12-07')[0],sourceHash:'fixture-hash'};
+  let calls=0;
+  const received=[];
+  try{
+    const clarified=defaultArtworkInstructions+'\nUse the supplied account of comfort, not an analogy.';
+    f.database().savePlannerInstructions(clarified,0,'administrator');
+    assert.throws(()=>f.database().savePlannerInstructions('stale',0,'other-admin'),/changed/);
+    f.reopen();
+    assert.equal(f.database().plannerInstructions().instructions,clarified);
+    const planner=createArtworkPlanner({config,database:f.database,reviewedItems:()=>[item],
+      now:()=>new Date('2026-11-10T12:00:00Z'),discover:async()=>({subjects:[],missing:[]}),
+      generate:async(subject,runConfig)=>{
+        calls++;received.push(runConfig.instructions);
+        return calls===1?{needsReview:true,reason:'Clarify the supported moment.',concepts:[]}:generated(subject);
+      }
+    });
+    await new Promise(resolve=>setImmediate(resolve));
+    assert.equal(calls,0,'Creating a planner and saving instructions must not spend quota.');
+    await planner.run({force:true});
+    await planner.run({force:true});
+    assert.equal(calls,1,'Unchanged instructions must not repeat a manual-review request.');
+    f.database().savePlannerInstructions(clarified+'\nShow the moment after the help arrives.',1,'administrator');
+    await planner.run({force:true});
+    assert.equal(calls,2);
+    assert.equal(received[1],f.database().plannerInstructions().instructions);
+    assert.equal(f.database().list().length,3);
+    f.database().savePlannerInstructions(clarified,2,'administrator');
+    await planner.run({force:true,regenerateDrafts:true});
+    assert.equal(calls,3,'Changed instructions make unapproved drafts eligible for an explicit rerun.');
+    assert.equal(f.database().list().length,3);
+    assert.ok(f.database().list().every(entry=>entry.prompt.includes('false god')));
   }finally{f.close();}
 });
 test('regeneration rolls back a subject if a draft is approved while Gemini is working',async()=>{

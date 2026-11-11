@@ -170,21 +170,39 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
   mkdirSync(publicDir);mkdirSync(meetingsDirectory);
   const env={...envFor(directory),MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_GEMINI_API_KEY:'not-a-real-api-key-for-tests'};
   const keys=await tokens(readAdminConfig(env,publicDir));
+  let providerCalls=0;
   const handler=createAdminHandler({env,publicDir,meetingsDirectory,verifyAccess:keys.verify,plannerOptions:{
     now:()=>new Date('2026-11-10T12:00:00Z'),
     discover:async week=>({subjects:[{meetingId:`meeting-${week}`,weekOf:week,kind:'midweek',partId:'part-1',title:'Patience',
       reference:'Test 1:1',sourceUrl:'https://www.jw.org/finder?docid=123',sourceStatus:'discovered',automatable:true}],missing:['weekend']}),
-    generate:async item=>({needsReview:false,concepts:artworkStyles.map(style=>artworkConcept({
+    generate:async item=>{providerCalls++;return {needsReview:false,concepts:artworkStyles.map(style=>artworkConcept({
       meetingId:item.meetingId,partId:item.partId,style,safeTheme:'Patience',scene:'A calm person tending a plant.'
-    },[item]))})
+    },[item]))};}
   }}),server=await serverFor(handler);
   const auth={'cf-access-jwt-assertion':await keys.sign()},mutation={...auth,Origin:origin,'X-MJ-Admin':'1','Content-Type':'application/json'};
   try{
     assert.equal((await fetch(server.base+'/api/admin/planner')).status,401);
+    assert.equal((await fetch(server.base+'/api/admin/planner/instructions')).status,401);
+    const promptUrl=server.base+'/api/admin/planner/instructions';
+    const initial=await fetch(promptUrl,{headers:auth}).then(r=>r.json());
+    assert.match(initial.instructions,/false god/);
+    const saveInstructions=(text,revision,headers=mutation)=>fetch(promptUrl,{
+      method:'POST',headers:{...headers,'If-Match':String(revision)},body:JSON.stringify({instructions:text})
+    });
+    assert.equal((await saveInstructions('changed',0,{...mutation,Origin:'https://evil.example'})).status,403);
+    assert.equal((await saveInstructions('',0)).status,400);
+    const edited=initial.instructions+'\nKeep plants natural.';
+    const saved=await saveInstructions(edited,0);
+    assert.equal(saved.status,200);
+    assert.equal((await saved.json()).instructions,edited);
+    assert.equal((await saveInstructions('stale',0)).status,409);
+    assert.equal(providerCalls,0,'Loading admin and saving instructions must not call Gemini.');
+    assert.equal((await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:mutation,body:'{}'})).status,428);
+    assert.equal((await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:mutation,body:'{"instructionsRevision":0}'})).status,409);
     assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST'})).status,401);
     assert.equal((await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:{...mutation,Origin:'https://evil.example'}})).status,403);
     assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST',headers:{...mutation,Origin:'https://evil.example'}})).status,403);
-    const triggered=await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:mutation,body:'{}'});
+    const triggered=await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:mutation,body:'{"instructionsRevision":1}'});
     assert.equal(triggered.status,202);
     await handler.runPlanner();
     const state=await fetch(server.base+'/api/admin/planner',{headers:auth}).then(r=>r.text());
@@ -193,7 +211,7 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     assert.equal(items.length,4);assert.equal(items[0].sourceStatus,'discovered');
     const drafts=await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json());
     assert.equal(drafts.length,12);assert.ok(drafts.every(draft=>draft.state==='draft'&&!draft.conceptApproval));
-    assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST',headers:mutation,body:'{}'})).status,202);
+    assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST',headers:mutation,body:'{"instructionsRevision":1}'})).status,202);
     await handler.runPlanner();
     assert.deepEqual(await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json()),drafts);
     const draft=drafts[0],path=`/api/admin/artwork/${draft.id}/actions`;
