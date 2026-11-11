@@ -32,7 +32,7 @@ test('four-week lookahead is calendar-week based across Sundays and year boundar
   assert.throws(()=>readPlannerConfig({MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_GEMINI_API_KEY:config.key,MJ_GEMINI_MODEL:'https://untrusted.example'}));
   assert.throws(()=>readPlannerConfig({MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_GEMINI_API_KEY:config.key,MJ_GEMINI_MODEL:'gemini-3.1-flash-image'}));
 });
-test('Gemini uses a private header, bounded structured output and immutable local safety rules',async()=>{
+test('Gemini requests source-linked scene variants while keeping safety exclusions out of image prompts',async()=>{
   const item={...subjects('2026-12-07')[0],sourceHash:'test-hash',notebook:'PRIVATE NOTE MUST NEVER BE SENT'};
   const reply=output=>new Response(JSON.stringify({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(output)}]}}]}));
   let request;
@@ -45,9 +45,17 @@ test('Gemini uses a private header, bounded structured output and immutable loca
   assert.equal(request.options.redirect,'error');
   assert.equal(request.body.generationConfig.responseMimeType,'application/json');
   assert.doesNotMatch(request.options.body,/PRIVATE NOTE|not-a-real-api-key/);
+  const instructions=request.body.systemInstruction.parts[0].text;
+  assert.match(instructions,/same supported scene and theme/);
+  assert.match(instructions,/Never replace the subject with an unrelated everyday analogy/);
+  assert.match(instructions,/does not support a clear, child-appropriate Bible scene, set needsReview=true/);
+  assert.match(instructions,/No sexual content/);
+  assert.equal(request.body.safetySettings.length,4);
   for(const entry of result.concepts){
     assert.equal(entry.state,'draft');assert.equal(entry.conceptApproval,null);assert.equal(entry.imageApproval,null);
-    assert.match(entry.prompt,/Do not depict sexual activity/);assert.match(entry.prompt,/no existing fictional characters|Do not copy official publication artwork/);
+    assert.match(entry.prompt,/fully clothed characters/);
+    assert.ok(entry.prompt.includes(`Theme: ${entry.safeTheme}\nScene: ${entry.scene}\n`));
+    assert.doesNotMatch(entry.prompt,/sexual|nudity|requires administrator approval|Do not depict|Do not copy/);
   }
   for(const output of [
     {needsReview:false,reason:'',concepts:suggestions().slice(0,2)},

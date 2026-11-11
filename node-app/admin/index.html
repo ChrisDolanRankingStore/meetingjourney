@@ -14,7 +14,7 @@
   <main hidden>
     <section id="planner">
       <h2>Four-week artwork planning</h2>
-      <p>Checks the next four meeting weeks, prioritising the furthest week ahead. Gemini suggests three private concepts per Treasures theme and Watchtower study: simple, detailed and manga-inspired. It does not generate images or approve anything.</p>
+      <p>Checks the next four meeting weeks, prioritising the furthest week ahead. Gemini suggests a source-linked Bible scene in simple, detailed and manga-inspired styles for each Treasures theme and Watchtower study. Insufficient scene context is flagged for manual review instead of generating an unrelated analogy. It does not generate images or approve anything.</p>
       <p id="planner-status"></p>
       <button id="plan-now" type="button" disabled>Check upcoming themes now</button>
       <ul id="planner-issues"></ul>
@@ -42,10 +42,10 @@
         <h3 id="state"></h3>
         <label>Generation prompt<textarea id="prompt" rows="12" readonly></textarea></label>
         <button id="copy" type="button">Copy prompt</button>
-        <p>Check the linked source and approve the concept first, then run its prompt in the image-generation tool. Metadata may not include the full study context. The prompt alone is not a safety guarantee: inspect every finished image.</p>
+        <p>Check the linked source and approve the concept first, then run its prompt in the image-generation tool. Metadata may not include the full study context. The prompt alone is not a safety guarantee: inspect every finished image. Existing entries keep their saved prompt; saving concept edits rebuilds it with the current template and resets its image and approvals.</p>
         <fieldset>
           <legend>Required human review</legend>
-          <label><input id="safe" type="checkbox">I reviewed this concept/image for child safety: no sexual content, nudity, violence, injury, illness, distress or frightening details.</label>
+          <label><input id="safe" type="checkbox">I inspected this concept/image and confirm it is calm, age-appropriate and suitable for children.</label>
           <label><input id="accurate" type="checkbox">I checked the reviewed source/theme, scene accuracy, and originality. This is not official publication artwork.</label>
         </fieldset>
         <button id="approve-concept" type="button">Approve concept</button>

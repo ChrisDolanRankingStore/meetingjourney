@@ -26,15 +26,13 @@ export function artworkConcept(input,items) {
   if(!item)throw new AdminError(400,'Choose an eligible meeting item.');
   if(!artworkStyles.includes(input.style))throw new AdminError(400,'Choose a supported drawing style.');
   const safeTheme=text(input.safeTheme,'child-safe theme',300),scene=text(input.scene,'safe scene description',1500);
-  const style={simple:'Simple friendly cartoon outlines, bold clear lines and large colouring areas.',detailed:'Natural proportions and moderately detailed outlines with generous colouring areas.',manga:'Original manga-inspired line art, expressive but calm faces, no existing fictional characters.'}[input.style];
+  const style={simple:'Simple friendly cartoon outlines, bold clear lines and large colouring areas.',detailed:'Natural proportions and moderately detailed outlines with generous colouring areas.',manga:'Original manga-inspired line art with expressive, calm faces and clear colouring areas.'}[input.style];
   const prompt=`Create ONE original black-and-white colouring page. ${style}
-Use only this positive theme: ${safeTheme}
-Scene concept (requires administrator approval before generation): ${scene}
-All characters must be fully clothed. Use a calm, reassuring scene suitable for children.
-Do not depict sexual activity, nudity, sexualised poses, abuse, violence, weapons, injury, skin sores, illness, death, frightening punishment, threatening figures or distress.
-If the theme cannot be illustrated safely, stop and request a different concept. Do not depict sensitive subject matter literally.
-Clean closed outlines on a plain white background. No text, captions, logos, watermarks, heavy shading or large solid black areas.
-Do not copy official publication artwork or a recognisable copyrighted character.`;
+Theme: ${safeTheme}
+Scene: ${scene}
+Use a calm, reassuring composition suitable for children, with modest, fully clothed characters wherever people appear.
+Use original character designs, clean closed outlines, generous open colouring areas and a plain white background.
+Keep the artwork unlettered and unshaded.`;
   return {meetingId:item.meetingId,weekOf:item.weekOf,partId:item.partId,partTitle:item.title,sourceHash:item.sourceHash,
     sourceUrl:item.sourceUrl,sourceStatus:item.sourceStatus,style:input.style,safeTheme,scene,prompt,
     state:'draft',conceptApproval:null,imageHash:null,imageApproval:null,publishedAt:null};
