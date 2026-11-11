@@ -74,6 +74,8 @@ Required environment variables:
 
 Install root production dependencies with `npm ci --omit=dev` on uploaded deployments. Native Git builds normally install these from the root lockfile. Back up the private data directory using a SQLite-aware backup or while Node is stopped; do not copy only the main database during live WAL writes. Check disk space and protect backups with the same access restrictions.
 
+If sign-in succeeds but the workspace cannot load, open `/api/admin/artwork` while signed in. Database initialization failures show a sanitised storage diagnostic to verified administrators (for example `EACCES`, `EROFS` or `SQLITE_CANTOPEN`); anonymous/public requests never receive these details. The original exception remains in Node stderr under `Administrator request failed.`, not in the web access log. An absolute path alone does not establish that the Node process can access it. Use private persistent storage outside the directory replaced by Git deployment; do not fix write failures by making it public or setting permissions to `777`.
+
 ### Review and publication
 
 The selector includes Treasures talks, Congregation Bible Study and Watchtower studies from reviewed meeting files, plus Treasures/Watchtower metadata discovered by the optional planner below. Discovered metadata is **not an approved outline**: the administrator must open its official source and confirm source accuracy before approving a concept. Discovery never changes published meeting outlines or children's notebooks. Congregation Bible Study concepts remain manual.

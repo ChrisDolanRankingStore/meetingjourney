@@ -13,6 +13,35 @@ const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 export const isAdminPath=path=>path==='/admin'||path.startsWith('/admin/')||path==='/api/admin'||path.startsWith('/api/admin/');
 export const isColouringPath=path=>path==='/api/colouring'||path.startsWith('/api/colouring/');
 
+class ArtworkStorageError extends Error {
+  constructor(cause){super('Private artwork storage initialization failed.',{cause});}
+}
+function storageErrorMessage(error) {
+  const cause=error.cause;
+  const filesystem={
+    EACCES:'Node does not have permission to access or write the private data directory (EACCES).',
+    EPERM:'The host denied access to the private data directory (EPERM).',
+    EROFS:'The private data directory is on a read-only filesystem (EROFS).',
+    ENOENT:'A required storage path is missing or not visible to the Node process (ENOENT).',
+    ENOTDIR:'A component of the configured storage path is not a directory (ENOTDIR).',
+    ENOSPC:'The filesystem has no space available for private artwork storage (ENOSPC).',
+    EDQUOT:'The hosting storage quota has been exceeded (EDQUOT).'
+  };
+  const sqlite={
+    5:'The private SQLite database is locked (SQLITE_BUSY).',
+    8:'Node cannot write the private SQLite database (SQLITE_READONLY).',
+    10:'The filesystem reported an SQLite input/output error (SQLITE_IOERR).',
+    11:'The private SQLite database is corrupt (SQLITE_CORRUPT). Restore a verified backup.',
+    13:'There is no space available for the private SQLite database (SQLITE_FULL).',
+    14:'SQLite cannot open its database file. Check the directory path and Node write access (SQLITE_CANTOPEN).',
+    26:'The private database file is not a valid SQLite database (SQLITE_NOTADB).'
+  };
+  const reason=Object.hasOwn(filesystem,cause?.code)?filesystem[cause.code]:
+    cause?.code==='ERR_SQLITE_ERROR'&&Object.hasOwn(sqlite,cause.errcode)?sqlite[cause.errcode]:
+    'Private artwork storage could not be initialized. Ask the host for the Node application error log.';
+  return reason+' Keep storage outside the deployment target and public directories.';
+}
+
 function checked(input) {
   if(input.safetyReviewed!==true||input.sourceReviewed!==true)throw new AdminError(400,'Confirm both the child-safety and source-accuracy reviews.');
 }
@@ -57,7 +86,10 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
   try {config=readAdminConfig(env,publicDir);}catch(error){console.error('Administration disabled: '+error.message);}
   const verify=config?(verifyAccess??createAccessVerifier(config)):null;
   let store;
-  const database=()=>store??=storeFactory(config.dataDir,publicDir);
+  const database=()=>{
+    try{return store??=storeFactory(config.dataDir,publicDir);}
+    catch(error){throw new ArtworkStorageError(error);}
+  };
   const reviewedItems=()=>reviewedArtworkItems(meetingsDirectory);
   const availableItems=()=>{
     const items=reviewedItems(),keys=new Set(items.map(item=>`${item.meetingId}/${item.partId}`));
@@ -84,6 +116,7 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
     if(!isAdminPath(path)&&!isColouringPath(path))return false;
     response.setHeader('Cache-Control','no-store, private');
     response.setHeader('Content-Security-Policy',"default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
+    let authenticated=false;
     try {
       if(!config){send(response,isAdminPath(path)?503:404,{error:isAdminPath(path)?'Administration is not configured.':'Not found'});return true;}
       if(isColouringPath(path)){
@@ -101,6 +134,7 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
         return true;
       }
       const actor=await verify(request);
+      authenticated=true;
       limit(actor.subject);
       if(!['GET','POST'].includes(request.method))throw new AdminError(405,'Method not allowed.');
       if(request.method==='POST')requireAdminMutation(request,config);
@@ -179,7 +213,9 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
     }catch(error){
       const status=error instanceof AdminError?error.status:500;
       if(status>=500)console.error('Administrator request failed.',error);
-      send(response,status,{error:error instanceof AdminError?error.message:'Administration is unavailable. Try again.'});
+      const message=error instanceof AdminError?error.message:
+        authenticated&&error instanceof ArtworkStorageError?storageErrorMessage(error):'Administration is unavailable. Try again.';
+      send(response,status,{error:message});
       return true;
     }
   };

@@ -62,6 +62,36 @@ test('admin endpoints fail closed without configuration and never serve the priv
     assert.equal((await fetch(server.base+'/api/colouring/meeting-2026-10-19/part-1')).status,404);
   }finally{await server.close();}
 });
+test('storage initialization diagnostics are sanitised and only shown after administrator verification',async t=>{
+  const logging=t.mock.method(console,'error',()=>{});
+  const env=envFor(tmpdir()),publicDir=join(tmpdir(),'public'),keys=await tokens(readAdminConfig(env,publicDir));
+  const auth={'cf-access-jwt-assertion':await keys.sign()};
+  for(const [properties,expected] of [
+    [{code:'EACCES'},/permission.*EACCES/],
+    [{code:'EROFS'},/read-only.*EROFS/],
+    [{code:'ERR_SQLITE_ERROR',errcode:14},/SQLite cannot open.*SQLITE_CANTOPEN/],
+    [{code:'unexpected-private-detail'},/could not be initialized/]
+  ]){
+    const failure=Object.assign(new Error('/private/secret-path: secret-provider-value'),properties);
+    let attempts=0;
+    const handler=createAdminHandler({env,publicDir,verifyAccess:keys.verify,storeFactory:()=>{attempts++;throw failure;}});
+    const server=await serverFor(handler);
+    try{
+      assert.equal((await fetch(server.base+'/api/admin/artwork')).status,401);
+      assert.equal(attempts,0);
+      const response=await fetch(server.base+'/api/admin/artwork',{headers:auth});
+      assert.equal(response.status,500);
+      const body=await response.text();
+      assert.match(body,expected);
+      assert.doesNotMatch(body,/secret-path|secret-provider-value|unexpected-private-detail/);
+      const log=logging.mock.calls.at(-1);
+      assert.equal(log.arguments[1].cause,failure);
+      const publicResponse=await fetch(server.base+'/api/colouring/meeting-2026-10-19/part-1');
+      assert.equal(publicResponse.status,500);
+      assert.deepEqual(await publicResponse.json(),{error:'Administration is unavailable. Try again.'});
+    }finally{await server.close();}
+  }
+});
 test('private artwork requires concept review, exact-image approval and explicit publication; edits revoke approval',async()=>{
   const directory=mkdtempSync(join(tmpdir(),'mj-admin-test-')),publicDir=join(directory,'public');
   mkdirSync(publicDir);
