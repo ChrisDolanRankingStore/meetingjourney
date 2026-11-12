@@ -23,13 +23,20 @@ export function smoothStrokePoints(points:number[]):number[]{
   return result;
 }
 
-export function renderDrawingInk(strokes: Stroke[], width: number, height: number, limit = 2048, pixelRatio = 1) {
+export function renderDrawingInk(strokes: Stroke[], width: number, height: number, limit = 2048, pixelRatio = 1, artwork?: {image:CanvasImageSource;width:number;height:number}) {
   const canvas = document.createElement('canvas');
   const scale = Math.min(pixelRatio, limit / Math.max(width, height));
   canvas.width = Math.max(1, Math.ceil(width * scale));
   canvas.height = Math.max(1, Math.ceil(height * scale));
   const context = canvas.getContext('2d', {willReadFrequently:true});
   if (!context) throw new Error('Drawing canvas is unavailable.');
+  const restoreOutline=()=>{
+    if(!artwork)return;
+    context.globalCompositeOperation='destination-over';context.globalAlpha=1;
+    context.drawImage(artwork.image,0,0,artwork.width*scale,artwork.height*scale);
+    context.globalCompositeOperation='source-over';
+  };
+  restoreOutline();
   context.lineCap = 'round'; context.lineJoin = 'round';
   for (const stroke of strokes) {
     if (stroke.points.length < 2) continue;
@@ -65,6 +72,7 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
       for (let index = 2; index + 1 < points.length; index += 2) context.lineTo(points[index] * scale, points[index + 1] * scale);
       context.stroke();
     }
+    if(stroke.mode==='eraser')restoreOutline();
   }
   return canvas;
 }

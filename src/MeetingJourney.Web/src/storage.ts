@@ -1,5 +1,6 @@
 import type { SavedNote, Stroke } from './types';
 import type { DrawingPaperSize } from './drawingViewport';
+import {validDrawingArtwork,type DrawingArtwork} from './publishedArtwork.ts';
 
 const DB_NAME = 'meeting-journey-local';
 const DB_VERSION = 2;
@@ -55,25 +56,26 @@ export async function readDrawing(meetingId: string, partId: string): Promise<St
   return (await readDrawingPage(meetingId, partId)).strokes;
 }
 
-export async function readDrawingPage(meetingId: string, partId: string): Promise<{ strokes: Stroke[]; paper?: DrawingPaperSize }> {
+export async function readDrawingPage(meetingId: string, partId: string): Promise<{ strokes: Stroke[]; paper?: DrawingPaperSize; artwork?: DrawingArtwork }> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const request = db.transaction(DRAWING_STORE).objectStore(DRAWING_STORE).get(keyFor(meetingId, partId));
     request.onsuccess = () => {
       const paper = request.result?.paper as DrawingPaperSize | undefined;
       db.close();
-      resolve({ strokes: (request.result?.value as Stroke[] | undefined) ?? [], paper: paper && paper.width > 0 && paper.height > 0 && Number.isFinite(paper.width) && Number.isFinite(paper.height) ? paper : undefined });
+      if(request.result?.artwork!==undefined&&!validDrawingArtwork(request.result.artwork)){reject(Error('The saved outline is invalid.'));return;}
+      resolve({ strokes: (request.result?.value as Stroke[] | undefined) ?? [], paper: paper && paper.width > 0 && paper.height > 0 && Number.isFinite(paper.width) && Number.isFinite(paper.height) ? paper : undefined,artwork:request.result?.artwork });
     };
     request.onerror = () => { db.close(); reject(request.error); };
   });
 }
 
-export function saveDrawing(meetingId: string, partId: string, strokes: Stroke[], paper?: DrawingPaperSize) { return trackJournalSave(writeDrawing(meetingId, partId, strokes, paper),`drawings:${keyFor(meetingId,partId)}`); }
-async function writeDrawing(meetingId: string, partId: string, strokes: Stroke[], paper?: DrawingPaperSize): Promise<void> {
+export function saveDrawing(meetingId: string, partId: string, strokes: Stroke[], paper?: DrawingPaperSize, artwork?: DrawingArtwork) { return trackJournalSave(writeDrawing(meetingId, partId, strokes, paper,artwork),`drawings:${keyFor(meetingId,partId)}`); }
+async function writeDrawing(meetingId: string, partId: string, strokes: Stroke[], paper?: DrawingPaperSize, artwork?: DrawingArtwork): Promise<void> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(DRAWING_STORE, 'readwrite');
-    transaction.objectStore(DRAWING_STORE).put({ key: keyFor(meetingId, partId), value: strokes, paper, updatedAt: new Date().toISOString() });
+    transaction.objectStore(DRAWING_STORE).put({ key: keyFor(meetingId, partId), value: strokes, paper, artwork, updatedAt: new Date().toISOString() });
     transaction.oncomplete = () => { db.close(); resolve(); };
     transaction.onabort = () => { db.close(); reject(transaction.error); };
     transaction.onerror = () => { db.close(); reject(transaction.error); };
@@ -84,6 +86,7 @@ export interface MeetingDrawingRecord {
   key: string;
   value: Stroke[];
   paper?: DrawingPaperSize;
+  artwork?: DrawingArtwork;
 }
 
 export async function readMeetingDrawings(meetingId: string): Promise<MeetingDrawingRecord[]> {

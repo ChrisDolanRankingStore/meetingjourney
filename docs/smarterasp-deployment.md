@@ -52,7 +52,7 @@ Point the hostname at the DNS target supplied by SmarterASP. Keep HTTPS enabled 
 
 ## Protected artwork administration
 
-The Node backend provides a separate `/admin` workspace and `/api/admin/...` API. Both are **disabled by default**, including on direct hosting URLs. Optional administrator-run AI planning discovers upcoming subjects and prepares private prompt drafts through Gemini or OpenRouter. Image generation and the drawing-tool preset picker are not implemented yet.
+The Node backend provides a separate `/admin` workspace and `/api/admin/...` API. Both are **disabled by default**, including on direct hosting URLs. Optional administrator-run AI planning discovers upcoming subjects and prepares private prompt drafts through Gemini or OpenRouter. Image generation is not implemented; administrators upload images for review and publication. Published outlines are available in the drawing tool for their matching meeting item.
 
 ### Cloudflare Access setup (required before enabling)
 
@@ -122,7 +122,9 @@ node node-app\scripts\plan-artwork.mjs
 
 The uploaded package includes this script. It uses the saved instructions, configured default provider/model, and the same lease, duplicate prevention and request cap as the web process. If the configured default is a paid OpenRouter model, explicitly pass `--allow-paid` to consent to its charges. Nonzero exit status indicates reported issues or a failed run; inspect its private output. Do not schedule it for unattended execution when administrator readiness is required. A run interrupted between the provider response and committing its draft batch can incur a repeat provider charge, but cannot create duplicate batches.
 
-Only published images are returned by `/api/colouring/<meetingId>/<partId>` and `/api/colouring/images/<id>.png`. Draft images exist only behind `/api/admin`. A future drawing preset picker will consume this feed; no images are offered in the drawing tool yet. Withdrawal cannot erase copies a user has already downloaded.
+Only published images are returned by `/api/colouring/<meetingId>/<partId>` and `/api/colouring/images/<id>.png`. Draft images exist only behind `/api/admin`. In the app, open the matching meeting date and item, open **Doodle notes**, then expand **Colour a published outline**. Choosing an outline adds a new page without replacing an existing drawing. **Save changes** keeps it on the device; **Download PNG** exports the outline with any colouring (or the uncoloured outline on an untouched page).
+
+The public feed and image are checked online when choosing an outline; these API routes bypass service-worker caching. Once chosen, the exact PNG is saved with the local drawing, included in journal backups and Discoveries previews, and can be reopened and coloured offline. Withdrawal removes it from future selections but cannot erase saved local pages, backups or downloaded files. No images from other meeting items are mixed into a general gallery.
 
 Administrative responses use `no-store`, a restrictive CSP, same-origin mutation checks and a per-identity request limit. The service worker never intercepts or caches administration routes, including escaped versions, and removes legacy admin cache entries. If an older worker controls the page, administration requires a confirmed network-only worker update before fetching private records; an update failure leaves the workspace closed without clearing journals or public offline resources. Every content mutation and its review snapshot is recorded atomically with the draft revision in the private SQLite audit log. This is an application audit trail, not a tamper-proof external log; the host and database administrators can alter it.
 

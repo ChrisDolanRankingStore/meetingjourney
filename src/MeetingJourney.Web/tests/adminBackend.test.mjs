@@ -255,7 +255,7 @@ test('the offline worker never intercepts administration routes and purges legac
   };
   const self={location:{origin},addEventListener:(name,handler)=>{if(name==='fetch')fetchHandler=handler;if(name==='message')messageHandler=handler;}};
   new Function('self','caches',worker)(self,{keys:async()=>['meeting-journey-legacy'],open:async()=>cache});
-  for(const path of ['/admin','/admin/app.js','/api/admin/artwork','/%61dmin','/api/%61dmin/artwork']){
+  for(const path of ['/admin','/admin/app.js','/api/admin/artwork','/%61dmin','/api/%61dmin/artwork','/api/colouring/meeting-2026-11-16/part-1','/api/colouring/images/test.png']){
     responded=false;
     fetchHandler({request:{method:'GET',url:origin+path},respondWith:()=>{responded=true;}});
     assert.equal(responded,false,path);

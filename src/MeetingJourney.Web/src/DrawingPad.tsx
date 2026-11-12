@@ -6,6 +6,9 @@ import { readDrawingPage, saveDrawing } from './storage';
 import { createDrawingPaper, drawingSurface, includeDrawingPoint, initialDrawingZoom, zoomDrawing, type DrawingPaperSize } from './drawingViewport';
 import { DrawingToolbar, type DrawingPageControls } from './DrawingToolbar';
 import {renderDrawingInk, pointerSamples, smoothStrokePoints} from './drawingInk';
+import {downloadPublishedArtwork,loadDrawingArtwork,type DrawingArtwork} from './publishedArtwork';
+import {PublishedArtworkPicker} from './PublishedArtworkPicker';
+import {NotebookIcon} from './NotebookIcon';
 
 interface Props { meetingId: string; partId: string; onSaved?: () => void; initialPage?: number; }
 type Tool = Stroke['mode'];
@@ -15,7 +18,15 @@ export function DrawingPad({ meetingId, partId, onSaved, initialPage=0 }: Props)
   const [pageCount, setPageCount] = useState(() => Math.max(initialPage+1, Math.max(1, Math.min(50, Number(localStorage.getItem(pageKey)) || 1))));
   const [page, setPage] = useState(initialPage);
   const [template, setTemplate] = useState<'blank' | 'lined'>('blank');
-  return <div className="drawing-notebook"><DrawingPage key={`${meetingId}:${partId}:${page}`} meetingId={meetingId} partId={page === 0 ? partId : `${partId}::page::${page}`} onSaved={onSaved} template={template} pages={{ page, count: pageCount, onSelect: setPage, onAdd: () => { localStorage.setItem(pageKey, String(pageCount + 1)); setPage(pageCount); setPageCount(count => count + 1); }, template, onTemplate: setTemplate }} /></div>;
+  const [openingArtwork,setOpeningArtwork]=useState(false);
+  return <div className="drawing-notebook"><PublishedArtworkPicker meetingId={meetingId} partId={partId} disabled={pageCount>=50} onChoose={async item=>{
+    setOpeningArtwork(true);
+    try{
+      const artwork=await downloadPublishedArtwork(item);
+      await saveDrawing(meetingId,`${partId}::page::${pageCount}`,[],{width:artwork.width,height:artwork.height},artwork);
+      localStorage.setItem(pageKey,String(pageCount+1));setPage(pageCount);setPageCount(count=>count+1);setTemplate('blank');onSaved?.();
+    }finally{setOpeningArtwork(false);}
+  }}/><DrawingPage key={`${meetingId}:${partId}:${page}`} meetingId={meetingId} partId={page === 0 ? partId : `${partId}::page::${page}`} onSaved={onSaved} template={template} pages={{ page, count: pageCount, onSelect: value=>{if(!openingArtwork)setPage(value);}, onAdd: () => {if(openingArtwork)return; localStorage.setItem(pageKey, String(pageCount + 1)); setPage(pageCount); setPageCount(count => count + 1); }, template, onTemplate: setTemplate }} /></div>;
 }
 
 function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { template: 'blank' | 'lined'; pages: DrawingPageControls }) {
@@ -34,6 +45,8 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   const [measured, setMeasured] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
+  const [artwork,setArtwork]=useState<DrawingArtwork>();
+  const [outline,setOutline]=useState<HTMLImageElement>();
   const drawing = useRef(false);
   const [zoom, setZoom] = useState(initialDrawingZoom);
   const zoomRef = useRef(zoom);
@@ -41,17 +54,21 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   const gesture = useRef(false);
   const strokeStart = useRef<{strokes:Stroke[]; redo:Stroke[]; paper:DrawingPaperSize | null} | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
-  const latestDrawing = useRef({ strokes, loaded, paper });
-  latestDrawing.current = { strokes, loaded, paper };
+  const latestDrawing = useRef({ strokes, loaded, paper,artwork });
+  latestDrawing.current = { strokes, loaded, paper,artwork };
   useEffect(() => {
-    const flush = () => { if (latestDrawing.current.loaded && latestDrawing.current.paper) void saveDrawing(meetingId, partId, latestDrawing.current.strokes, latestDrawing.current.paper).catch(() => undefined); };
+    const flush = () => { if (latestDrawing.current.loaded && latestDrawing.current.paper) void saveDrawing(meetingId, partId, latestDrawing.current.strokes, latestDrawing.current.paper,latestDrawing.current.artwork).catch(()=>setSaveError(true)); };
     window.addEventListener('pagehide', flush);
     return () => { window.removeEventListener('pagehide', flush); flush(); };
   }, [meetingId, partId]);
 
   useEffect(() => {
     let active = true;
-    readDrawingPage(meetingId, partId).then(saved => { if (!active) return; basePaper.current=saved.paper??null;setStrokes(saved.strokes); setPaper(saved.paper ?? null); setLoaded(true); }).catch(() => { if (active) setSaveError(true); });
+    readDrawingPage(meetingId, partId).then(async saved => {
+      const image=saved.artwork?await loadDrawingArtwork(saved.artwork.dataUrl):undefined;
+      if (!active) return;
+      basePaper.current=saved.paper??null;setStrokes(saved.strokes);setPaper(saved.paper??null);setArtwork(saved.artwork);setOutline(image);setLoaded(true);
+    }).catch(() => { if (active) setSaveError(true); });
     return () => { active = false; };
   }, [meetingId, partId]);
 
@@ -59,10 +76,10 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     if (!loaded || !paper) return;
     const timer = window.setTimeout(() => {
       setSaving(true);
-      saveDrawing(meetingId, partId, strokes, paper).then(() => { setSaveError(false); onSaved?.(); }).catch(() => setSaveError(true)).finally(() => setSaving(false));
+      saveDrawing(meetingId, partId, strokes, paper,artwork).then(() => { setSaveError(false); onSaved?.(); }).catch(() => setSaveError(true)).finally(() => setSaving(false));
     }, 250);
     return () => window.clearTimeout(timer);
-  }, [loaded, meetingId, onSaved, partId, strokes, paper]);
+  }, [loaded, meetingId, onSaved, partId, strokes, paper,artwork]);
 
   useEffect(() => {
     const resize = () => {
@@ -85,7 +102,8 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   const view = drawingSurface(basePaper.current??sheet, width, height);
   const visiblePaper={width:Math.max(sheet.width,view.paperWidth,view.paperWidth/zoom.scale),height:Math.max(sheet.height,view.paperHeight,view.paperHeight/zoom.scale)};
   const extent={width:Math.max(sheet.width,view.paperWidth)*view.scale,height:Math.max(sheet.height,view.paperHeight)*view.scale};
-  const ink = useMemo(() => strokes.some(stroke => stroke.mode === 'smudge'||stroke.mode==='fill') ? renderDrawingInk(strokes, sheet.width, sheet.height, 2048, 2) : null, [strokes, sheet.width, sheet.height]);
+  const artworkLayer=useMemo(()=>outline&&artwork?{image:outline,width:artwork.width,height:artwork.height}:undefined,[outline,artwork]);
+  const ink = useMemo(() => artworkLayer||strokes.some(stroke => stroke.mode === 'smudge'||stroke.mode==='fill') ? renderDrawingInk(strokes, sheet.width, sheet.height, 2048, 2,artworkLayer) : null, [strokes, sheet.width, sheet.height,artworkLayer]);
   const changeZoom = (next: typeof zoom) => {
     const latest=latestDrawing.current;
     if(next.scale<1&&next.scale<zoomRef.current.scale&&latest.paper){
@@ -116,7 +134,7 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     if (pointers.current.size > 1) {
       gesture.current = true;
       if (drawing.current && strokeStart.current) {
-        latestDrawing.current={strokes:strokeStart.current.strokes,loaded:true,paper:strokeStart.current.paper};
+        latestDrawing.current={...latestDrawing.current,strokes:strokeStart.current.strokes,loaded:true,paper:strokeStart.current.paper};
         setStrokes(strokeStart.current.strokes); setRedoStack(strokeStart.current.redo); setPaper(strokeStart.current.paper);
         drawing.current = false;
       }
@@ -128,7 +146,7 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     if (!point || !loaded || !paper) return;
     const nextPaper=tool==='fill'?includeDrawingPoint(paper,{x:visiblePaper.width,y:visiblePaper.height}):includeDrawingPoint(paper,point);
     const nextStrokes=[...latestDrawing.current.strokes,{...activeStroke,smooth:true,points:[point.x,point.y],...(tool==='fill'?{fillBounds:nextPaper}:{})}];
-    latestDrawing.current={strokes:nextStrokes,loaded:true,paper:nextPaper};
+    latestDrawing.current={...latestDrawing.current,strokes:nextStrokes,loaded:true,paper:nextPaper};
     setPaper(nextPaper);
     drawing.current = true;
     setRedoStack([]);
@@ -154,7 +172,7 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     const latest=latestDrawing.current;
     const nextPaper=latest.paper?samples.reduce((paper,point)=>includeDrawingPoint(paper,point),latest.paper):null;
     const nextStrokes=latest.strokes.map((stroke,index)=>index===latest.strokes.length-1?{...stroke,points:[...stroke.points,...samples.flatMap(point=>[point.x,point.y])]}:stroke);
-    latestDrawing.current={strokes:nextStrokes,loaded:latest.loaded,paper:nextPaper};
+    latestDrawing.current={...latest,strokes:nextStrokes,paper:nextPaper};
     setPaper(nextPaper);setStrokes(nextStrokes);
   };
   const finish = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -165,11 +183,11 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     if (!drawing.current) return;
     drawing.current = false;
     if (event.type === 'pointercancel' && strokeStart.current) {
-      latestDrawing.current={strokes:strokeStart.current.strokes,loaded:true,paper:strokeStart.current.paper};
+      latestDrawing.current={...latestDrawing.current,strokes:strokeStart.current.strokes,loaded:true,paper:strokeStart.current.paper};
       setStrokes(strokeStart.current.strokes); setRedoStack(strokeStart.current.redo); setPaper(strokeStart.current.paper);
       return;
     }
-    if (latestDrawing.current.paper) void saveDrawing(meetingId, partId, latestDrawing.current.strokes, latestDrawing.current.paper).catch(() => setSaveError(true));
+    if (latestDrawing.current.paper) void saveDrawing(meetingId, partId, latestDrawing.current.strokes, latestDrawing.current.paper,latestDrawing.current.artwork).catch(() => setSaveError(true));
   };
   const undo = () => setStrokes(current => {
     if (!current.length) return current;
@@ -191,13 +209,13 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     if(!latest.loaded||!latest.paper)return;
     setSaving(true);
     try{
-      await saveDrawing(meetingId,partId,latest.strokes,latest.paper);
+      await saveDrawing(meetingId,partId,latest.strokes,latest.paper,latest.artwork);
       setSaveError(false);onSaved?.();
     }catch{setSaveError(true);}
     finally{setSaving(false);}
   };
   const exportPng = () => {
-    const exportInk = renderDrawingInk(strokes, sheet.width, sheet.height, 4096, 2);
+    const exportInk = renderDrawingInk(strokes, sheet.width, sheet.height, 4096, 2,artworkLayer);
     const output = document.createElement('canvas'); output.width = exportInk.width; output.height = exportInk.height;
     const context = output.getContext('2d');
     if (!context) { window.alert(t('Could not export this drawing.')); return; }
@@ -214,9 +232,9 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
 
   return <section className="drawing-card" aria-labelledby={`${partId}-drawing-title`}>
     <div className="drawing-heading"><div><h3 id={`${partId}-drawing-title`}>{t("Doodle notes")}</h3><p>{t("Draw, write or sketch a thought.")}</p></div></div><span className={`save-state notebook-save-state ${saveError ? 'has-error' : ''}`} aria-live="polite">{saveError ? t("Could not load or save this drawing on this device.") : !loaded ? t("Opening your drawing…") : saving ? t("Saving…") : t("Saved on this device")}</span>
-    <button className="drawing-save-changes" type="button" disabled={!loaded||!paper||saving} onClick={()=>void saveChanges()}>{t('Save changes')}</button>
+    <div className="drawing-page-actions">{artwork&&<span>{artwork.title}</span>}<button className="drawing-save-changes" type="button" disabled={!loaded||!paper||saving} onClick={()=>void saveChanges()}><NotebookIcon name="save"/>{t('Save changes')}</button><button className="drawing-save-changes" type="button" disabled={!loaded||(!strokes.length&&!artwork)} onClick={exportPng}><NotebookIcon name="download"/>{t('Download PNG')}</button></div>
     <div className="drawing-paper-workspace">
-    <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={brushSize} onSize={tool === 'smudge' ? setSmudgeSize : setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} onUndo={undo} onRedo={redo} onClear={clear} onExport={exportPng} zoom={zoom.scale} onZoom={value=>changeZoom(zoomDrawing(zoomRef.current,{x:width/2,y:height/2},{x:width/2,y:height/2},value/zoomRef.current.scale,width,height,extent))} onResetZoom={()=>changeZoom(initialDrawingZoom)} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:visiblePaper.width, y:visiblePaper.height}) : createDrawingPaper(width, height))} pages={pages} />
+    <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={brushSize} onSize={tool === 'smudge' ? setSmudgeSize : setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} canExport={loaded&&(strokes.length>0||Boolean(artwork))} onUndo={undo} onRedo={redo} onClear={clear} onExport={exportPng} zoom={zoom.scale} onZoom={value=>changeZoom(zoomDrawing(zoomRef.current,{x:width/2,y:height/2},{x:width/2,y:height/2},value/zoomRef.current.scale,width,height,extent))} onResetZoom={()=>changeZoom(initialDrawingZoom)} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:visiblePaper.width, y:visiblePaper.height}) : createDrawingPaper(width, height))} pages={pages} />
     <div className="canvas-shell" ref={canvasRef} onContextMenu={event => event.preventDefault()} onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} data-zoom={zoom.scale}>
       <Stage width={view.width} height={view.height}>
         <Layer x={zoom.x} y={zoom.y} scaleX={view.scale * zoom.scale} scaleY={view.scale * zoom.scale}><Rect width={visiblePaper.width} height={visiblePaper.height} fill="#fffdf7" />{template === 'lined' && Array.from({ length: Math.ceil(visiblePaper.height / 30) }, (_, index) => <Line key={index} points={[0, 30 + index * 30, visiblePaper.width, 30 + index * 30]} stroke="#d7dfef" strokeWidth={1} />)}</Layer>

@@ -56,6 +56,14 @@ test('a fill-only page is kept as a drawing discovery',()=>{
  assert.equal(result.length,1);
  assert.deepEqual(result[0].drawings[0].strokes,[fill]);
 });
+test('an outline-only page remains discoverable with its offline image after clearing ink',()=>{
+ const artwork={id:'12345678-1234-1234-1234-123456789abc',title:'Saved outline',imageHash:'a'.repeat(64),dataUrl:'data:image/png;base64,aGVsbG8=',width:760,height:900};
+ const result=buildDiscoveryTreasures(meeting,[],[{key:'week-a:part-1::page::1',value:[],paper:{width:760,height:900},artwork}]);
+ assert.equal(result.length,1);
+ assert.equal(result[0].drawings[0].page,1);
+ assert.deepEqual(result[0].drawings[0].artwork,artwork);
+ assert.equal(discoverySummary(result[0]),'1 drawing page');
+});
 test('a stop keeps the same terrain position when earlier stops have no saved notes', () => {
   const single = buildDiscoveryTreasures(meeting, [note('part-10', 'Later thought')], []);
   const both = buildDiscoveryTreasures(meeting, [note('part-1', 'Earlier thought'), note('part-10', 'Later thought')], []);

@@ -63,5 +63,5 @@ SmarterASP setup instructions are in [docs/smarterasp-deployment.md](docs/smarte
 - Simple, Standard and Reflective Explorer presentation preferences.
 - Quiet, Guided and Active engagement preferences; Quiet hides activities without deleting notes.
 - Local notes stored in IndexedDB and restored by meeting/part.
-- Editable drawing pages with pen, colour, highlighter, eraser, undo, redo, clear confirmation and PNG export.
+- Editable drawing pages with pen, colour, highlighter, eraser, undo, redo, clear confirmation and PNG export. Published outlines for the matching meeting item can be chosen on a new page, coloured and saved offline without replacing existing drawings.
 - Optional three-level clue mission with independently revealed clues and no score, timer or failure state.

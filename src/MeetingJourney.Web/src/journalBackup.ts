@@ -1,6 +1,7 @@
 ﻿import { openDb } from './storage.ts';
 import {validConnectionChoice} from './connectionActivity.ts';
-type Entry = { key: string; id?: string; modifiedAt?: string; updatedAt?:string; value: any; paper?: { width: number; height: number } };
+import {validDrawingArtwork,type DrawingArtwork} from './publishedArtwork.ts';
+type Entry = { key: string; id?: string; modifiedAt?: string; updatedAt?:string; value: any; paper?: { width: number; height: number }; artwork?: DrawingArtwork };
 type PreferenceRecord = {id:string;key:string;value:string;modifiedAt:string};
 export interface JournalBackup { format: 'meeting-journey'; version: 1; formatVersion?: 2; exportedAt: string; notes: Entry[]; drawings: Entry[]; engagement: Entry[]; preferences: Record<string, string>; preferenceRecords?:PreferenceRecord[] }
 const stores = ['notes', 'drawings', 'engagement'] as const;
@@ -39,6 +40,7 @@ export function validateBackup(value: any): JournalBackup {
           if(stroke.mode==='fill'&&(stroke.points.length!==2||!stroke.fillBounds||!['width','height'].every(d=>Number.isFinite(stroke.fillBounds[d])&&stroke.fillBounds[d]>0&&stroke.fillBounds[d]<=100000)||stroke.points[0]<0||stroke.points[1]<0||stroke.points[0]>=stroke.fillBounds.width||stroke.points[1]>=stroke.fillBounds.height))throw new Error('Invalid colour fill.');
         }
         if (entry.paper && !['width','height'].every(d => Number.isFinite(entry.paper[d]) && entry.paper[d] > 0 && entry.paper[d] <= 100000)) throw new Error('Invalid page size.');
+        if(entry.artwork!==undefined&&!validDrawingArtwork(entry.artwork))throw Error('Invalid saved outline.');
       } else if (!entry.value || `${entry.value.meetingId}:${entry.value.partId}` !== entry.key) throw new Error('Meeting and part do not match.');
       if(name === 'notes') { const note=entry.value; if(note.feedback!==undefined && (typeof note.feedback!=='string'||note.feedback.length>100000)) throw Error('Invalid reflection'); for(const field of ['feedbackChoices','sourceConfirmations']) if(note[field]!==undefined && (!Array.isArray(note[field])||note[field].length>1000||!note[field].every((item:unknown)=>typeof item==='string'&&item.length<1000))) throw Error('Invalid reflection choices'); }
       if(name === 'engagement' && entry.value.bingoWords !== undefined && (!Array.isArray(entry.value.bingoWords) || entry.value.bingoWords.length > 100 || !entry.value.bingoWords.every((word: unknown) => typeof word === 'string' && word.length <= 60))) throw Error('Invalid bingo words');

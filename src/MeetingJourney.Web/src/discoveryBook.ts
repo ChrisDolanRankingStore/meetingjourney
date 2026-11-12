@@ -2,8 +2,9 @@ import {t} from './i18n.ts';
 import type { Meeting, MeetingPart, SavedNote, Stroke } from './types';
 import type { MeetingDrawingRecord } from './storage';
 import type { DrawingPaperSize } from './drawingViewport';
+import type {DrawingArtwork} from './publishedArtwork';
 
-export interface DiscoveryDrawing { page: number; strokes: Stroke[]; paper?: DrawingPaperSize; }
+export interface DiscoveryDrawing { page: number; strokes: Stroke[]; paper?: DrawingPaperSize; artwork?: DrawingArtwork; }
 export interface DiscoveryTreasure {
   part: MeetingPart;
   partIndex: number;
@@ -35,11 +36,11 @@ export function buildDiscoveryTreasures(meeting: Meeting, notes: (SavedNote | un
     sectionOffsets[part.section] = offset + 1;
     const note = notes.find(item => item?.meetingId === meeting.id && item.partId === part.id);
     const drawings = records.flatMap(record => {
-      if (!record.key.startsWith(prefix) || !Array.isArray(record.value) || !record.value.some(stroke => (stroke.mode === 'pen' || stroke.mode === 'highlighter'||stroke.mode==='fill') && stroke.points.length > 0)) return [];
+      if (!record.key.startsWith(prefix) || !Array.isArray(record.value) || !record.artwork&&!record.value.some(stroke => (stroke.mode === 'pen' || stroke.mode === 'highlighter'||stroke.mode==='fill') && stroke.points.length > 0)) return [];
       const suffix = record.key.slice(prefix.length);
       const extraPage = suffix.match(/^(.*)::page::(\d+)$/);
       const recordPart = extraPage ? extraPage[1] : suffix;
-      return recordPart === part.id ? [{ page: extraPage ? Number(extraPage[2]) : 0, strokes: record.value, paper: record.paper }] : [];
+      return recordPart === part.id ? [{ page: extraPage ? Number(extraPage[2]) : 0, strokes: record.value, paper: record.paper,artwork:record.artwork }] : [];
     }).sort((left, right) => left.page - right.page);
     if (!hasSavedDiscovery(note) && drawings.length === 0) return [];
     const route = landmarks[part.section];

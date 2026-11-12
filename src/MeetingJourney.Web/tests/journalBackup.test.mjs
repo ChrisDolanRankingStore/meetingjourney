@@ -12,6 +12,21 @@ import {assemblyMeeting,readCircuitAssembly,saveCircuitAssembly} from '../src/ci
 import {conventionDates,conventionMeeting,readConvention,saveConvention} from '../src/convention.ts';
 class MemoryStorage{data=new Map();get length(){return this.data.size;}key(i){return [...this.data.keys()][i]??null;}getItem(k){return this.data.get(k)??null;}setItem(k,v){this.data.set(k,String(v));}removeItem(k){this.data.delete(k);}}
 beforeEach(()=>{globalThis.indexedDB=new IDBFactory();});
+test('outline pages preserve local PNG snapshots and colours through saving and backup without changing existing blank drawings',async()=>{
+ const storage=new MemoryStorage(),stroke={points:[20,30],color:'#c54d43',size:5,mode:'fill',fillBounds:{width:760,height:900}};
+ const artwork={id:'12345678-1234-1234-1234-123456789abc',title:'Kindness',imageHash:'a'.repeat(64),dataUrl:'data:image/png;base64,aGVsbG8=',width:760,height:900};
+ await saveDrawing('week-a','reading',[],{width:760,height:420});
+ const blank=await readDrawingPage('week-a','reading');
+ await saveDrawing('week-a','reading::page::1',[stroke],{width:760,height:900},artwork);
+ assert.deepEqual(await readDrawingPage('week-a','reading'),blank);
+ const saved=await readDrawingPage('week-a','reading::page::1');
+ assert.deepEqual(saved.artwork,artwork);
+ const backup=validateBackup(await exportJournal(storage));
+ globalThis.indexedDB=new IDBFactory();await importJournal(backup,false,new MemoryStorage());
+ assert.deepEqual(await readDrawingPage('week-a','reading::page::1'),saved);
+ const invalid=structuredClone(backup);invalid.drawings.find(entry=>entry.artwork).artwork.dataUrl='data:image/svg+xml;base64,aGVsbG8=';
+ assert.throws(()=>validateBackup(invalid),/Invalid saved outline/);
+});
 test('backup round-trip preserves editable strokes, paper, notes, study comments and preferences',async()=>{
  const storage=new MemoryStorage();storage.setItem('mj-character','{"name":"Test"}');storage.setItem('unrelated','keep');storage.setItem('mj-programme-import-choice','personal-v1');
  storage.setItem('mj-comfort','{"neutral":true,"hideCounts":true,"iconLabels":true,"textSize":"larger"}');

@@ -159,6 +159,10 @@ html[data-neutral="true"] .app .home-sources-card { margin: 24px auto; max-width
 }
 .icon-action:focus-visible > .icon-action-hint { display: block; }
 @media (hover: hover) { .icon-action:hover > .icon-action-hint { display: block; } }
+.app .story-map-heading .icon-action > .icon-action-hint { bottom: auto; top: 50%; transform: translateY(-50%); right: calc(100% + 6px); }
+.app .story-map-heading .icon-action:first-child > .icon-action-hint { right: auto; left: calc(100% + 6px); }
+.app .paragraph-controls > label { text-align: center; }
+.app .paragraph-controls input { margin-inline: auto; }
 .app .notes-timeline > label { display: grid; gap: 6px; min-width: 0; }
 .app .notes-timeline input[type="search"] {
   appearance: none; -webkit-appearance: none; box-sizing: border-box; display: block;

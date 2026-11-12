@@ -15,6 +15,7 @@ import {NotesTimeline} from './NotesTimeline';
 import {HistoricalNotebook, type HistoricalTarget} from './HistoricalNotebook';
 import {MeetingStamps} from './MeetingStamps';
 import {ScriptureLookup} from './ScriptureLookup';
+import {loadDrawingArtwork} from './publishedArtwork';
 
 function TreasureChest({ open }: { open: boolean }) {
   const shade = `chest-${useId().replace(/:/g, '')}`;
@@ -31,7 +32,9 @@ function TreasureChest({ open }: { open: boolean }) {
 
 function SavedDrawingPreview({ drawing }: { drawing: DiscoveryDrawing }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [failed,setFailed]=useState(false);
   useEffect(() => {
+    let active=true;setFailed(false);
     const canvas = canvasRef.current;
     if (!canvas) return;
     const paper = drawing.paper ?? { width: 760, height: 420 };
@@ -40,9 +43,15 @@ function SavedDrawingPreview({ drawing }: { drawing: DiscoveryDrawing }) {
     canvas.height = Math.max(1, Math.round(paper.height * scale));
     const context = canvas.getContext('2d');
     if (!context) return;
-    context.drawImage(renderDrawingInk(drawing.strokes, paper.width, paper.height, 1200), 0, 0, canvas.width, canvas.height);
+    const render=async()=>{
+      const artwork=drawing.artwork;
+      const image=artwork?await loadDrawingArtwork(artwork.dataUrl):undefined;
+      if(active)context.drawImage(renderDrawingInk(drawing.strokes,paper.width,paper.height,1200,1,image&&artwork?{image,width:artwork.width,height:artwork.height}:undefined),0,0,canvas.width,canvas.height);
+    };
+    void render().catch(()=>{if(active)setFailed(true);});
+    return()=>{active=false;};
   }, [drawing]);
-  return <canvas className="treasure-drawing-preview" ref={canvasRef} role="img" aria-label={tt`Your saved drawing, page ${drawing.page + 1}`}>{t("Your saved drawing, page ")}{drawing.page + 1}.</canvas>;
+  return <>{failed&&<p role="alert">{t('The saved outline could not be opened.')}</p>}<canvas className="treasure-drawing-preview" ref={canvasRef} role="img" aria-label={tt`Your saved drawing, page ${drawing.page + 1}`}>{t("Your saved drawing, page ")}{drawing.page + 1}.</canvas></>;
 }
 
 function TreasureContents({ treasure, onReturn, onEdit }: { treasure: DiscoveryTreasure; onReturn: (index: number) => void; onEdit:(kind:'note'|'drawing',page?:number)=>void }) {

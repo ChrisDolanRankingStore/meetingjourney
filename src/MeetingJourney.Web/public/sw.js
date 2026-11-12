@@ -1,4 +1,4 @@
-const CACHE = 'meeting-journey-104-london-seasons';
+const CACHE = 'meeting-journey-105-published-artwork';
 const APP_SHELL=['/','/index.html','/manifest.webmanifest','/journey-route-192.png','/journey-route-180.png','/journey-route-512.png','/privacy.html','/about.html','/welcome.html','/info.css','/refresh.html','/app-refresh.js','/es/privacy.html','/es/about.html','/es/welcome.html', .../*BUILD_ASSETS*/[]];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 function adminPath(path){try{path=decodeURIComponent(path);}catch{return false;}return path==='/admin'||path.startsWith('/admin/')||path==='/api/admin'||path.startsWith('/api/admin/');}
@@ -9,6 +9,7 @@ self.addEventListener('fetch',event=>{
  const request=event.request,url=new URL(request.url);if(request.method!=='GET'||url.origin!==self.location.origin)return;
  let pathname;try{pathname=decodeURIComponent(url.pathname);}catch{return;}
  if(adminPath(pathname))return;
+ if(pathname==='/api/colouring'||pathname.startsWith('/api/colouring/'))return;
  const documentRequest=request.mode==='navigate';const api=url.pathname.startsWith('/api/');
  event.respondWith((async()=>{
   if(documentRequest||api){try{return await storeResponse(request,await fetch(request));}catch{const publicPage=({'/privacy':'/privacy.html','/about':'/about.html','/welcome':'/welcome.html','/refresh':'/refresh.html'})[url.pathname];const cached=(await caches.match(request))??(publicPage?await caches.match(publicPage):undefined)??(!api?await caches.match('/index.html'):undefined);return cached??new Response(api?'\u007b"error":"Meeting not cached"\u007d':'This page has not been saved offline.',{status:503,headers:{'Content-Type':api?'application/json':'text/plain'}});}}
