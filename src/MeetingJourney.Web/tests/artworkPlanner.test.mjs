@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {openAdminStore} from '../../../node-app/admin-store.js';
 import {artworkConcept,artworkStyles} from '../../../node-app/artwork-concepts.js';
-import {artworkLookahead,createArtworkPlanner,defaultArtworkInstructions,generateArtworkConcepts,readPlannerConfig,selectPlannerConfig} from '../../../node-app/artwork-planner.js';
+import {artworkLookahead,artworkPlanningWeeks,createArtworkPlanner,defaultArtworkInstructions,generateArtworkConcepts,readPlannerConfig,selectPlannerConfig} from '../../../node-app/artwork-planner.js';
 
 const config=readPlannerConfig({MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_GEMINI_API_KEY:'not-a-real-api-key-for-tests',MJ_ARTWORK_MAX_CALLS_PER_DAY:'12'});
 const subjects=week=>['midweek','weekend'].map(kind=>({
@@ -26,6 +26,15 @@ test('four-week lookahead is calendar-week based across Sundays and year boundar
   assert.deepEqual(artworkLookahead('2026-11-10'),['2026-11-16','2026-11-23','2026-11-30','2026-12-07']);
   assert.deepEqual(artworkLookahead('2026-11-15'),artworkLookahead('2026-11-10'));
   assert.deepEqual(artworkLookahead('2027-01-01'),['2027-01-04','2027-01-11','2027-01-18','2027-01-25']);
+  assert.deepEqual(artworkPlanningWeeks('2026-11-12'),['2026-11-09','2026-11-16','2026-11-23','2026-11-30','2026-12-07']);
+  assert.deepEqual(artworkPlanningWeeks('2026-11-15'),artworkPlanningWeeks('2026-11-09'));
+  assert.deepEqual(artworkPlanningWeeks('2027-01-01'),['2026-12-28','2027-01-04','2027-01-11','2027-01-18','2027-01-25']);
+  assert.deepEqual(artworkPlanningWeeks('2026-11-12',{startWeek:'2026-11-04',endWeek:'2026-11-15'}),['2026-11-02','2026-11-09']);
+  assert.deepEqual(artworkPlanningWeeks('2026-11-12',{startWeek:'2026-11-09',endWeek:'2026-11-09'}),['2026-11-09']);
+  for(const range of [
+    {startWeek:'2026-02-30'},{startWeek:null},{startWeek:'2026-11-16',endWeek:'2026-11-09'},
+    {startWeek:'2026-01-01',endWeek:'2026-12-31'}
+  ])assert.throws(()=>artworkPlanningWeeks('2026-11-12',range),error=>error.status===400);
   assert.throws(()=>artworkLookahead('2026-02-30'));
   assert.equal(readPlannerConfig({}),null);
   assert.throws(()=>readPlannerConfig({MJ_ARTWORK_AUTOMATION_ENABLED:'true'}));
@@ -153,7 +162,7 @@ test('Gemini requests source-linked scene variants while keeping safety exclusio
     return reply({needsReview:true,reason:'Insufficient context',concepts:[]});
   }});
 });
-test('planning catches up four future weeks, survives restarts and never overwrites reviewed work',async()=>{
+test('planning includes the current and four future weeks, survives restarts and never overwrites reviewed work',async()=>{
   const f=fixture();let calls=0,discoveryCalls=0,changed=false;
   const options={config,database:f.database,reviewedItems:()=>[],now:()=>new Date('2026-11-10T12:00:00Z'),
     discover:async week=>{
@@ -163,23 +172,58 @@ test('planning catches up four future weeks, survives restarts and never overwri
     },generate:async item=>{calls++;return generated(item);}};
   try{
     const planner=createArtworkPlanner(options),result=await planner.run();
-    assert.equal(result.generated,24);assert.equal(calls,8);assert.equal(discoveryCalls,4);
+    assert.equal(result.generated,30);assert.equal(calls,10);assert.equal(discoveryCalls,5);
     const draft=f.database().list()[0];
     f.database().update(draft.id,draft.revision,'test-admin','approve-concept',entry=>({
       ...entry,data:{...entry.data,state:'concept-approved',conceptApproval:{actor:'test-admin',promptHash:'reviewed'}}}));
     await planner.run();
-    assert.equal(calls,8);assert.equal(discoveryCalls,4);
+    assert.equal(calls,10);assert.equal(discoveryCalls,5);
     f.reopen();
     const restarted=createArtworkPlanner(options);
     await restarted.run({force:true});
-    assert.equal(calls,8);
+    assert.equal(calls,10);
     assert.equal(f.database().get(draft.id).data.state,'concept-approved');
     assert.equal(f.database().audit(draft.id).at(-1).action,'generate-concept');
     changed=true;
     await restarted.run({force:true});
-    assert.equal(calls,9);assert.equal(f.database().list().length,27);
+    assert.equal(calls,11);assert.equal(f.database().list().length,33);
     assert.equal(f.database().get(draft.id).data.state,'concept-approved');
     assert.equal(f.database().sources().find(item=>item.weekOf==='2026-12-07'&&item.kind==='midweek').title,'Updated Treasures theme');
+  }finally{f.close();}
+});
+test('catch-up discovers both missing November weeks, adds only missing subjects and preserves published artwork',async()=>{
+  const f=fixture(),requested=[],generatedWeeks=[];
+  const options={config:{...config,maxCallsPerDay:50},database:f.database,reviewedItems:()=>[],
+    now:()=>new Date('2026-11-12T12:00:00Z'),
+    discover:async week=>{requested.push(week);return {subjects:subjects(week),missing:[]};},
+    generate:async item=>{generatedWeeks.push(item.weekOf);return generated(item);}
+  };
+  try{
+    const planner=createArtworkPlanner(options);
+    await planner.run({force:true,startWeek:'2026-11-16',endWeek:'2026-12-07'});
+    const draft=f.database().list()[0];
+    f.database().update(draft.id,draft.revision,'administrator','publish',entry=>({
+      data:{...entry.data,state:'published',conceptApproval:{actor:'administrator'},imageHash:'saved-image',imageApproval:{imageHash:'saved-image'},publishedAt:'2026-11-12T12:00:00Z'},
+      image:Buffer.from('published image fixture')
+    }));
+    const existing=f.database().list().map(entry=>f.database().get(entry.id));
+    requested.length=0;generatedWeeks.length=0;
+    const range={force:true,startWeek:'2026-11-02',endWeek:'2026-12-07'};
+    const result=await planner.run(range);
+    assert.deepEqual(result.weeks,['2026-11-02','2026-11-09','2026-11-16','2026-11-23','2026-11-30','2026-12-07']);
+    assert.deepEqual(requested,[...result.weeks].reverse());
+    assert.deepEqual(generatedWeeks,['2026-11-09','2026-11-09','2026-11-02','2026-11-02']);
+    assert.equal(result.generated,12);
+    assert.equal(f.database().list().length,36);
+    for(const entry of existing)assert.deepEqual(f.database().get(entry.data.id),entry);
+    for(const week of ['2026-11-02','2026-11-09']){
+      assert.equal(f.database().sources().filter(item=>item.weekOf===week).length,2);
+      assert.equal(f.database().list().filter(entry=>entry.weekOf===week).length,6);
+    }
+    f.reopen();
+    const retry=await createArtworkPlanner(options).run(range);
+    assert.equal(retry.generated,0);assert.equal(generatedWeeks.length,4);
+    assert.equal(f.database().list().length,36);
   }finally{f.close();}
 });
 test('explicit regeneration replaces only older unapproved Gemini drafts without duplicating or rewriting approved artwork',async()=>{
@@ -207,15 +251,15 @@ test('explicit regeneration replaces only older unapproved Gemini drafts without
     const manual=f.database().create(generated({...subjects('2026-11-16')[0],sourceHash:'manual-source'}).concepts[0],'administrator');
     const planner=createArtworkPlanner(options);
     const normal=await planner.run({force:true});
-    assert.equal(calls,8,'Normal checks must not replay old batches.');
+    assert.equal(calls,10,'Normal checks must not replay old batches.');
     const capped=await planner.run({force:true,regenerateDrafts:true});
     assert.equal(calls,12);assert.equal(capped.callsToday,12);
     assert.match(capped.issues[0].message,/Run draft regeneration again on another UTC day/);
     date=new Date('2026-11-11T13:00:00Z');
     const result=await planner.run({force:true,regenerateDrafts:true});
-    assert.equal(capped.regenerated+result.regenerated,20);assert.equal(calls,16);
+    assert.equal(capped.regenerated+result.regenerated,26);assert.equal(calls,20);
     assert.equal(result.nextCheckAt,normal.nextCheckAt,'Refreshing drafts must not postpone the normal daily check.');
-    assert.equal(f.database().list().length,25,'Regeneration updates existing IDs rather than adding duplicate entries.');
+    assert.equal(f.database().list().length,31,'Regeneration updates existing IDs rather than adding duplicate entries.');
     for(const entry of protectedEntries)assert.deepEqual(f.database().get(entry.data.id),entry);
     assert.deepEqual(f.database().get(manual.id).data,manual);
     const refreshed=f.database().list().find(entry=>entry.generation?.promptVersion!==undefined);
@@ -224,7 +268,7 @@ test('explicit regeneration replaces only older unapproved Gemini drafts without
     assert.equal(f.database().audit(refreshed.id)[0].action,'regenerate-concept');
     f.reopen();
     await createArtworkPlanner(options).run({force:true,regenerateDrafts:true});
-    assert.equal(calls,16,'Already refreshed drafts must not be billed again.');
+    assert.equal(calls,20,'Already refreshed drafts must not be billed again.');
   }finally{f.close();}
 });
 test('saved instructions persist without generating and permit retry after clarification',async()=>{
@@ -336,11 +380,11 @@ test('missing publications and ambiguous concepts stay visible without guessed d
       }
     });
     const result=await planner.run();
-    assert.equal(calls,3);assert.equal(f.database().list().length,0);
+    assert.equal(calls,4);assert.equal(f.database().list().length,0);
     assert.ok(result.issues.some(issue=>issue.week==='2026-12-07'&&/date-validated/.test(issue.message)));
     assert.ok(result.issues.some(issue=>/not published yet/.test(issue.message)));
     date=new Date('2026-11-11T13:00:00Z');
     const next=await planner.run();
-    assert.equal(calls,3);assert.ok(next.issues.some(issue=>/Insufficient context/.test(issue.message)));
+    assert.equal(calls,4);assert.ok(next.issues.some(issue=>/Insufficient context/.test(issue.message)));
   }finally{f.close();}
 });

@@ -169,7 +169,8 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
           throw new AdminError(409,'Planning instructions changed. Reload and review them before running.');
         if(plannerStatus().running)
           throw new AdminError(409,'Artwork planning is already running. Wait for it to finish before requesting regeneration.');
-        void planner.run({force:true,regenerateDrafts:path.endsWith('/regenerate'),provider:input.provider,model:input.model,allowPaid:input.allowPaid})
+        void planner.run({force:true,regenerateDrafts:path.endsWith('/regenerate'),provider:input.provider,model:input.model,allowPaid:input.allowPaid,
+          startWeek:input.startWeek,endWeek:input.endWeek})
           .catch(error=>console.error('Artwork planning check failed.',error));
         send(response,202,plannerStatus());return true;
       }

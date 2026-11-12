@@ -82,8 +82,12 @@ async function updatePlanner(){
     $('#planning-provider').value=planner.provider;
     $('#planning-model').value=planner.model;
   }
+  if(planner.enabled&&!$('#planning-start').value){
+    $('#planning-start').value=planner.defaultWeeks[0];
+    $('#planning-end').value=planner.defaultWeeks.at(-1);
+  }
   $('#planner-status').textContent=!planner.enabled?planner.message:
-    `${planner.running?'Running saved instructions...':'Manual generation. Review the instructions and run when ready; refresh the queue after completion.'} Last/default provider: ${planner.provider}. Model: ${planner.model}. Weeks: ${planner.weeks.join(', ')}. Last completed: ${planner.lastCheckedAt??'not yet'}. Regenerated drafts last run: ${planner.regenerated??0}. Shared AI calls today: ${planner.callsToday}/${planner.maxCallsPerDay}.`;
+    `${planner.running?'Running saved instructions...':'Manual generation. Review the instructions and run when ready; refresh the queue after completion.'} Last/default provider: ${planner.provider}. Model: ${planner.model}. Last/default run weeks: ${planner.weeks.join(', ')}. Last completed: ${planner.lastCheckedAt??'not yet'}. New drafts last run: ${planner.generated??0}. Regenerated drafts last run: ${planner.regenerated??0}. Shared AI calls today: ${planner.callsToday}/${planner.maxCallsPerDay}.`;
   $('#planner-issues').replaceChildren();
   for(const issue of planner.issues??[]){
     const row=document.createElement('li');row.textContent=`${issue.week??''} ${issue.title??''}: ${issue.message}`;$('#planner-issues').append(row);
@@ -178,11 +182,13 @@ for(const [button,path,regenerate] of [
 ])$(button).addEventListener('click',()=>void run(async()=>{
   const provider=$('#planning-provider').value,model=$('#planning-model').value.trim();
   if(!model)throw Error('Choose a model ID before running.');
+  const startWeek=$('#planning-start').value,endWeek=$('#planning-end').value;
+  if(!startWeek||!endWeek)throw Error('Choose planning start and end dates before running.');
   const paid=provider==='openrouter'&&model!=='openrouter/free'&&!model.endsWith(':free');
   const warnings=[...(paid?[`Use PAID OpenRouter model ${model}? This run can incur charges at the provider's current rates.`]:[]),
     ...(regenerate?['Replace outdated unapproved AI drafts? Approved concepts and images will not change.']:[])];
   if(warnings.length&&!confirm(warnings.join('\n\n')))return;
-  await api(path,jsonOptions({instructionsRevision:planningInstructions.revision,provider,model,allowPaid:paid}));
+  await api(path,jsonOptions({instructionsRevision:planningInstructions.revision,provider,model,allowPaid:paid,startWeek,endWeek}));
   await updatePlanner();message('AI planning requested. Refresh the queue after it finishes; review any source-context issues.');
 }));
 $('#copy').addEventListener('click',()=>void run(async()=>{

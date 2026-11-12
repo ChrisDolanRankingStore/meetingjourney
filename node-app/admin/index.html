@@ -13,10 +13,16 @@
   <p role="status" id="status"></p>
   <main hidden>
     <section id="planner">
-      <h2>Four-week artwork planning</h2>
-      <p>Checks the next four meeting weeks, prioritising the furthest week ahead. Your selected AI provider suggests a source-linked Bible scene in simple, detailed and manga-inspired styles for each Treasures theme and Watchtower study. Insufficient scene context is flagged for manual review instead of generating an unrelated analogy. It does not generate images or approve anything.</p>
+      <h2>Artwork planning and catch-up</h2>
+      <p>Checks your selected meeting weeks, prioritising the furthest week ahead. The default includes the current week and four weeks ahead. Your selected AI provider suggests a source-linked Bible scene in simple, detailed and manga-inspired styles for each Treasures theme and Watchtower study. Insufficient scene context is flagged for manual review instead of generating an unrelated analogy. It does not generate images or approve anything.</p>
       <p id="planner-status"></p>
       <p>Generation is manual: opening this page or restarting the server does not call an AI provider. Review and save the instructions below, then run them when you are ready.</p>
+      <fieldset>
+        <legend>Meeting weeks for the next run</legend>
+        <label>From week containing<input id="planning-start" type="date" required></label>
+        <label>Through week containing<input id="planning-end" type="date" required></label>
+        <p>Both boundary weeks are included. Choose an earlier start to catch up missed weeks, then run for new subjects. Dates are grouped by their Monday; at most 12 weeks per run. Existing suggestions and approvals are preserved. Missing source material is reported, not invented.</p>
+      </fieldset>
       <fieldset>
         <legend>Provider for the next run</legend>
         <label>AI provider<select id="planning-provider"></select></label>

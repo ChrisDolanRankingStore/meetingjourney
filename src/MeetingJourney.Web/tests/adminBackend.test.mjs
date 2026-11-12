@@ -203,6 +203,8 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     assert.equal((await requestRun({provider:'unconfigured'})).status,400);
     assert.equal((await requestRun({provider:'openrouter',model:'example/paid-model'})).status,400);
     assert.equal((await requestRun({provider:'openrouter',model:'example/paid-model',allowPaid:'true'})).status,400);
+    assert.equal((await requestRun({startWeek:'invalid'})).status,400);
+    assert.equal((await requestRun({startWeek:'2026-11-16',endWeek:'2026-11-02'})).status,400);
     assert.equal(providerCalls,0,'Invalid or unconfirmed provider selections must not call a provider.');
     assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST'})).status,401);
     assert.equal((await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:{...mutation,Origin:'https://evil.example'}})).status,403);
@@ -215,15 +217,15 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     assert.equal(JSON.parse(state).maxCallsPerDay,50);
     assert.deepEqual(JSON.parse(state).providers.map(provider=>provider.id),['gemini','openrouter']);
     const items=await fetch(server.base+'/api/admin/meetings',{headers:auth}).then(r=>r.json());
-    assert.equal(items.length,4);assert.equal(items[0].sourceStatus,'discovered');
+    assert.equal(items.length,5);assert.equal(items[0].sourceStatus,'discovered');
     const drafts=await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json());
-    assert.equal(drafts.length,12);assert.ok(drafts.every(draft=>draft.state==='draft'&&!draft.conceptApproval));
+    assert.equal(drafts.length,15);assert.ok(drafts.every(draft=>draft.state==='draft'&&!draft.conceptApproval));
     assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST',headers:mutation,body:'{"instructionsRevision":1}'})).status,202);
     await handler.runPlanner();
     assert.deepEqual(await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json()),drafts);
     assert.equal((await requestRun({provider:'openrouter',model:'example/paid-model',allowPaid:true})).status,202);
     await handler.runPlanner();
-    assert.equal(providerCalls,4,'Switching provider/model must not duplicate existing subject suggestions.');
+    assert.equal(providerCalls,5,'Switching provider/model must not duplicate existing subject suggestions.');
     assert.deepEqual(await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json()),drafts);
     const draft=drafts[0],path=`/api/admin/artwork/${draft.id}/actions`;
     const action=data=>fetch(server.base+path,{method:'POST',headers:{...mutation,'If-Match':String(draft.revision)},body:JSON.stringify(data)});
@@ -232,6 +234,16 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     const approved=await (await action({action:'approve-concept',safetyReviewed:true,sourceReviewed:true})).json();
     assert.equal(approved.conceptApproval.sourceHash,draft.sourceHash);
     assert.deepEqual(await fetch(server.base+`/api/colouring/${draft.meetingId}/${draft.partId}`).then(r=>r.json()),[]);
+    assert.equal((await requestRun({startWeek:'2026-11-02',endWeek:'2026-11-09'})).status,202);
+    await handler.runPlanner({startWeek:'2026-11-02',endWeek:'2026-11-09'});
+    const caughtUp=await fetch(server.base+'/api/admin/meetings',{headers:auth}).then(r=>r.json());
+    assert.ok(caughtUp.some(item=>item.weekOf==='2026-11-02'));
+    const latest=await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json());
+    assert.equal(latest.length,18);
+    assert.deepEqual(latest.find(entry=>entry.id===approved.id),approved);
+    const catchupStatus=await fetch(server.base+'/api/admin/planner',{headers:auth}).then(r=>r.json());
+    assert.deepEqual(catchupStatus.weeks,['2026-11-02','2026-11-09']);
+    assert.deepEqual(catchupStatus.defaultWeeks,['2026-11-09','2026-11-16','2026-11-23','2026-11-30','2026-12-07']);
   }finally{await server.close();rmSync(directory,{recursive:true,force:true});}
 });
 test('the offline worker never intercepts administration routes and purges legacy private cache entries',async()=>{

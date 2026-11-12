@@ -70,6 +70,19 @@ export function artworkLookahead(today) {
     const date=new Date(monday);date.setDate(date.getDate()+7*(index+1));return localDateKey(date);
   });
 }
+export function artworkPlanningWeeks(today,{startWeek=weekOfDate(today),endWeek=artworkLookahead(today).at(-1)}={}) {
+  let start,end;
+  try{
+    start=weekOfDate(startWeek);end=weekOfDate(endWeek);
+  }catch{throw new AdminError(400,'Choose valid planning start and end dates.');}
+  if(start>end)throw new AdminError(400,'The planning end date must not be before the start date.');
+  const date=parseCalendarDate(start),weeks=[];
+  while(localDateKey(date)<=end){
+    if(weeks.length===12)throw new AdminError(400,'Choose at most 12 meeting weeks per run.');
+    weeks.push(localDateKey(date));date.setDate(date.getDate()+7);
+  }
+  return weeks;
+}
 export async function generateArtworkConcepts(item,config,{fetcher=fetch}={}) {
   const openrouter=config.provider==='openrouter',label=openrouter?'OpenRouter':'Gemini';
   const instructions=config.instructions??defaultArtworkInstructions;
@@ -135,15 +148,17 @@ export function createArtworkPlanner({config,database,reviewedItems,discover=loa
     const provider=Object.hasOwn(config.providers,state.provider)?state.provider:config.provider;
     return {...state,enabled:true,manualOnly:true,provider,model:state.provider===provider?state.model:config.providers[provider].model,
       providers:Object.entries(config.providers).map(([id,value])=>({id,model:value.model})),running:state.leaseUntil>now().getTime(),
-      weeks:artworkLookahead(localDateKey(now())),callsToday:database().plannerCalls(now().toISOString().slice(0,10)),maxCallsPerDay:config.maxCallsPerDay};
+      weeks:state.weeks??artworkPlanningWeeks(localDateKey(now())),defaultWeeks:artworkPlanningWeeks(localDateKey(now())),
+      callsToday:database().plannerCalls(now().toISOString().slice(0,10)),maxCallsPerDay:config.maxCallsPerDay};
   };
-  const run=({force=false,regenerateDrafts=false,...selection}={})=>{
+  const run=({force=false,regenerateDrafts=false,startWeek,endWeek,...selection}={})=>{
     if(active)return active;
     const selected=selectPlannerConfig(config,selection),maxCalls=config.maxCallsPerDay;
-    const started=now(),owner=database().claimPlanner(started.getTime(),force);
+    const started=now(),weeks=artworkPlanningWeeks(localDateKey(started),{startWeek,endWeek});
+    const owner=database().claimPlanner(started.getTime(),force);
     if(!owner)return Promise.resolve(status());
     active=(async()=>{
-      const weeks=artworkLookahead(localDateKey(started)),result={lastStartedAt:started.toISOString(),provider:selected.provider,model:selected.model,weeks,generated:0,regenerated:0,skipped:0,issues:[]};
+      const result={lastStartedAt:started.toISOString(),provider:selected.provider,model:selected.model,weeks,generated:0,regenerated:0,skipped:0,issues:[]};
       try{
         const instructions=database().plannerInstructions()?.instructions??defaultArtworkInstructions;
         const instructionsHash=artworkHash(instructions),runConfig={...selected,instructions};
