@@ -141,6 +141,14 @@ test('private artwork requires concept review, exact-image approval and explicit
     assert.equal(published[0].id,draft.id);
     assert.equal(published[0].imageHash,draft.imageHash);
     assert.equal(published[0].prompt,undefined);
+    for(const changed of [
+      {...input,partId:items.find(candidate=>candidate.partId!==item.partId).partId},
+      {...input,style:'detailed'}
+    ]){
+      assert.equal((await call(path,changed,draft.revision)).status,409);
+      assert.deepEqual(await fetch(server.base+path,{headers:auth}).then(r=>r.json()),draft);
+      assert.equal((await fetch(server.base+publicImage)).status,200,'Rejected reassignment must not discard a published image.');
+    }
     const changedPart=reviewed.meeting.parts.find(part=>part.id===item.partId),originalSummary=changedPart.summary;
     changedPart.summary='A changed reviewed theme summary';writeFileSync(reviewedPath,JSON.stringify(reviewed));
     assert.equal((await fetch(server.base+publicImage)).status,404);
@@ -249,6 +257,13 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     const latest=await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json());
     assert.equal(latest.length,18);
     assert.deepEqual(latest.find(entry=>entry.id===approved.id),approved);
+    const anotherMeeting=latest.find(entry=>entry.meetingId!==approved.meetingId);
+    const reassignment=await fetch(server.base+`/api/admin/artwork/${approved.id}`,{
+      method:'POST',headers:{...mutation,'If-Match':String(approved.revision)},
+      body:JSON.stringify({meetingId:anotherMeeting.meetingId,partId:anotherMeeting.partId,style:approved.style,safeTheme:approved.safeTheme,scene:approved.scene})
+    });
+    assert.equal(reassignment.status,409);
+    assert.deepEqual(await fetch(server.base+`/api/admin/artwork/${approved.id}`,{headers:auth}).then(r=>r.json()),approved);
     const catchupStatus=await fetch(server.base+'/api/admin/planner',{headers:auth}).then(r=>r.json());
     assert.deepEqual(catchupStatus.weeks,['2026-11-02','2026-11-09']);
     assert.deepEqual(catchupStatus.defaultWeeks,['2026-11-09','2026-11-16','2026-11-23','2026-11-30','2026-12-07']);

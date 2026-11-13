@@ -44,6 +44,7 @@
     </section>
     <aside>
       <h2>Review queue</h2>
+      <p>One row per meeting item. Choose its drawing style in the editor.</p>
       <button id="refresh" type="button">Refresh queue</button>
       <ul id="queue"></ul>
       <button id="new" type="button">New safe concept</button>
@@ -57,6 +58,8 @@
         <p id="source"></p>
         <details><summary>Source message sent with the planning instructions for this item</summary><label>Exact metadata payload<textarea id="planning-source" rows="6" readonly></textarea></label></details>
         <label>Drawing style<select name="style"><option value="simple">Simple outlines</option><option value="detailed">Detailed outlines</option><option value="manga">Manga-inspired outlines</option></select></label>
+        <label id="saved-version-field" hidden>Saved concept for this style<select id="saved-version"></select></label>
+        <p>Changing the meeting item or style opens its own saved concept, or a blank form if none exists. It never moves the current concept. If a style has multiple saved concepts, choose the one to review above.</p>
         <label>Child-safe positive theme<input name="safeTheme" maxlength="300" required></label>
         <label>Safe scene description<textarea name="scene" rows="5" maxlength="1500" required></textarea></label>
         <p>Saving edits removes previous image/concept approvals, withdraws publication, and discards the old image. Existing user notebooks are not changed.</p>

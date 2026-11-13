@@ -1,6 +1,7 @@
 const $=selector=>document.querySelector(selector);
 const form=$('#concept'),review=$('#review'),status=$('#status');
 let items=[],entries=[],selected=null,planner=null,plannerTimer,planningInstructions=null;
+let editingItem=null,editingStyle='simple';
 function message(text){status.textContent=text;}
 async function api(path,options={}){
   const response=await fetch(path,{...options,cache:'no-store',credentials:'same-origin',headers:{'X-MJ-Admin':'1',...options.headers}});
@@ -12,7 +13,7 @@ async function api(path,options={}){
   return response.json();
 }
 async function run(operation){
-  const buttons=[...document.querySelectorAll('button')];
+  const buttons=[...document.querySelectorAll('button,input,select,textarea')];
   const previous=buttons.map(button=>button.disabled);
   buttons.forEach(button=>button.disabled=true);
   try{await operation();}
@@ -31,21 +32,50 @@ function applyState(){
   $('#publish').hidden=state!=='approved';
   $('#withdraw').hidden=!selected||state==='rejected';
 }
-function choose(entry){
+const sameItem=(left,right)=>left&&right&&left.meetingId===right.meetingId&&left.partId===right.partId;
+function choose(entry,item=entry?items.find(item=>sameItem(item,entry)):items[0],style=entry?.style??'simple'){
+  if(entry&&!item)throw Error('This artwork source is unavailable. Refresh the queue before editing it.');
   selected=entry;
-  form.elements.meetingItem.value=entry?items.findIndex(item=>item.meetingId===entry.meetingId&&item.partId===entry.partId):0;
-  form.elements.style.value=entry?.style??'simple';
+  editingItem=item;editingStyle=style;
+  form.elements.meetingItem.value=String(items.indexOf(item));
+  form.elements.style.value=style;
   form.elements.safeTheme.value=entry?.safeTheme??'';
   form.elements.scene.value=entry?.scene??'';
   $('#editor-title').textContent=entry?`Review: ${entry.partTitle}`:'New safe concept';
   review.hidden=!entry;
   $('#safe').checked=false;$('#accurate').checked=false;
+  $('#upload').reset();
   $('#prompt').value=entry?.prompt??'';
   $('#state').textContent=entry?`${entry.state} - revision ${entry.revision}${entry.generation?` - ${entry.generation.provider} suggestion (human review required)`:''}`:'';
   $('#preview').hidden=!entry?.imageHash;
   if(entry?.imageHash)$('#preview').src=`/api/admin/artwork/${entry.id}/image?revision=${entry.revision}`;
   else $('#preview').removeAttribute('src');
   $('#audit').replaceChildren();showSource();applyState();
+  const versions=entries.filter(candidate=>sameItem(candidate,item)&&candidate.style===style);
+  $('#saved-version').replaceChildren();
+  for(const candidate of versions){
+    const option=document.createElement('option');option.value=candidate.id;
+    option.textContent=`${candidate.state} - revision ${candidate.revision} (${candidate.id.slice(0,8)})`;
+    $('#saved-version').append(option);
+  }
+  $('#saved-version-field').hidden=versions.length<2||!entry;
+  if(entry)$('#saved-version').value=entry.id;
+}
+function hasConceptEdits(){
+  return form.elements.safeTheme.value!==(selected?.safeTheme??'')||form.elements.scene.value!==(selected?.scene??'');
+}
+function allowSelectionChange(){
+  if(!hasConceptEdits()||confirm('Discard unsaved concept edits and open the other selection?'))return true;
+  form.elements.meetingItem.value=String(items.indexOf(editingItem));
+  form.elements.style.value=editingStyle;
+  $('#saved-version').value=selected?.id??'';
+  return false;
+}
+async function selectConcept(item,style){
+  if(!item)throw Error('This artwork source is unavailable. Refresh the queue before editing it.');
+  const entry=entries.find(candidate=>sameItem(candidate,item)&&candidate.style===style);
+  choose(entry??null,item,style);
+  if(entry)await loadAudit(entry.id);
 }
 function showSource(){
   const item=items[Number(form.elements.meetingItem.value)],host=$('#source');
@@ -99,10 +129,17 @@ async function updatePlanner(){
 async function refresh(id=selected?.id){
   entries=await api('/api/admin/artwork');
   $('#queue').replaceChildren();
+  const groups=new Map();
   for(const entry of entries){
+    const key=`${entry.meetingId}/${entry.partId}`;
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(entry);
+  }
+  for(const group of groups.values()){
+    const entry=group[0],styles=[...new Set(group.map(candidate=>candidate.style))];
     const row=document.createElement('li'),button=document.createElement('button');
-    button.type='button';button.textContent=`${entry.weekOf} - ${entry.partTitle} (${entry.style}, ${entry.state})`;
-    button.addEventListener('click',()=>run(()=>open(entry)));
+    button.type='button';button.textContent=`${entry.weekOf} - ${entry.partTitle} (${styles.join(', ')})`;
+    button.addEventListener('click',()=>{if(allowSelectionChange())void run(()=>selectConcept(items.find(item=>sameItem(item,entry)),group.some(candidate=>candidate.style===editingStyle)?editingStyle:entry.style));});
     row.append(button);$('#queue').append(row);
   }
   const entry=entries.find(entry=>entry.id===id);
@@ -111,13 +148,13 @@ async function refresh(id=selected?.id){
 }
 async function loadAudit(id){
   const audit=await api(`/api/admin/artwork/${id}/audit`);
+  if(selected?.id!==id)return;
   for(const event of audit){
     const row=document.createElement('li');
     row.textContent=`${event.recordedAt}: ${event.action}, revision ${event.revision} (administrator ${event.actor})`;
     $('#audit').append(row);
   }
 }
-async function open(entry){choose(entry);await loadAudit(entry.id);}
 function jsonOptions(data){return {method:'POST',headers:{'Content-Type':'application/json',...(selected?{'If-Match':String(selected.revision)}:{})},body:JSON.stringify(data)};}
 function requireSavedConcept(){
   const item=items[Number(form.elements.meetingItem.value)];
@@ -130,6 +167,8 @@ form.addEventListener('submit',event=>{
   void run(async()=>{
     const item=items[Number(form.elements.meetingItem.value)];
     if(!item)throw Error('Choose an eligible reviewed meeting item.');
+    if(selected&&(!sameItem(item,selected)||form.elements.style.value!==selected.style))
+      throw Error('Open the matching meeting item and style before saving. Existing artwork cannot be reassigned.');
     if(selected&&!confirm('Save edits and reset this draft, its image, approvals and publication?'))return;
     const entry=await api(selected?`/api/admin/artwork/${selected.id}`:'/api/admin/artwork',jsonOptions({
       meetingId:item.meetingId,partId:item.partId,style:form.elements.style.value,safeTheme:form.elements.safeTheme.value,scene:form.elements.scene.value
@@ -159,9 +198,16 @@ $('#upload').addEventListener('submit',event=>{
     $('#upload').reset();await refresh(result.id);message('Image uploaded privately. Inspect every detail before approving it.');
   });
 });
-$('#new').addEventListener('click',()=>{choose(null);message('New draft. Blank drawing pages remain available to users.');});
-form.elements.meetingItem.addEventListener('change',showSource);
-$('#refresh').addEventListener('click',()=>void run(async()=>{await loadItems();await refresh();await updatePlanner();message('Queue refreshed.');}));
+$('#new').addEventListener('click',()=>{if(allowSelectionChange()){choose(null,editingItem,editingStyle);message('New draft. Blank drawing pages remain available to users.');}});
+for(const control of [form.elements.meetingItem,form.elements.style])control.addEventListener('change',()=>{
+  const item=items[Number(form.elements.meetingItem.value)],style=form.elements.style.value;
+  if(allowSelectionChange())void run(()=>selectConcept(item,style));
+});
+$('#saved-version').addEventListener('change',()=>{
+  const entry=entries.find(candidate=>candidate.id===$('#saved-version').value);
+  if(entry&&allowSelectionChange())void run(async()=>{choose(entry);await loadAudit(entry.id);});
+});
+$('#refresh').addEventListener('click',()=>{if(allowSelectionChange())void run(async()=>{await loadItems();await refresh();await updatePlanner();message('Queue refreshed.');});});
 $('#planning-text').addEventListener('input',applyState);
 $('#planning-provider').addEventListener('change',()=>{
   $('#planning-model').value=planner.providers.find(provider=>provider.id===$('#planning-provider').value)?.model??'';

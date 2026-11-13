@@ -99,14 +99,15 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     if (!paper) {basePaper.current=available;setPaper(available);}
   }, [loaded, measured, paper, width, height]);
   const sheet = paper ?? { width: 760, height: 420 };
-  const view = drawingSurface(basePaper.current??sheet, width, height);
-  const visiblePaper={width:Math.max(sheet.width,view.paperWidth,view.paperWidth/zoom.scale),height:Math.max(sheet.height,view.paperHeight,view.paperHeight/zoom.scale)};
+  const maxZoom=artwork?16:4;
+  const view = drawingSurface(basePaper.current??sheet, width, height,Boolean(artwork));
+  const visiblePaper=artwork?sheet:{width:Math.max(sheet.width,view.paperWidth,view.paperWidth/zoom.scale),height:Math.max(sheet.height,view.paperHeight,view.paperHeight/zoom.scale)};
   const extent={width:Math.max(sheet.width,view.paperWidth)*view.scale,height:Math.max(sheet.height,view.paperHeight)*view.scale};
   const artworkLayer=useMemo(()=>outline&&artwork?{image:outline,width:artwork.width,height:artwork.height}:undefined,[outline,artwork]);
   const ink = useMemo(() => artworkLayer||strokes.some(stroke => stroke.mode === 'smudge'||stroke.mode==='fill') ? renderDrawingInk(strokes, sheet.width, sheet.height, 2048, 2,artworkLayer) : null, [strokes, sheet.width, sheet.height,artworkLayer]);
   const changeZoom = (next: typeof zoom) => {
     const latest=latestDrawing.current;
-    if(next.scale<1&&next.scale<zoomRef.current.scale&&latest.paper){
+    if(!artwork&&next.scale<1&&next.scale<zoomRef.current.scale&&latest.paper){
       const nextPaper=includeDrawingPoint(latest.paper,{x:(width-next.x)/(view.scale*next.scale),y:(height-next.y)/(view.scale*next.scale)});
       latestDrawing.current={...latest,paper:nextPaper};
       setPaper(nextPaper);
@@ -144,7 +145,8 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     strokeStart.current = {strokes:latestDrawing.current.strokes, redo:redoStack, paper};
     const point = pointerPosition(event);
     if (!point || !loaded || !paper) return;
-    const nextPaper=tool==='fill'?includeDrawingPoint(paper,{x:visiblePaper.width,y:visiblePaper.height}):includeDrawingPoint(paper,point);
+    if(artwork&&(point.x>sheet.width||point.y>sheet.height))return;
+    const nextPaper=artwork?paper:tool==='fill'?includeDrawingPoint(paper,{x:visiblePaper.width,y:visiblePaper.height}):includeDrawingPoint(paper,point);
     const nextStrokes=[...latestDrawing.current.strokes,{...activeStroke,smooth:true,points:[point.x,point.y],...(tool==='fill'?{fillBounds:nextPaper}:{})}];
     latestDrawing.current={...latestDrawing.current,strokes:nextStrokes,loaded:true,paper:nextPaper};
     setPaper(nextPaper);
@@ -162,15 +164,18 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
       if (current.length === 2) {
         const middle = (points: typeof current) => ({x:(points[0].x + points[1].x) / 2, y:(points[0].y + points[1].y) / 2});
         const distance = (points: typeof current) => Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
-        changeZoom(zoomDrawing(zoomRef.current, middle(previous), middle(current), distance(current) / Math.max(1, distance(previous)), width, height,extent));
+        changeZoom(zoomDrawing(zoomRef.current, middle(previous), middle(current), distance(current) / Math.max(1, distance(previous)), width, height,extent,maxZoom));
       }
       return;
     }
     if (!drawing.current) return;
     if(tool==='fill')return;
-    const samples=pointerSamples(event.nativeEvent).map(sample=>pointerPosition({clientX:sample.clientX,clientY:sample.clientY,currentTarget:event.currentTarget}));
+    const samples=pointerSamples(event.nativeEvent).map(sample=>{
+      const point=pointerPosition({clientX:sample.clientX,clientY:sample.clientY,currentTarget:event.currentTarget});
+      return artwork?{x:Math.min(sheet.width,point.x),y:Math.min(sheet.height,point.y)}:point;
+    });
     const latest=latestDrawing.current;
-    const nextPaper=latest.paper?samples.reduce((paper,point)=>includeDrawingPoint(paper,point),latest.paper):null;
+    const nextPaper=artwork?latest.paper:latest.paper?samples.reduce((paper,point)=>includeDrawingPoint(paper,point),latest.paper):null;
     const nextStrokes=latest.strokes.map((stroke,index)=>index===latest.strokes.length-1?{...stroke,points:[...stroke.points,...samples.flatMap(point=>[point.x,point.y])]}:stroke);
     latestDrawing.current={...latest,strokes:nextStrokes,paper:nextPaper};
     setPaper(nextPaper);setStrokes(nextStrokes);
@@ -234,7 +239,7 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     <div className="drawing-heading"><div><h3 id={`${partId}-drawing-title`}>{t("Doodle notes")}</h3><p>{t("Draw, write or sketch a thought.")}</p></div></div><span className={`save-state notebook-save-state ${saveError ? 'has-error' : ''}`} aria-live="polite">{saveError ? t("Could not load or save this drawing on this device.") : !loaded ? t("Opening your drawing…") : saving ? t("Saving…") : t("Saved on this device")}</span>
     <div className="drawing-page-actions">{artwork&&<span>{artwork.title}</span>}<button className="drawing-save-changes" type="button" disabled={!loaded||!paper||saving} onClick={()=>void saveChanges()}><NotebookIcon name="save"/>{t('Save changes')}</button><button className="drawing-save-changes" type="button" disabled={!loaded||(!strokes.length&&!artwork)} onClick={exportPng}><NotebookIcon name="download"/>{t('Download PNG')}</button></div>
     <div className="drawing-paper-workspace">
-    <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={brushSize} onSize={tool === 'smudge' ? setSmudgeSize : setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} canExport={loaded&&(strokes.length>0||Boolean(artwork))} onUndo={undo} onRedo={redo} onClear={clear} onExport={exportPng} zoom={zoom.scale} onZoom={value=>changeZoom(zoomDrawing(zoomRef.current,{x:width/2,y:height/2},{x:width/2,y:height/2},value/zoomRef.current.scale,width,height,extent))} onResetZoom={()=>changeZoom(initialDrawingZoom)} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:visiblePaper.width, y:visiblePaper.height}) : createDrawingPaper(width, height))} pages={pages} />
+    <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={brushSize} onSize={tool === 'smudge' ? setSmudgeSize : setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} canExport={loaded&&(strokes.length>0||Boolean(artwork))} onUndo={undo} onRedo={redo} onClear={clear} onExport={exportPng} zoom={zoom.scale} maxZoom={maxZoom} fixedPaper={Boolean(artwork)} onZoom={value=>changeZoom(zoomDrawing(zoomRef.current,{x:width/2,y:height/2},{x:width/2,y:height/2},value/zoomRef.current.scale,width,height,extent,maxZoom))} onResetZoom={()=>changeZoom(initialDrawingZoom)} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:visiblePaper.width, y:visiblePaper.height}) : createDrawingPaper(width, height))} pages={pages} />
     <div className="canvas-shell" ref={canvasRef} onContextMenu={event => event.preventDefault()} onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} data-zoom={zoom.scale}>
       <Stage width={view.width} height={view.height}>
         <Layer x={zoom.x} y={zoom.y} scaleX={view.scale * zoom.scale} scaleY={view.scale * zoom.scale}><Rect width={visiblePaper.width} height={visiblePaper.height} fill="#fffdf7" />{template === 'lined' && Array.from({ length: Math.ceil(visiblePaper.height / 30) }, (_, index) => <Line key={index} points={[0, 30 + index * 30, visiblePaper.width, 30 + index * 30]} stroke="#d7dfef" strokeWidth={1} />)}</Layer>

@@ -207,7 +207,11 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
       const input=await jsonBody(request);
       if(!suffix){
         const updated=concept(input,availableItems());
-        send(response,200,database().update(id,revision,actor.subject,'edit-concept',entry=>({data:{...updated,generation:entry.data.generation,createdAt:entry.data.createdAt},image:null})));return true;
+        send(response,200,database().update(id,revision,actor.subject,'edit-concept',entry=>{
+          if(updated.meetingId!==entry.data.meetingId||updated.partId!==entry.data.partId||updated.style!==entry.data.style)
+            throw new AdminError(409,'Existing artwork cannot be moved to another meeting item or drawing style. Open that selection and create a separate concept.');
+          return {data:{...updated,generation:entry.data.generation,createdAt:entry.data.createdAt},image:null};
+        }));return true;
       }
       if(suffix!=='/actions')throw new AdminError(404,'Not found');
       const result=database().update(id,revision,actor.subject,input.action,entry=>{

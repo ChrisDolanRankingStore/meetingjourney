@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {initialDrawingZoom,zoomDrawing} from '../src/drawingViewport.ts';
+import {initialDrawingZoom,zoomDrawing,drawingSurface} from '../src/drawingViewport.ts';
 
 test('pinch anchors the same paper point and limits zoom to 25–400 percent',()=>{
  const centre={x:200,y:150};
@@ -30,4 +30,17 @@ test('zooming back in and panning can reach marks on extended paper',()=>{
  assert.deepEqual(zoom,{scale:1,x:-600,y:-450});
  assert.equal((centre.x-zoom.x)/zoom.scale,800);
  assert.deepEqual(zoomDrawing(zoom,centre,{x:-10000,y:-10000},1,400,300,extent),{scale:1,x:-1200,y:-900});
+});
+test('image-sized paper stays fixed on a phone and allows 1600 percent detail zoom with bounded panning',()=>{
+ const paper={width:760,height:1140},view=drawingSurface(paper,220,400,true);
+ assert.equal(view.paperWidth,760);
+ assert.equal(view.paperHeight,1140);
+ const extent={width:paper.width*view.scale,height:paper.height*view.scale},centre={x:110,y:200};
+ const zoom=zoomDrawing(initialDrawingZoom,centre,centre,40,220,400,extent,16);
+ assert.equal(zoom.scale,16);
+ assert.equal((centre.x-zoom.x)/(view.scale*zoom.scale),centre.x/view.scale);
+ const corner=zoomDrawing(zoom,centre,{x:-100000,y:-100000},1,220,400,extent,16);
+ assert.equal(corner.x,220-extent.width*16);
+ assert.equal(corner.y,400-extent.height*16);
+ assert.deepEqual(paper,{width:760,height:1140});
 });
