@@ -106,6 +106,7 @@ export interface SavedNote {
 }
 
 export interface Stroke {
+  fillUsesOutline?: boolean;
   smooth?: boolean;
   points: number[];
   color: string;

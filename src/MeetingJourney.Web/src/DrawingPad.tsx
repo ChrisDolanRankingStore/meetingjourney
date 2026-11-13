@@ -6,35 +6,41 @@ import { readDrawingPage, saveDrawing } from './storage';
 import { createDrawingPaper, drawingSurface, includeDrawingPoint, initialDrawingZoom, zoomDrawing, type DrawingPaperSize } from './drawingViewport';
 import { DrawingToolbar, type DrawingPageControls } from './DrawingToolbar';
 import {renderDrawingInk, pointerSamples, smoothStrokePoints} from './drawingInk';
-import {downloadPublishedArtwork,loadDrawingArtwork,type DrawingArtwork} from './publishedArtwork';
+import {downloadPublishedArtwork,loadDrawingArtwork,type DrawingArtwork,type PublishedArtwork} from './publishedArtwork';
 import {PublishedArtworkPicker} from './PublishedArtworkPicker';
-import {NotebookIcon} from './NotebookIcon';
 
-interface Props { meetingId: string; partId: string; onSaved?: () => void; initialPage?: number; }
+interface Props { meetingId: string; partId: string; onSaved?: () => void; initialPage?: number; onFindPlace?:()=>void; }
 type Tool = Stroke['mode'];
 
-export function DrawingPad({ meetingId, partId, onSaved, initialPage=0 }: Props) {
+export function DrawingPad({ meetingId, partId, onSaved, initialPage=0,onFindPlace }: Props) {
   const pageKey = `mj-drawing-pages:${meetingId}:${partId}`;
   const [pageCount, setPageCount] = useState(() => Math.max(initialPage+1, Math.max(1, Math.min(50, Number(localStorage.getItem(pageKey)) || 1))));
   const [page, setPage] = useState(initialPage);
   const [template, setTemplate] = useState<'blank' | 'lined'>('blank');
   const [openingArtwork,setOpeningArtwork]=useState(false);
-  return <div className="drawing-notebook"><PublishedArtworkPicker meetingId={meetingId} partId={partId} disabled={pageCount>=50} onChoose={async item=>{
+  const [color,setColor]=useState('#163b5c');
+  const notebookRef=useRef<HTMLDivElement>(null),focusArtwork=useRef(false);
+  useEffect(()=>{
+    if(!focusArtwork.current)return;
+    notebookRef.current?.querySelector<HTMLButtonElement>('.drawing-artwork-trigger')?.focus();
+    focusArtwork.current=false;
+  },[page]);
+  const chooseArtwork=async(item:PublishedArtwork)=>{
     setOpeningArtwork(true);
     try{
       const artwork=await downloadPublishedArtwork(item);
       await saveDrawing(meetingId,`${partId}::page::${pageCount}`,[],{width:artwork.width,height:artwork.height},artwork);
-      localStorage.setItem(pageKey,String(pageCount+1));setPage(pageCount);setPageCount(count=>count+1);setTemplate('blank');onSaved?.();
+      localStorage.setItem(pageKey,String(pageCount+1));focusArtwork.current=true;setPage(pageCount);setPageCount(count=>count+1);setTemplate('blank');onSaved?.();
     }finally{setOpeningArtwork(false);}
-  }}/><DrawingPage key={`${meetingId}:${partId}:${page}`} meetingId={meetingId} partId={page === 0 ? partId : `${partId}::page::${page}`} onSaved={onSaved} template={template} pages={{ page, count: pageCount, onSelect: value=>{if(!openingArtwork)setPage(value);}, onAdd: () => {if(openingArtwork)return; localStorage.setItem(pageKey, String(pageCount + 1)); setPage(pageCount); setPageCount(count => count + 1); }, template, onTemplate: setTemplate }} /></div>;
+  };
+  return <div className="drawing-notebook" ref={notebookRef}><DrawingPage key={`${meetingId}:${partId}:${page}`} meetingId={meetingId} partId={page === 0 ? partId : `${partId}::page::${page}`} onSaved={onSaved} onFindPlace={onFindPlace} colour={color} onColour={setColor} artworkControls={{partId,disabled:pageCount>=50||openingArtwork,onChoose:chooseArtwork}} template={template} pages={{ page, count: pageCount, onSelect: value=>{if(!openingArtwork)setPage(value);}, onAdd: () => {if(openingArtwork)return; localStorage.setItem(pageKey, String(pageCount + 1)); setPage(pageCount); setPageCount(count => count + 1); }, template, onTemplate: setTemplate }} /></div>;
 }
 
-function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { template: 'blank' | 'lined'; pages: DrawingPageControls }) {
+function DrawingPage({ meetingId, partId, onSaved, template, pages,onFindPlace,colour:color,onColour:setColor,artworkControls }: Props & { template: 'blank' | 'lined'; pages: DrawingPageControls; colour:string;onColour:(colour:string)=>void;artworkControls:{partId:string;disabled:boolean;onChoose:(item:PublishedArtwork)=>Promise<void>} }) {
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [redoStack, setRedoStack] = useState<Stroke[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [tool, setTool] = useState<Tool>('pen');
-  const [color, setColor] = useState('#163b5c');
   const [size, setSize] = useState(5);
   const [smudgeSize, setSmudgeSize] = useState(18);
   const [width, setWidth] = useState(760);
@@ -45,6 +51,7 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   const [measured, setMeasured] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
+  const [exportError,setExportError]=useState('');
   const [artwork,setArtwork]=useState<DrawingArtwork>();
   const [outline,setOutline]=useState<HTMLImageElement>();
   const drawing = useRef(false);
@@ -99,11 +106,12 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
     if (!paper) {basePaper.current=available;setPaper(available);}
   }, [loaded, measured, paper, width, height]);
   const sheet = paper ?? { width: 760, height: 420 };
-  const maxZoom=artwork?16:4;
+  const hasOutline=Boolean(artwork&&!artwork.hidden);
+  const maxZoom=hasOutline?16:4;
   const view = drawingSurface(basePaper.current??sheet, width, height,Boolean(artwork));
   const visiblePaper=artwork?sheet:{width:Math.max(sheet.width,view.paperWidth,view.paperWidth/zoom.scale),height:Math.max(sheet.height,view.paperHeight,view.paperHeight/zoom.scale)};
   const extent={width:Math.max(sheet.width,view.paperWidth)*view.scale,height:Math.max(sheet.height,view.paperHeight)*view.scale};
-  const artworkLayer=useMemo(()=>outline&&artwork?{image:outline,width:artwork.width,height:artwork.height}:undefined,[outline,artwork]);
+  const artworkLayer=useMemo(()=>outline&&artwork?{image:outline,width:artwork.width,height:artwork.height,hidden:artwork.hidden}:undefined,[outline,artwork]);
   const ink = useMemo(() => artworkLayer||strokes.some(stroke => stroke.mode === 'smudge'||stroke.mode==='fill') ? renderDrawingInk(strokes, sheet.width, sheet.height, 2048, 2,artworkLayer) : null, [strokes, sheet.width, sheet.height,artworkLayer]);
   const changeZoom = (next: typeof zoom) => {
     const latest=latestDrawing.current;
@@ -209,37 +217,47 @@ function DrawingPage({ meetingId, partId, onSaved, template, pages }: Props & { 
   const clear = () => {
     if (!strokes.length || window.confirm(t("Clear this drawing page?"))) { setRedoStack([]); setStrokes([]); }
   };
-  const saveChanges = async () => {
-    const latest=latestDrawing.current;
-    if(!latest.loaded||!latest.paper)return;
-    setSaving(true);
-    try{
-      await saveDrawing(meetingId,partId,latest.strokes,latest.paper,latest.artwork);
-      setSaveError(false);onSaved?.();
-    }catch{setSaveError(true);}
-    finally{setSaving(false);}
+  const removeOutline=()=>{
+    if(!artwork||!hasOutline)return;
+    const keepFill=(stroke:Stroke)=>stroke.mode==='fill'?{...stroke,fillUsesOutline:true}:stroke;
+    const nextStrokes=strokes.map(keepFill),nextArtwork={...artwork,hidden:true};
+    latestDrawing.current={...latestDrawing.current,strokes:nextStrokes,artwork:nextArtwork};
+    setStrokes(nextStrokes);setRedoStack(current=>current.map(keepFill));setArtwork(nextArtwork);
+    changeZoom(initialDrawingZoom);
   };
-  const exportPng = () => {
-    const exportInk = renderDrawingInk(strokes, sheet.width, sheet.height, 4096, 2,artworkLayer);
-    const output = document.createElement('canvas'); output.width = exportInk.width; output.height = exportInk.height;
-    const context = output.getContext('2d');
-    if (!context) { window.alert(t('Could not export this drawing.')); return; }
-    context.fillStyle = '#fffdf7'; context.fillRect(0, 0, output.width, output.height);
-    if (template === 'lined') {
-      const scale = output.width / sheet.width;
-      context.strokeStyle = '#d7dfef'; context.lineWidth = scale;
-      for (let y = 30; y < sheet.height; y += 30) { context.beginPath(); context.moveTo(0, y * scale); context.lineTo(output.width, y * scale); context.stroke(); }
+  const canShare=typeof navigator.share==='function'&&typeof navigator.canShare==='function';
+  const exportPng = async () => {
+    setExportError('');
+    try{
+      const exportInk = renderDrawingInk(strokes, sheet.width, sheet.height, 4096, 2,artworkLayer);
+      const output = document.createElement('canvas'); output.width = exportInk.width; output.height = exportInk.height;
+      const context = output.getContext('2d');
+      if (!context) { window.alert(t('Could not export this drawing.')); return; }
+      context.fillStyle = '#fffdf7'; context.fillRect(0, 0, output.width, output.height);
+      if (template === 'lined') {
+        const scale = output.width / sheet.width;
+        context.strokeStyle = '#d7dfef'; context.lineWidth = scale;
+        for (let y = 30; y < sheet.height; y += 30) { context.beginPath(); context.moveTo(0, y * scale); context.lineTo(output.width, y * scale); context.stroke(); }
+      }
+      context.drawImage(exportInk, 0, 0);
+      const data = output.toDataURL('image/png');
+      const file=new File([Uint8Array.from(atob(data.split(',')[1]),character=>character.charCodeAt(0))],`${partId}-discovery.png`,{type:'image/png'});
+      if(canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({files:[file]});
+      }else{
+        const link = document.createElement('a'); link.download = file.name; link.href = data; link.click();
+      }
+    }catch(error){
+      if(error instanceof DOMException&&error.name==='AbortError')return;
+      setExportError('Could not share or download this drawing. Please try again.');
     }
-    context.drawImage(exportInk, 0, 0);
-    const data = output.toDataURL('image/png');
-    const link = document.createElement('a'); link.download = `${partId}-discovery.png`; link.href = data; link.click();
   };
 
   return <section className="drawing-card" aria-labelledby={`${partId}-drawing-title`}>
     <div className="drawing-heading"><div><h3 id={`${partId}-drawing-title`}>{t("Doodle notes")}</h3><p>{t("Draw, write or sketch a thought.")}</p></div></div><span className={`save-state notebook-save-state ${saveError ? 'has-error' : ''}`} aria-live="polite">{saveError ? t("Could not load or save this drawing on this device.") : !loaded ? t("Opening your drawing…") : saving ? t("Saving…") : t("Saved on this device")}</span>
-    <div className="drawing-page-actions">{artwork&&<span>{artwork.title}</span>}<button className="drawing-save-changes" type="button" disabled={!loaded||!paper||saving} onClick={()=>void saveChanges()}><NotebookIcon name="save"/>{t('Save changes')}</button><button className="drawing-save-changes" type="button" disabled={!loaded||(!strokes.length&&!artwork)} onClick={exportPng}><NotebookIcon name="download"/>{t('Download PNG')}</button></div>
+    {exportError&&<p role="alert">{t(exportError)}</p>}
     <div className="drawing-paper-workspace">
-    <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={brushSize} onSize={tool === 'smudge' ? setSmudgeSize : setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} canExport={loaded&&(strokes.length>0||Boolean(artwork))} onUndo={undo} onRedo={redo} onClear={clear} onExport={exportPng} zoom={zoom.scale} maxZoom={maxZoom} fixedPaper={Boolean(artwork)} onZoom={value=>changeZoom(zoomDrawing(zoomRef.current,{x:width/2,y:height/2},{x:width/2,y:height/2},value/zoomRef.current.scale,width,height,extent,maxZoom))} onResetZoom={()=>changeZoom(initialDrawingZoom)} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:visiblePaper.width, y:visiblePaper.height}) : createDrawingPaper(width, height))} pages={pages} />
+    <DrawingToolbar tool={tool} onTool={setTool} colour={color} onColour={setColor} size={brushSize} onSize={tool === 'smudge' ? setSmudgeSize : setSize} canUndo={strokes.length > 0} canRedo={redoStack.length > 0} canExport={loaded&&(strokes.length>0||hasOutline)} onUndo={undo} onRedo={redo} onClear={clear} onExport={()=>void exportPng()} canShare={canShare} onFindPlace={onFindPlace} hasOutline={hasOutline} onRemoveOutline={removeOutline} artworkPicker={<PublishedArtworkPicker meetingId={meetingId} partId={artworkControls.partId} disabled={artworkControls.disabled} onChoose={artworkControls.onChoose}/>} zoom={zoom.scale} maxZoom={maxZoom} fixedPaper={Boolean(artwork)} onZoom={value=>changeZoom(zoomDrawing(zoomRef.current,{x:width/2,y:height/2},{x:width/2,y:height/2},value/zoomRef.current.scale,width,height,extent,maxZoom))} onResetZoom={()=>changeZoom(initialDrawingZoom)} onExtendPaper={() => setPaper(current => current ? includeDrawingPoint(current, {x:visiblePaper.width, y:visiblePaper.height}) : createDrawingPaper(width, height))} pages={pages} />
     <div className="canvas-shell" ref={canvasRef} onContextMenu={event => event.preventDefault()} onPointerDown={start} onPointerMove={move} onPointerUp={finish} onPointerCancel={finish} data-zoom={zoom.scale}>
       <Stage width={view.width} height={view.height}>
         <Layer x={zoom.x} y={zoom.y} scaleX={view.scale * zoom.scale} scaleY={view.scale * zoom.scale}><Rect width={visiblePaper.width} height={visiblePaper.height} fill="#fffdf7" />{template === 'lined' && Array.from({ length: Math.ceil(visiblePaper.height / 30) }, (_, index) => <Line key={index} points={[0, 30 + index * 30, visiblePaper.width, 30 + index * 30]} stroke="#d7dfef" strokeWidth={1} />)}</Layer>

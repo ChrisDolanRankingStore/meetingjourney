@@ -28,6 +28,16 @@ test('fill cannot cross diagonals or wrap a row and handles same-colour and edge
  floodFillPixels(pixels,3,3,-1,0,colour);
  assert.deepEqual(pixels,before);
 });
+test('outline boundaries guide a fill without copying the outline into the removable ink layer',()=>{
+ const mask=new Uint8ClampedArray(5*5*4),ink=new Uint8ClampedArray(mask.length);
+ for(let y=0;y<5;y++)for(let x=0;x<5;x++)mask.set(x===2?[0,0,0,255]:[255,255,255,255],(y*5+x)*4);
+ ink.set([0,0,255,255],4*4);
+ floodFillPixels(mask,5,5,0,2,[255,0,0,255],ink);
+ assert.deepEqual([...ink.slice(0,4)],[255,0,0,255]);
+ assert.deepEqual([...ink.slice(2*4,3*4)],[0,0,0,0],'No outline pixels belong to the colouring layer.');
+ assert.deepEqual([...ink.slice(4*4,5*4)],[0,0,255,255],'Existing ink outside the filled region stays intact.');
+ assert.deepEqual([...ink.slice((2*5+4)*4,(2*5+5)*4)],[0,0,0,0],'Fill cannot leak after hiding the original outline.');
+});
 
 test('fill is iterative on large empty paper and leaves opaque boundaries intact',()=>{
  const pixels=new Uint8ClampedArray(1024*1024*4);

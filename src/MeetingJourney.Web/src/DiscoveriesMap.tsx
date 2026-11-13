@@ -46,7 +46,7 @@ function SavedDrawingPreview({ drawing }: { drawing: DiscoveryDrawing }) {
     const render=async()=>{
       const artwork=drawing.artwork;
       const image=artwork?await loadDrawingArtwork(artwork.dataUrl):undefined;
-      if(active)context.drawImage(renderDrawingInk(drawing.strokes,paper.width,paper.height,1200,1,image&&artwork?{image,width:artwork.width,height:artwork.height}:undefined),0,0,canvas.width,canvas.height);
+      if(active)context.drawImage(renderDrawingInk(drawing.strokes,paper.width,paper.height,1200,1,image&&artwork?{image,width:artwork.width,height:artwork.height,hidden:artwork.hidden}:undefined),0,0,canvas.width,canvas.height);
     };
     void render().catch(()=>{if(active)setFailed(true);});
     return()=>{active=false;};

@@ -163,6 +163,20 @@ html[data-neutral="true"] .app .home-sources-card { margin: 24px auto; max-width
 .app .story-map-heading .icon-action:first-child > .icon-action-hint { right: auto; left: calc(100% + 6px); }
 .app .paragraph-controls > label { text-align: center; }
 .app .paragraph-controls input { margin-inline: auto; }
+.drawing-card .notebook-save-state:not(.has-error) { position:absolute; width:1px; height:1px; margin:0; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+@media (max-width:759px) {
+  .app .part-card .journey-tool-modal[data-tool="doodle"] { padding:52px 9px 9px; }
+  .app .part-card .journey-tool-modal[data-tool="doodle"] > .illustrated-tool-heading { position:absolute; inset:3px 3px auto 10px; height:44px; min-height:0; margin:0; padding:0; border:0; background:transparent; }
+  .app .journey-tool-modal[data-tool="doodle"] > .illustrated-tool-heading > .illustrated-icon,
+  .app .journey-tool-modal[data-tool="doodle"] > .illustrated-tool-heading p { display:none; }
+  .app .journey-tool-modal[data-tool="doodle"] > .illustrated-tool-heading > div { max-width:calc(100% - 190px); min-width:0; }
+  .app .journey-tool-modal[data-tool="doodle"] > .illustrated-tool-heading h3 { margin:0; font-size:.8rem; line-height:1.2; }
+  .app .part-card .journey-tool-modal[data-tool="doodle"] > .notebook-tabs { position:absolute; top:3px; right:49px; left:auto; display:flex; flex-wrap:nowrap; gap:0; height:44px; margin:0; padding:0; border:0; background:transparent; }
+  .app .part-card .journey-tool-modal[data-tool="doodle"] > .notebook-tabs button { display:grid; place-items:center; width:44px; min-width:44px; height:44px; min-height:44px; margin:0; padding:0; border:0; background:transparent; }
+  .app .part-card .journey-tool-modal[data-tool="doodle"] > .notebook-tabs button[aria-pressed="true"] { color:#fff; background:#3e5a78; }
+  .app .journey-tool-modal[data-tool="doodle"] .notebook-tab-label { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+  .app .journey-tool-modal[data-tool="doodle"] .journey-tool-close { position:absolute; top:0; right:0; width:44px; height:44px; min-height:44px; }
+}
 .app .notes-timeline > label { display: grid; gap: 6px; min-width: 0; }
 .app .notes-timeline input[type="search"] {
   appearance: none; -webkit-appearance: none; box-sizing: border-box; display: block;
@@ -193,7 +207,11 @@ html[data-neutral="true"] .app .home-sources-card { margin: 24px auto; max-width
 .app .home-copy > .programme-import { margin-top: 12px; }
 .app .home-copy .comfort-shortcut { min-height: 44px; }
 .neutral-notebook-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 12px; }
-.neutral-notebook-actions button { min-height: 44px; }
+.neutral-notebook-actions button { appearance:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:6px 8px; border:0; border-radius:6px; background:transparent; color:#314f70; font:inherit; cursor:pointer; }
+.neutral-notebook-actions button:hover { background:#e8ddc266; }
+.neutral-notebook-actions button:focus-visible { outline:2px solid #254f78; outline-offset:2px; }
+.neutral-notebook-actions button:disabled { opacity:.5; cursor:default; }
+.neutral-notebook-actions button svg { flex:0 0 22px; width:22px; height:22px; }
 .app .part-guidance { margin-block: 8px; }
 .app .part-guidance > summary { color: #31485f; font-weight: 600; }
 .app .part-guidance .part-focus-panel { margin: 0; }

@@ -69,3 +69,9 @@ test('a stop keeps the same terrain position when earlier stops have no saved no
   const both = buildDiscoveryTreasures(meeting, [note('part-1', 'Earlier thought'), note('part-10', 'Later thought')], []);
   assert.deepEqual(single[0].position, both[1].position);
 });
+test('a removed outline alone is empty but its retained colouring remains discoverable',()=>{
+ const artwork={id:'12345678-1234-1234-1234-123456789abc',title:'Removed',imageHash:'a'.repeat(64),dataUrl:'data:image/png;base64,aGVsbG8=',width:760,height:900,hidden:true};
+ assert.deepEqual(buildDiscoveryTreasures(meeting,[],[{key:'week-a:part-1',value:[],artwork}]),[]);
+ const result=buildDiscoveryTreasures(meeting,[],[{key:'week-a:part-1',value:[stroke],artwork}]);
+ assert.deepEqual(result[0].drawings[0].strokes,[stroke]);
+});

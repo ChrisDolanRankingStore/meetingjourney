@@ -1,4 +1,6 @@
 "family","current_key","current_reference","requested_svg","source"
+"control","image","reference-controls/control-image.svg","control-image.svg","src/MeetingJourney.Web/src/NotebookIcon.tsx"
+"control","share","reference-controls/control-share.svg","control-share.svg","src/MeetingJourney.Web/src/NotebookIcon.tsx"
 "control","save","reference-controls/control-save.svg","control-save.svg","src/MeetingJourney.Web/src/NotebookIcon.tsx"
 "control","fill","reference-controls/control-fill.svg","control-fill.svg","src/MeetingJourney.Web/src/NotebookIcon.tsx"
 "control","pen","reference-controls/control-pen.svg","control-pen.svg","src/MeetingJourney.Web/src/NotebookIcon.tsx"

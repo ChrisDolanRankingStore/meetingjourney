@@ -1,0 +1,12 @@
+---
+description: Keep buttons consistent with Meeting Journey instead of browser-default grey controls
+alwaysApply: true
+---
+
+# App button styling
+
+- Never introduce browser-default grey buttons or grey boxed action controls.
+- Reuse an existing appropriate app button style. For lightweight actions, use transparent icon/text controls with the app's ink colours, not an unstyled `<button>`.
+- For example, Home notebook shortcuts should use transparent icon/text actions, not native button chrome.
+- Preserve visible keyboard focus, readable disabled/selected states, accessible labels for icon-only buttons, and at least 44px touch targets.
+- Check the actual rendered controls at phone widths, including hover, focus and disabled states; a class name alone does not establish that a button is styled.

@@ -23,20 +23,13 @@ export function smoothStrokePoints(points:number[]):number[]{
   return result;
 }
 
-export function renderDrawingInk(strokes: Stroke[], width: number, height: number, limit = 2048, pixelRatio = 1, artwork?: {image:CanvasImageSource;width:number;height:number}) {
+export function renderDrawingInk(strokes: Stroke[], width: number, height: number, limit = 2048, pixelRatio = 1, artwork?: {image:CanvasImageSource;width:number;height:number;hidden?:boolean}) {
   const canvas = document.createElement('canvas');
   const scale = Math.min(pixelRatio, limit / Math.max(width, height));
   canvas.width = Math.max(1, Math.ceil(width * scale));
   canvas.height = Math.max(1, Math.ceil(height * scale));
   const context = canvas.getContext('2d', {willReadFrequently:true});
   if (!context) throw new Error('Drawing canvas is unavailable.');
-  const restoreOutline=()=>{
-    if(!artwork)return;
-    context.globalCompositeOperation='destination-over';context.globalAlpha=1;
-    context.drawImage(artwork.image,0,0,artwork.width*scale,artwork.height*scale);
-    context.globalCompositeOperation='source-over';
-  };
-  restoreOutline();
   context.lineCap = 'round'; context.lineJoin = 'round';
   for (const stroke of strokes) {
     if (stroke.points.length < 2) continue;
@@ -44,14 +37,24 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
       const bounds=stroke.fillBounds??{width,height};
       const fillWidth=Math.min(canvas.width,Math.ceil(bounds.width*scale));
       const fillHeight=Math.min(canvas.height,Math.ceil(bounds.height*scale));
-      const pixels=context.getImageData(0,0,fillWidth,fillHeight);
+      const ink=context.getImageData(0,0,fillWidth,fillHeight);
+      let pixels=ink;
+      // Keep the outline only as a boundary mask so removing it cannot remove colouring.
+      if(artwork&&(!artwork.hidden||stroke.fillUsesOutline)){
+        const mask=document.createElement('canvas');mask.width=fillWidth;mask.height=fillHeight;
+        const maskContext=mask.getContext('2d',{willReadFrequently:true});
+        if(!maskContext)throw new Error('Drawing canvas is unavailable.');
+        maskContext.drawImage(artwork.image,0,0,artwork.width*scale,artwork.height*scale);
+        maskContext.drawImage(canvas,0,0);
+        pixels=maskContext.getImageData(0,0,fillWidth,fillHeight);
+      }
       const swatch=document.createElement('canvas');
       swatch.width=swatch.height=1;
       const colour=swatch.getContext('2d');
       if(!colour)throw new Error('Drawing canvas is unavailable.');
       colour.fillStyle=stroke.color;colour.fillRect(0,0,1,1);
-      floodFillPixels(pixels.data,fillWidth,fillHeight,Math.floor(stroke.points[0]*scale),Math.floor(stroke.points[1]*scale),colour.getImageData(0,0,1,1).data);
-      context.putImageData(pixels,0,0);
+      floodFillPixels(pixels.data,fillWidth,fillHeight,Math.floor(stroke.points[0]*scale),Math.floor(stroke.points[1]*scale),colour.getImageData(0,0,1,1).data,ink.data);
+      context.putImageData(ink,0,0);
       continue;
     }
     const points=stroke.smooth?smoothStrokePoints(stroke.points):stroke.points;
@@ -72,12 +75,16 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
       for (let index = 2; index + 1 < points.length; index += 2) context.lineTo(points[index] * scale, points[index + 1] * scale);
       context.stroke();
     }
-    if(stroke.mode==='eraser')restoreOutline();
+  }
+  if(artwork&&!artwork.hidden){
+    context.globalCompositeOperation='destination-over';context.globalAlpha=1;
+    context.drawImage(artwork.image,0,0,artwork.width*scale,artwork.height*scale);
+    context.globalCompositeOperation='source-over';
   }
   return canvas;
 }
 
-export function floodFillPixels(pixels:Uint8ClampedArray,width:number,height:number,x:number,y:number,colour:ArrayLike<number>){
+export function floodFillPixels(pixels:Uint8ClampedArray,width:number,height:number,x:number,y:number,colour:ArrayLike<number>,ink?:Uint8ClampedArray){
   if(x<0||y<0||x>=width||y>=height)return;
   const start=(y*width+x)*4;
   const target=pixels.slice(start,start+4);
@@ -99,6 +106,7 @@ export function floodFillPixels(pixels:Uint8ClampedArray,width:number,height:num
   while(head<tail){
     const index=queue[head++],offset=index*4;
     pixels.set(colour,offset);
+    ink?.set(colour,offset);
     if(index%width>0)enqueue(index-1);
     if(index%width<width-1)enqueue(index+1);
     if(index>=width)enqueue(index-width);

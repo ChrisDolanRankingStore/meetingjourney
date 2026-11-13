@@ -37,6 +37,7 @@ export function validateBackup(value: any): JournalBackup {
         if (!Array.isArray(entry.value) || entry.value.length > 50000) throw new Error('Invalid drawing.');
         for (const stroke of entry.value) {
           if (!stroke || !['pen','eraser','highlighter','smudge','fill'].includes(stroke.mode) || typeof stroke.color !== 'string' || stroke.color.length > 60 || !Number.isFinite(stroke.size) || stroke.size <= 0 || stroke.size > 200 || !Array.isArray(stroke.points) || stroke.points.length % 2 || stroke.points.length > 1000000 || !stroke.points.every((p: unknown) => typeof p === 'number' && Number.isFinite(p) && Math.abs(p) < 1000000)) throw new Error('Invalid drawing stroke.');
+          if(stroke.fillUsesOutline!==undefined&&(stroke.mode!=='fill'||typeof stroke.fillUsesOutline!=='boolean'))throw new Error('Invalid outline fill.');
           if(stroke.mode==='fill'&&(stroke.points.length!==2||!stroke.fillBounds||!['width','height'].every(d=>Number.isFinite(stroke.fillBounds[d])&&stroke.fillBounds[d]>0&&stroke.fillBounds[d]<=100000)||stroke.points[0]<0||stroke.points[1]<0||stroke.points[0]>=stroke.fillBounds.width||stroke.points[1]>=stroke.fillBounds.height))throw new Error('Invalid colour fill.');
         }
         if (entry.paper && !['width','height'].every(d => Number.isFinite(entry.paper[d]) && entry.paper[d] > 0 && entry.paper[d] <= 100000)) throw new Error('Invalid page size.');

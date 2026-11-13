@@ -6,6 +6,7 @@ export interface PublishedArtwork {
   imageUrl: string;
 }
 export interface DrawingArtwork {
+  hidden?: boolean;
   id: string;
   title: string;
   imageHash: string;
@@ -16,7 +17,7 @@ export interface DrawingArtwork {
 export function validDrawingArtwork(value: unknown): value is DrawingArtwork {
   if(!value||typeof value!=='object')return false;
   const item=value as Record<string,unknown>;
-  return typeof item.id==='string'&&/^[a-f0-9-]{36}$/.test(item.id)&&
+  return (item.hidden===undefined||typeof item.hidden==='boolean')&&typeof item.id==='string'&&/^[a-f0-9-]{36}$/.test(item.id)&&
     typeof item.title==='string'&&item.title.length<=300&&
     typeof item.imageHash==='string'&&/^[a-f0-9]{64}$/.test(item.imageHash)&&
     typeof item.dataUrl==='string'&&item.dataUrl.length<=12*1024*1024&&/^data:image\/png;base64,[A-Za-z0-9+/]+={0,2}$/.test(item.dataUrl)&&

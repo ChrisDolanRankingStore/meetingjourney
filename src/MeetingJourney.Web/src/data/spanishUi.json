@@ -1,4 +1,11 @@
 {
+  "Load or remove outline": "Cargar o quitar dibujo",
+  "Load simple outline": "Cargar dibujo sencillo",
+  "Load detailed outline": "Cargar dibujo detallado",
+  "Load manga-inspired outline": "Cargar dibujo inspirado en el manga",
+  "Remove outline; keep colouring": "Quitar contornos y conservar los colores",
+  "Share drawing": "Compartir dibujo",
+  "Could not share or download this drawing. Please try again.": "No se pudo compartir ni descargar este dibujo. Inténtalo de nuevo.",
   "Colour a published outline": "Colorear un dibujo publicado",
   "Optional outlines for this meeting item. Choosing one adds a new page and keeps your existing drawings.": "Dibujos opcionales para esta parte de la reunión. Al elegir uno se añade una página nueva y se conservan tus dibujos.",
   "Loading outlines...": "Cargando dibujos...",

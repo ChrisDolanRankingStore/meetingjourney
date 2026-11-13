@@ -16,7 +16,7 @@ The app currently mixes small outline controls with painted activity and movemen
 - Use a single ink colour for the main set. Supply editable SVGs using `currentColor` so the app can apply normal, selected, disabled and high-contrast colours.
 - Start with the existing deep ink blue `#163b5c`. The artwork must also work in black and white. Colour must not be the only way to distinguish functions.
 - Keep save and download clearly different: save means keeping work on this device; download means exporting a PNG.
-- The save control should work as a small icon beside "Save changes", without a boxed button appearance. Button styling belongs to the app, not the asset.
+- Where a manual save control is used, it should work as a small icon beside its label, without a boxed button appearance. Drawing pages autosave and use Share instead. Button styling belongs to the app, not the asset.
 
 Before completing the family, submit six samples together: pen, highlighter, save, download, listen and a movement icon. This is a proposed direction for approval, not permission to redesign the app's navigation or behaviour.
 
@@ -33,7 +33,7 @@ Before completing the family, submit six samples together: pen, highlighter, sav
 
 ## Required icons
 
-The accompanying CSV lists 49 current references: 34 controls, nine activity icons and six movement icons. Prefixes distinguish repeated concepts in different existing families; visually identical replacements may share a master where their meaning is genuinely the same.
+The accompanying CSV lists 51 current references: 36 controls, nine activity icons and six movement icons. The image control loads or removes a drawing outline; the share control opens native device sharing (with a download fallback). Drawing pages autosave and do not have a manual Save button. Prefixes distinguish repeated concepts in different existing families; visually identical replacements may share a master where their meaning is genuinely the same.
 
 ### Drawing, notebook and controls
 

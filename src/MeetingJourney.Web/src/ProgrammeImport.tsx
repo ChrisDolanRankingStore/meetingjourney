@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {t} from './i18n';
 import {NotebookIcon} from './NotebookIcon';
 
@@ -36,11 +36,18 @@ export function ProgrammeContentNotice({notice,meetingId,home=false,className='m
   }}><NotebookIcon name="close"/></button>{error&&<p role="alert">{t(error)}</p>}</div>:null;
 }
 
-export function ProgrammeImport({home=false}:{home?:boolean}){
+export function ProgrammeImport({home=false,focusOnOpen=false}:{home?:boolean;focusOnOpen?:boolean}){
   const [enabled,setEnabled]=useState(programmeImportEnabled);
   const [expanded,setExpanded]=useState(()=>!programmeImportEnabled());
   const [confirmed,setConfirmed]=useState(false);
   const [error,setError]=useState('');
+  const summaryRef=useRef<HTMLElement>(null);
+  useEffect(()=>{
+    if(!focusOnOpen)return;
+    setExpanded(true);
+    summaryRef.current?.focus();
+    summaryRef.current?.scrollIntoView({block:'start'});
+  },[focusOnOpen]);
   const choose=(allow:boolean)=>{
     try{
       localStorage.setItem(key,allow?'personal-v1':'disabled');
@@ -48,10 +55,10 @@ export function ProgrammeImport({home=false}:{home?:boolean}){
       window.dispatchEvent(new Event(PROGRAMME_IMPORT_CHANGED));
     }catch{setError('Could not save your import preference on this device. Please try again.');}
   };
-  if(home)return enabled?null:<p className="home-import-prompt"><button type="button" className="text-button" onClick={()=>window.dispatchEvent(new Event('mj-open-settings'))}>{t('Ask a grown-up to turn on meeting import in Settings')}</button></p>;
+  if(home)return enabled?null:<p className="home-import-prompt"><button type="button" className="text-button" onClick={()=>window.dispatchEvent(new Event('mj-open-programme-import'))}>{t('Ask a grown-up to turn on meeting import in Settings')}</button></p>;
   return <section className="settings-card programme-import" aria-label={t('Personal programme import')}>
     <details open={expanded} onToggle={event=>setExpanded(event.currentTarget.open)}>
-      <summary>{t(enabled?'Personal programme import is on':'Personal programme import')}</summary>
+      <summary ref={summaryRef}>{t(enabled?'Personal programme import is on':'Personal programme import')}</summary>
       <p>{t('Meeting Journey is an independent focus aid designed to help neurodivergent users follow meetings. It is not affiliated with or endorsed by Jehovah’s Witnesses, and does not replace JW.org, JW Library or Watchtower ONLINE LIBRARY (wol.jw.org).')}</p>
       <p>{t('With your confirmation, the server retrieves programme details and reads cited scriptures temporarily to extract listening words. Only titles, timings, references and word lists are saved on this device. Article and verse text are not saved or sent to the app. Your personal notes are never sent to WOL.')}</p>
       <p>{t('Your confirmation records your personal-use preference; it does not grant publisher permission or change the source’s terms of use.')}</p>

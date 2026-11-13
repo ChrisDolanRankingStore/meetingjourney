@@ -40,6 +40,18 @@ test('backup round-trip preserves editable strokes, paper, notes, study comments
  assert.equal(JSON.parse(restored.getItem('mj-comfort')).hideCounts,true);
  assert.equal(JSON.parse(restored.getItem('mj-notebook-labels:week-a')).parts[0].title,'A saved title');
 });
+test('removing an outline preserves its fill boundaries in offline backups without making it visible again',async()=>{
+ const artwork={id:'12345678-1234-1234-1234-123456789abc',title:'Removed outline',imageHash:'a'.repeat(64),dataUrl:'data:image/png;base64,aGVsbG8=',width:760,height:900,hidden:true};
+ const fill={points:[20,30],color:'#c54d43',size:5,mode:'fill',fillBounds:{width:760,height:900},fillUsesOutline:true};
+ await saveDrawing('week-a','reading',[fill],{width:760,height:900},artwork);
+ const backup=validateBackup(await exportJournal(new MemoryStorage()));
+ globalThis.indexedDB=new IDBFactory();await importJournal(backup,false,new MemoryStorage());
+ const restored=await readDrawingPage('week-a','reading');
+ assert.equal(restored.artwork.hidden,true);
+ assert.deepEqual(restored.strokes,[fill]);
+ const invalid=structuredClone(backup);invalid.drawings[0].value[0].fillUsesOutline='yes';
+ assert.throws(()=>validateBackup(invalid),/Invalid outline fill/);
+});
 test('restore keeps newer device entries instead of overwriting them',async()=>{await saveNote({meetingId:'week-a',partId:'reading',text:'Old',updatedAt:'2026-10-25'});const backup=await exportJournal(new MemoryStorage());await saveNote({meetingId:'week-a',partId:'reading',text:'Keep this',updatedAt:'2026-10-26'});assert.deepEqual(await importJournal(backup,false,new MemoryStorage()),{added:0,updated:0,kept:1});assert.equal((await readNote('week-a','reading')).text,'Keep this');});
 test('merge adds different device entries and is idempotent',async()=>{
  await saveNote({meetingId:'week-a',partId:'device-a',text:'A',updatedAt:'2026-10-25'});

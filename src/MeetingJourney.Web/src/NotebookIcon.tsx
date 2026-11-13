@@ -1,7 +1,9 @@
-export type NotebookIconName = 'save' | 'fill' | 'pen' | 'highlighter' | 'eraser' | 'smudge' | 'undo' | 'redo' | 'pages' | 'more' | 'download' | 'trash' | 'plus' | 'close' | 'note' | 'heart' | 'clue' | 'expand' | 'home' | 'route' | 'treasure' | 'settings' | 'book' | 'grid' | 'list' | 'calendar' | 'back' | 'next' | 'external' | 'music' | 'check' | 'chevron-down' | 'clock' | 'pin';
+export type NotebookIconName = 'image' | 'share' | 'save' | 'fill' | 'pen' | 'highlighter' | 'eraser' | 'smudge' | 'undo' | 'redo' | 'pages' | 'more' | 'download' | 'trash' | 'plus' | 'close' | 'note' | 'heart' | 'clue' | 'expand' | 'home' | 'route' | 'treasure' | 'settings' | 'book' | 'grid' | 'list' | 'calendar' | 'back' | 'next' | 'external' | 'music' | 'check' | 'chevron-down' | 'clock' | 'pin';
 
 export function NotebookIcon({ name }: { name: NotebookIconName }) {
   const shapes = {
+    image: <><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="2"/><path d="m3 17 5-5 4 4 4-6 5 7"/></>,
+    share: <><path d="M12 15V3m-4 4 4-4 4 4M7 10H4v11h16V10h-3"/></>,
     save: <><path d="M4 3h13l4 4v14H3V3ZM7 3v6h10V3M7 21v-8h10v8" /></>,
     fill: <><path d="m5 3 12 12-7 6-9-9 7-7m-6 7h15M19 11s-3 4-3 6a3 3 0 0 0 6 0c0-2-3-6-3-6Z" /></>,
     calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4m10-4v4M3 10h18M7 14h3m4 0h3M7 17h3" /></>,

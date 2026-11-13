@@ -4,7 +4,7 @@ import {focusLandscape, sceneImage, portraitImage} from './artwork';
 import {sceneAssetsForWeek,readSceneHemisphere,SCENE_HEMISPHERE_KEY,type SceneHemisphere} from './sceneSets';
 import {paintedIconAssets} from './paintedIcons';
 import type {Meeting} from './types';
-import {ProgrammeImport,programmeImportEnabled} from './ProgrammeImport';
+import {programmeImportEnabled} from './ProgrammeImport';
 
 export function OfflineMeeting({meeting, portrait}: {meeting: Meeting; portrait: string}) {
   const [status, setStatus] = useState('');
@@ -36,7 +36,7 @@ export function OfflineMeeting({meeting, portrait}: {meeting: Meeting; portrait:
       setStatus(error instanceof Error ? error.message : 'Could not save for offline use.');
     } finally { setBusy(false); }
   };
-  return <><ProgrammeImport /><section className="settings-card"><h3>{t('Ready without a connection')}</h3><p>{t('The chosen companion and scenery prepare in the background when connected. Use this button to save or retry the meeting pack. Official reading material opens separately in JW Library.')}</p><button disabled={busy || !('serviceWorker' in navigator)} onClick={() => void save()}>{t('Save this meeting offline')}</button><p role="status">{t(status)}</p></section></>;
+  return <section className="settings-card"><h3>{t('Ready without a connection')}</h3><p>{t('The chosen companion and scenery prepare in the background when connected. Use this button to save or retry the meeting pack. Official reading material opens separately in JW Library.')}</p><button disabled={busy || !('serviceWorker' in navigator)} onClick={() => void save()}>{t('Save this meeting offline')}</button><p role="status">{t(status)}</p></section>;
 }
 
 export function DisplaySettings() {
