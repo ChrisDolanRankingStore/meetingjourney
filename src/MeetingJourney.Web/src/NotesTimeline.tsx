@@ -1,11 +1,12 @@
 import {useEffect,useRef,useState} from 'react';
-import {openDb} from './storage';
+import {openDb,type MeetingDrawingRecord} from './storage';
 import type {SavedNote} from './types';
 import type {StudyProgress} from './studyStorage';
 import {getLanguage,t} from './i18n';
 import {ScriptureLookup} from './ScriptureLookup';
 import {HistoricalNotebook, type HistoricalTarget} from './HistoricalNotebook';
 import {notebookContext,notebookSearch} from './notebookLabels';
+import {hasSavedDrawing} from './discoveryBook';
 
 type TimelineNote=HistoricalTarget&{key:string;text:string;updatedAt:string};
 function noteDate(note:TimelineNote){
@@ -19,15 +20,15 @@ export async function readNotesTimeline():Promise<TimelineNote[]> {
     transaction.oncomplete=()=>{
       const entries:TimelineNote[]=[];
       for(const entry of notes.result as {key:string;value:SavedNote}[]){
-        const note=entry.value,text=[note.text,note.feedback].filter(Boolean).join('\n');
+        const note=entry.value,text=[note.text,note.feedback,...(note.feedbackChoices??[]).map(choice=>t(choice))].filter(Boolean).join('\n');
         if(text.trim())entries.push({...note,key:`notes:${entry.key}`,text,kind:'note'});
       }
       for(const entry of study.result as {key:string;value:StudyProgress}[]){
         const note=entry.value,text=[note.draft,...note.comments.map(comment=>comment.text),...Object.values(note.connectionExamples??{}),...(note.partId.endsWith(':connections')?Object.entries(note.pointChoices??{}).filter(([,target])=>target).map(([source,target])=>`${t(source)} → ${t(target)}`):[])].filter(Boolean).join('\n');
         if(text.trim())entries.push({...note,key:`study:${entry.key}`,text,kind:'study'});
       }
-      for(const entry of drawings.result as {key:string;value:import('./types').Stroke[];updatedAt?:string}[]){
-        if(!entry.value.some(stroke=>(stroke.mode==='pen'||stroke.mode==='highlighter'||stroke.mode==='fill')&&stroke.points.length))continue;
+      for(const entry of drawings.result as (MeetingDrawingRecord&{updatedAt?:string})[]){
+        if(!hasSavedDrawing(entry))continue;
         const separator=entry.key.indexOf(':');
         if(separator<0)continue;
         entries.push({key:`drawing:${entry.key}`,meetingId:entry.key.slice(0,separator),partId:entry.key.slice(separator+1),text:t('My drawing'),updatedAt:entry.updatedAt??'',kind:'drawing'});

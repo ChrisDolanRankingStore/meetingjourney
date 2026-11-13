@@ -24,6 +24,23 @@ test('timeline includes saved meeting and assembly notes and study drafts, newes
   assert.equal(drawing.meetingId,'meeting-2026-10-19');assert.equal(drawing.partId,'old-part::page::2');
   await saveDrawing('meeting-2026-10-19','fill-only',[{mode:'fill',size:5,color:'#123456',points:[20,30],fillBounds:{width:760,height:900}}],{width:760,height:900});
   assert.equal((await readNotesTimeline()).find(note=>note.partId==='fill-only').kind,'drawing');
+  const artwork={id:'12345678-1234-1234-1234-123456789abc',title:'Saved outline',imageHash:'a'.repeat(64),dataUrl:'data:image/png;base64,aGVsbG8=',width:760,height:1140};
+  await saveDrawing('meeting-2026-10-19','outline-only',[],{width:760,height:1140},artwork);
+  await saveDrawing('meeting-2026-10-19','removed-outline',[],{width:760,height:1140},{...artwork,hidden:true});
+  await saveDrawing('meeting-2026-10-19','removed-with-fill',[{mode:'fill',size:5,color:'#123456',points:[20,30],fillBounds:{width:760,height:1140},fillUsesOutline:true}],{width:760,height:1140},{...artwork,hidden:true});
+  await saveNote({meetingId:'meeting-2026-10-19',partId:'feelings-only',text:'',feedbackChoices:['A thought to keep'],updatedAt:'2026-10-19T20:00:00Z'});
+  const retained=await readNotesTimeline();
+  assert.equal(retained.find(note=>note.partId==='outline-only').kind,'drawing');
+  assert.equal(retained.some(note=>note.partId==='removed-outline'),false);
+  assert.equal(retained.find(note=>note.partId==='removed-with-fill').kind,'drawing');
+  assert.equal(retained.find(note=>note.partId==='feelings-only').text,'A thought to keep');
+  const {stampGroups}=await server.ssrLoadModule('/src/MeetingStamps.tsx');
+  const stamps=stampGroups([
+   {key:'meeting-2026-10-19:outline-only',value:[],artwork},
+   {key:'meeting-2026-10-19:removed-outline',value:[],artwork:{...artwork,hidden:true}},
+   {key:'meeting-2026-10-19:fill-only',value:[{mode:'fill',points:[20,30]}]}
+  ]);
+  assert.deepEqual([...stamps.get('meeting-2026-10-19')].sort(),['fill-only','outline-only']);
   assert.equal(notes.find(note=>note.text==='Study draft').kind,'study');
   assert.equal(notes.find(note=>note.text==='John 3:16').kind,'note');
   await saveStudy({...emptyStudy('meeting-2026-11-02','part-1:connections'),pointChoices:{'An idea I heard':'Something I could try'},connectionExamples:{'An idea I heard':'A personal connection'}});

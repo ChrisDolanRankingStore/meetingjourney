@@ -131,8 +131,28 @@ html[data-neutral="true"] .app .home-sources-card { margin: 24px auto; max-width
 .meeting-stamp { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 30px; height: 30px; border: 1px dashed #aaadb0; color: #304d63; border-radius: 6px; background: transparent; }
 .meeting-stamp.is-kept { background: #e2eee4; border: 1px solid #42694b; }
 .meeting-stamps > details { font-size: .875rem; }
-.app .discovery-map-heading:has(.meeting-stamps) { display: flex; flex-wrap: wrap; max-height: 38dvh; overflow-y: auto; }
-.app .discovery-map-heading > .meeting-stamps { flex: 1 0 100%; }
+.app .discovery-map-heading { flex-wrap:wrap; max-height:none; overflow:visible; }
+.app .discovery-map-heading > .discovery-view-picker { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); flex:1 0 100%; gap:4px; margin:0; }
+.app .discovery-view-picker .icon-action { display:flex; flex-direction:column; justify-content:center; gap:4px; width:100%; min-width:0; height:auto; min-height:64px; padding:6px 2px; border:0; border-radius:6px; background:transparent; }
+.app .discovery-view-picker .icon-action-label { font-size:.75rem; line-height:1.2; text-align:center; overflow-wrap:anywhere; }
+.app .discovery-view-picker .icon-action[aria-pressed="true"] { color:#fff; background:#3e5a78; }
+.app .discovery-view-picker .icon-action:focus-visible { outline:2px solid #31597c; outline-offset:1px; }
+.discovery-stamps { flex:1 0 100%; min-width:0; }
+.discovery-stamps > summary { display:flex; align-items:center; min-height:44px; cursor:pointer; font-size:.875rem; }
+.discovery-stamps > summary::before { content:"+"; margin-right:8px; }
+.discovery-stamps[open] > summary::before { content:"-"; }
+.discovery-stamps > .meeting-stamps { max-height:25dvh; overflow-y:auto; overscroll-behavior:contain; }
+.app .discovery-stamps > p { font-size:.875rem; }
+.app .historical-notebook-back { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:6px 8px; border:0; border-radius:6px; background:transparent; color:#314f70; font:inherit; cursor:pointer; }
+.app .historical-notebook-back:focus-visible { outline:2px solid #31597c; outline-offset:2px; }
+.app dialog.historical-drawing-dialog[open] { position:fixed; inset:0; display:flex; flex-direction:column; gap:6px; box-sizing:border-box; width:calc(100vw - 12px); max-width:calc(100vw - 12px); height:calc(100dvh - 12px); max-height:calc(100dvh - 12px); margin:auto; padding:6px; overflow:hidden; background:#fff8e9; }
+.app dialog.historical-drawing-dialog:not([open]) { display:none; }
+.historical-drawing-dialog::backdrop { background:#1f2740a6; }
+.app .historical-drawing-dialog > header { flex:0 0 44px; flex-wrap:nowrap; gap:8px; min-height:44px; }
+.app .historical-drawing-dialog h2 { font-size:1rem; }
+.app .historical-drawing-dialog .historical-notebook-back { flex:0 0 44px; width:44px; height:44px; padding:0; }
+.app .historical-drawing-dialog .drawing-card { padding:0; border:0; background:transparent; box-shadow:none; }
+.app .historical-drawing-dialog .canvas-shell { overflow:hidden; border-radius:4px; background:#fffdf7; }
 :root[data-text-size="larger"] { font-size: 20px; }
 .app :is(p, small, label, summary, legend, .settings-help, .illustrated-stop-caption strong, .icon-action-label) {
   overflow-wrap: anywhere;

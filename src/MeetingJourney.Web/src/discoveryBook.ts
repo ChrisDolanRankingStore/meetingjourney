@@ -28,6 +28,11 @@ export function hasSavedDiscovery(note?: SavedNote) {
   return Boolean(note?.text?.trim() || note?.feedback?.trim() || note?.feedbackChoices?.some(choice => choice.trim()));
 }
 
+export function hasSavedDrawing(record: Pick<MeetingDrawingRecord, 'value' | 'artwork'>) {
+  return Boolean(record.artwork&&!record.artwork.hidden)||record.value.some(stroke=>
+    (stroke.mode==='pen'||stroke.mode==='highlighter'||stroke.mode==='fill')&&stroke.points.length>0);
+}
+
 export function buildDiscoveryTreasures(meeting: Meeting, notes: (SavedNote | undefined)[], records: MeetingDrawingRecord[]): DiscoveryTreasure[] {
   const prefix = `${meeting.id}:`;
   const sectionOffsets: Record<string, number> = {};
@@ -36,7 +41,7 @@ export function buildDiscoveryTreasures(meeting: Meeting, notes: (SavedNote | un
     sectionOffsets[part.section] = offset + 1;
     const note = notes.find(item => item?.meetingId === meeting.id && item.partId === part.id);
     const drawings = records.flatMap(record => {
-      if (!record.key.startsWith(prefix) || !Array.isArray(record.value) || (!record.artwork||record.artwork.hidden)&&!record.value.some(stroke => (stroke.mode === 'pen' || stroke.mode === 'highlighter'||stroke.mode==='fill') && stroke.points.length > 0)) return [];
+      if (!record.key.startsWith(prefix) || !Array.isArray(record.value) || !hasSavedDrawing(record)) return [];
       const suffix = record.key.slice(prefix.length);
       const extraPage = suffix.match(/^(.*)::page::(\d+)$/);
       const recordPart = extraPage ? extraPage[1] : suffix;

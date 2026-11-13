@@ -5,13 +5,15 @@ import type {StudyProgress} from './studyStorage';
 import {useComfort} from './ComfortSettings';
 import {notebookContext} from './notebookLabels';
 import {t} from './i18n';
+import {hasSavedDrawing} from './discoveryBook';
+import type {DrawingArtwork} from './publishedArtwork';
 
-type StampRecord={key:string;value:SavedNote|StudyProgress|Stroke[]};
+type StampRecord={key:string;value:SavedNote|StudyProgress|Stroke[];artwork?:DrawingArtwork};
 export function stampGroups(records:StampRecord[]) {
   const groups=new Map<string,Set<string>>();
   for(const entry of records) {
     const value=entry.value;
-    const kept=Array.isArray(value)?value.some(stroke=>['pen','highlighter'].includes(stroke.mode)&&stroke.points.length):
+    const kept=Array.isArray(value)?hasSavedDrawing({value,artwork:entry.artwork}):
       'text' in value?Boolean(value.text.trim()||value.feedback?.trim()||value.feedbackChoices?.length||value.sourceConfirmations?.includes('I followed this part')):
       Boolean(value.draft?.trim()||value.comments.length||Object.values(value.connectionExamples??{}).some(text=>text.trim()));
     if(!kept)continue;
@@ -44,6 +46,6 @@ export function MeetingStamps({meeting}:{meeting:Meeting}) {
   return <section className="meeting-stamps" aria-label={t('This week')}>
     <h3>{t('This week')}</h3>{row(meeting.id,meeting.parts)}
     {error&&<p role="status">{t(error)} <button type="button" onClick={()=>setRetry(value=>value+1)}>{t('Try again')}</button></p>}
-    {[...groups.keys()].filter(id=>id!==meeting.id).sort().reverse().map(id=><details key={id}><summary>{notebookContext(id,'').date||id}</summary>{row(id,[...groups.get(id)!].map(partId=>({id:partId,title:notebookContext(id,partId).title})))}</details>)}
+    {[...groups.keys()].filter(id=>id!==meeting.id).sort().reverse().map(id=><details key={id}><summary>{notebookContext(id,'').label||id}</summary>{row(id,[...groups.get(id)!].map(partId=>({id:partId,title:notebookContext(id,partId).title})))}</details>)}
   </section>;
 }

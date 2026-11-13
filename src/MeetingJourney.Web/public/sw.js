@@ -1,4 +1,4 @@
-const CACHE = 'meeting-journey-107-compact-drawing';
+const CACHE = 'meeting-journey-108-saved-notebooks';
 const APP_SHELL=['/','/index.html','/manifest.webmanifest','/journey-route-192.png','/journey-route-180.png','/journey-route-512.png','/privacy.html','/about.html','/welcome.html','/info.css','/refresh.html','/app-refresh.js','/es/privacy.html','/es/about.html','/es/welcome.html', .../*BUILD_ASSETS*/[]];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(APP_SHELL)));self.skipWaiting();});
 function adminPath(path){try{path=decodeURIComponent(path);}catch{return false;}return path==='/admin'||path.startsWith('/admin/')||path==='/api/admin'||path.startsWith('/api/admin/');}

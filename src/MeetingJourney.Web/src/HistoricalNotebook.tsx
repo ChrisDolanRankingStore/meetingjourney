@@ -7,6 +7,7 @@ import {t} from './i18n';
 import {ScriptureLookup} from './ScriptureLookup';
 import {NoteEditor} from './NoteEditor';
 import {notebookContext} from './notebookLabels';
+import {NotebookIcon} from './NotebookIcon';
 
 const DrawingPad=lazy(()=>import('./DrawingPad').then(module=>({default:module.DrawingPad})));
 export type HistoricalTarget={meetingId:string;partId:string;kind:'note'|'study'|'drawing'};
@@ -19,8 +20,11 @@ export function HistoricalNotebook({target,onClose}:{target:HistoricalTarget;onC
   const [dirty,setDirty]=useState(false);
   const [retry,setRetry]=useState(0);
   const closeRef=useRef<HTMLButtonElement>(null);
+  const dialogRef=useRef<HTMLDialogElement>(null);
   useEffect(()=>{
     const previous=document.activeElement;
+    const dialog=dialogRef.current,overflow=document.body.style.overflow;
+    if(dialog){dialog.showModal();document.body.style.overflow='hidden';}
     closeRef.current?.focus();
     let active=true;
     const load=async()=>{
@@ -38,7 +42,7 @@ export function HistoricalNotebook({target,onClose}:{target:HistoricalTarget;onC
       if(!active)return;
       setStatus('');
     }).catch(()=>{if(active)setStatus('Could not open your notes. Try again.');});
-    return()=>{active=false;if(previous instanceof HTMLElement&&previous.isConnected)previous.focus();};
+    return()=>{active=false;if(dialog){dialog.close();document.body.style.overflow=overflow;}if(previous instanceof HTMLElement&&previous.isConnected)previous.focus();};
   },[target,retry]);
   useEffect(()=>{
     if(!dirty)return;
@@ -62,16 +66,21 @@ export function HistoricalNotebook({target,onClose}:{target:HistoricalTarget;onC
     finally{setBusy(false);}
   };
   const page=target.partId.match(/^(.*)::page::(\d+)$/);
-  return <section className={`historical-notebook ${target.kind==='drawing'?'editing-drawing':''}`} aria-label={t('Edit saved notebook')}>
-    <header><h2>{t('Edit saved notebook')}</h2><button ref={closeRef} type="button" disabled={busy} onClick={()=>{if(!dirty||window.confirm(t('Discard unsaved changes?')))onClose();}}>{t('Back to previous notes')}</button></header>
+  if(target.kind==='drawing')return <dialog ref={dialogRef} className="historical-notebook historical-drawing-dialog editing-drawing" aria-label={t('Edit saved notebook')} onCancel={event=>{event.preventDefault();onClose();}}>
+    <header><h2>{t('Doodle notes')}</h2><button ref={closeRef} className="historical-notebook-back" type="button" aria-label={t('Back to previous notes')} title={t('Back to previous notes')} onClick={onClose}><NotebookIcon name="close"/></button></header>
+    <p className="visually-hidden">{notebookContext(target.meetingId,target.partId).label}</p>
+    <Suspense fallback={<p role="status">{t('Opening your drawing page…')}</p>}><DrawingPad meetingId={target.meetingId} partId={page?.[1]??target.partId} initialPage={page?Number(page[2]):0}/></Suspense>
+  </dialog>;
+  return <section className="historical-notebook" aria-label={t('Edit saved notebook')}>
+    <header><h2>{t('Edit saved notebook')}</h2><button ref={closeRef} className="historical-notebook-back" type="button" disabled={busy} onClick={()=>{if(!dirty||window.confirm(t('Discard unsaved changes?')))onClose();}}><NotebookIcon name="back"/>{t('Back to previous notes')}</button></header>
     <p>{notebookContext(target.meetingId,target.partId).label}</p>
-    {target.kind==='drawing'?<Suspense fallback={<p role="status">{t('Opening your drawing page…')}</p>}><DrawingPad meetingId={target.meetingId} partId={page?.[1]??target.partId} initialPage={page?Number(page[2]):0}/></Suspense>:<fieldset disabled={busy} onChange={()=>{setDirty(true);setStatus('');}}>
+    <fieldset disabled={busy} onChange={()=>{setDirty(true);setStatus('');}}>
       <legend className="visually-hidden">{t('Edit saved notebook')}</legend>
       {note&&<><NoteEditor value={note.text} maxLength={100000} onChange={text=>setNote({...note,text})}/><label>{t('What I noticed')}<textarea value={note.feedback??''} maxLength={100000} onChange={event=>setNote({...note,feedback:event.target.value})}/></label><ScriptureLookup text={note.feedback??''}/></>}
       {study&&<><label>{t('Your own words')}<textarea value={study.draft??''} maxLength={10000} onChange={event=>setStudy({...study,draft:event.target.value})}/></label>{study.comments.map(comment=><label key={comment.id}>{t('Paragraph')} {comment.paragraph}<textarea value={comment.text} maxLength={10000} onChange={event=>setStudy({...study,comments:study.comments.map(item=>item.id===comment.id?{...item,text:event.target.value}:item)})}/></label>)}{Object.entries(study.connectionExamples??{}).map(([source,text])=><label key={source}>{t('My example for {idea} (optional)',{idea:t(source)})}<textarea value={text} maxLength={1000} onChange={event=>setStudy({...study,connectionExamples:{...study.connectionExamples,[source]:event.target.value}})}/></label>)}<ScriptureLookup text={[study.draft,...study.comments.map(comment=>comment.text),...Object.values(study.connectionExamples??{})].filter(Boolean).join('\n')}/></>}
       {(note||study)&&<button type="button" disabled={busy} onClick={()=>void save()}>{t('Save changes')}</button>}
       <p role="status">{t(status)}</p>
       {!note&&!study&&status.startsWith('Could')&&<button type="button" onClick={()=>{setStatus('Opening your notes...');setRetry(value=>value+1);}}>{t('Try again')}</button>}
-    </fieldset>}
+    </fieldset>
   </section>;
 }

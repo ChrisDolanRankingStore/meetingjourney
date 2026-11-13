@@ -129,11 +129,11 @@ export function DiscoveriesMap({ meeting, onReturn, teen = false, standardRegist
   if(editing)return <section className="discovery-map-screen"><HistoricalNotebook target={editing} onClose={()=>{setEditing(null);setRetry(value=>value+1);requestAnimationFrame(()=>closeRef.current?.focus());}}/></section>;
   return <section className={`discovery-map-screen ${split ? 'has-day-sessions' : ''} ${timeline ? 'showing-timeline' : ''} ${selected&&!timeline ? 'reading-discovery' : ''}`}>
     <header className="discovery-map-heading"><div><p className="eyebrow">{standardRegister ? t("My notes") : t("Your adventure journal")}</p><h2>{t("My discoveries")}</h2><p>{t("The things you chose to keep along the way.")}</p></div><div className="discovery-view-picker" role="group" aria-label={t('Discovery view')}>
-      <IconAction icon="grid" label={t('Gallery')} aria-pressed={!timeline&&gallery} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(true);}} />
-      <IconAction icon="route" label={t('Map')} aria-pressed={!timeline&&!gallery&&!list} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(false);setList(false);}} />
-      <IconAction icon="list" label={t('List')} aria-pressed={!timeline&&!gallery&&list} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(false);setList(true);}} />
-      <IconAction icon="calendar" label={t('Previous notes')} aria-pressed={timeline} onClick={()=>{setTimeline(true);setSelectedId(null);}} />
-    </div>{!timeline&&<MeetingStamps key={retry} meeting={meeting}/>}</header>
+      <IconAction icon="grid" label={t('Gallery')} showLabel aria-pressed={!timeline&&gallery} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(true);}} />
+      <IconAction icon="route" label={t('Map')} showLabel aria-pressed={!timeline&&!gallery&&!list} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(false);setList(false);}} />
+      <IconAction icon="list" label={t('List')} showLabel aria-pressed={!timeline&&!gallery&&list} onClick={()=>{setTimeline(false);setSelectedId(null);setGallery(false);setList(true);}} />
+      <IconAction icon="calendar" label={t('Previous notes')} showLabel aria-pressed={timeline} onClick={()=>{setTimeline(true);setSelectedId(null);}} />
+    </div>{!timeline&&<details className="discovery-stamps"><summary>{t('Meeting stamps')}</summary><p>{t('Choose Previous notes to read or edit saved entries from any meeting.')}</p><MeetingStamps key={retry} meeting={meeting}/></details>}</header>
     {timeline?<NotesTimeline/>:<><div className="discovery-filters" role="group" aria-label={t('Filter discoveries')}>{(['all','drawings','thoughts','feelings'] as const).map(value=><button type="button" key={value} aria-pressed={filter===value} onClick={()=>{setFilter(value);setSelectedId(null);}}>{t(({all:'All',drawings:'Drawings',thoughts:'Thoughts',feelings:'Feelings'})[value])}</button>)}</div>
     {split && <MeetingSessionPicker value={session} onChange={setSession} />}
     <div className={`discovery-map-workspace ${selected ? 'has-treasure-open' : ''}`}>
