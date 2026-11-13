@@ -160,7 +160,7 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
         database().savePlannerInstructions(input.instructions.trim(),revision,actor.subject);
         send(response,200,planningInstructions());return true;
       }
-      if(['/api/admin/planner/run','/api/admin/planner/regenerate'].includes(path)&&request.method==='POST'){
+      if(['/api/admin/planner/run','/api/admin/planner/regenerate','/api/admin/planner/retry'].includes(path)&&request.method==='POST'){
         if(!planner)throw new AdminError(503,plannerStatus().message);
         const input=await jsonBody(request);
         if(!Number.isSafeInteger(input.instructionsRevision)||input.instructionsRevision<0)
@@ -169,7 +169,7 @@ export function createAdminHandler({env=process.env,publicDir,meetingsDirectory=
           throw new AdminError(409,'Planning instructions changed. Reload and review them before running.');
         if(plannerStatus().running)
           throw new AdminError(409,'Artwork planning is already running. Wait for it to finish before requesting regeneration.');
-        void planner.run({force:true,regenerateDrafts:path.endsWith('/regenerate'),provider:input.provider,model:input.model,allowPaid:input.allowPaid,
+        void planner.run({force:true,regenerateDrafts:path.endsWith('/regenerate'),retryReviews:path.endsWith('/retry'),provider:input.provider,model:input.model,allowPaid:input.allowPaid,
           startWeek:input.startWeek,endWeek:input.endWeek})
           .catch(error=>console.error('Artwork planning check failed.',error));
         send(response,202,plannerStatus());return true;

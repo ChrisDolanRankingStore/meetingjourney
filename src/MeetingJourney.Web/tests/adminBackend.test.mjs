@@ -170,12 +170,12 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
   mkdirSync(publicDir);mkdirSync(meetingsDirectory);
   const env={...envFor(directory),MJ_ARTWORK_AUTOMATION_ENABLED:'true',MJ_GEMINI_API_KEY:'not-a-real-api-key-for-tests',MJ_OPENROUTER_API_KEY:'not-a-real-openrouter-key'};
   const keys=await tokens(readAdminConfig(env,publicDir));
-  let providerCalls=0;
+  let providerCalls=0,needsReview=false;
   const handler=createAdminHandler({env,publicDir,meetingsDirectory,verifyAccess:keys.verify,plannerOptions:{
     now:()=>new Date('2026-11-10T12:00:00Z'),
     discover:async week=>({subjects:[{meetingId:`meeting-${week}`,weekOf:week,kind:'midweek',partId:'part-1',title:'Patience',
       reference:'Test 1:1',sourceUrl:'https://www.jw.org/finder?docid=123',sourceStatus:'discovered',automatable:true}],missing:['weekend']}),
-    generate:async item=>{providerCalls++;return {needsReview:false,concepts:artworkStyles.map(style=>artworkConcept({
+    generate:async item=>{providerCalls++;if(needsReview)return {needsReview:true,reason:'Clarify the supported scene.',concepts:[]};return {needsReview:false,concepts:artworkStyles.map(style=>artworkConcept({
       meetingId:item.meetingId,partId:item.partId,style,safeTheme:'Patience',scene:'A calm person tending a plant.'
     },[item]))};}
   }}),server=await serverFor(handler);
@@ -207,6 +207,11 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     assert.equal((await requestRun({startWeek:'2026-11-16',endWeek:'2026-11-02'})).status,400);
     assert.equal(providerCalls,0,'Invalid or unconfirmed provider selections must not call a provider.');
     assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST'})).status,401);
+    const requestRetry=(input={},headers=mutation)=>fetch(server.base+'/api/admin/planner/retry',{method:'POST',headers,body:JSON.stringify({instructionsRevision:1,...input})});
+    assert.equal((await fetch(server.base+'/api/admin/planner/retry',{method:'POST'})).status,401);
+    assert.equal((await requestRetry({}, {...mutation,Origin:'https://evil.example'})).status,403);
+    assert.equal((await requestRetry({instructionsRevision:0})).status,409);
+    assert.equal((await requestRetry({provider:'openrouter',model:'example/paid-model'})).status,400);
     assert.equal((await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:{...mutation,Origin:'https://evil.example'}})).status,403);
     assert.equal((await fetch(server.base+'/api/admin/planner/regenerate',{method:'POST',headers:{...mutation,Origin:'https://evil.example'}})).status,403);
     const triggered=await fetch(server.base+'/api/admin/planner/run',{method:'POST',headers:mutation,body:'{"instructionsRevision":1}'});
@@ -226,6 +231,9 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     assert.equal((await requestRun({provider:'openrouter',model:'example/paid-model',allowPaid:true})).status,202);
     await handler.runPlanner();
     assert.equal(providerCalls,5,'Switching provider/model must not duplicate existing subject suggestions.');
+    assert.equal((await requestRetry()).status,202);
+    await handler.runPlanner();
+    assert.equal(providerCalls,5,'Explicit retry must preserve existing subject drafts.');
     assert.deepEqual(await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json()),drafts);
     const draft=drafts[0],path=`/api/admin/artwork/${draft.id}/actions`;
     const action=data=>fetch(server.base+path,{method:'POST',headers:{...mutation,'If-Match':String(draft.revision)},body:JSON.stringify(data)});
@@ -244,6 +252,21 @@ test('only authenticated same-origin admins can trigger planning; discovered dra
     const catchupStatus=await fetch(server.base+'/api/admin/planner',{headers:auth}).then(r=>r.json());
     assert.deepEqual(catchupStatus.weeks,['2026-11-02','2026-11-09']);
     assert.deepEqual(catchupStatus.defaultWeeks,['2026-11-09','2026-11-16','2026-11-23','2026-11-30','2026-12-07']);
+    const retryRange={startWeek:'2026-10-12',endWeek:'2026-10-12'};
+    needsReview=true;
+    assert.equal((await requestRun(retryRange)).status,202);
+    await handler.runPlanner(retryRange);
+    const afterReview=providerCalls;
+    assert.equal((await requestRun(retryRange)).status,202);
+    await handler.runPlanner(retryRange);
+    assert.equal(providerCalls,afterReview,'Normal API runs reuse review outcomes.');
+    needsReview=false;
+    assert.equal((await requestRetry(retryRange)).status,202);
+    await handler.runPlanner({...retryRange,retryReviews:true});
+    assert.equal(providerCalls,afterReview+1,'The retry endpoint must actually re-request the saved review subject.');
+    const retriedDrafts=await fetch(server.base+'/api/admin/artwork',{headers:auth}).then(r=>r.json());
+    assert.equal(retriedDrafts.filter(entry=>entry.weekOf==='2026-10-12').length,3);
+    assert.deepEqual(retriedDrafts.find(entry=>entry.id===approved.id),approved);
   }finally{await server.close();rmSync(directory,{recursive:true,force:true});}
 });
 test('the offline worker never intercepts administration routes and purges legacy private cache entries',async()=>{

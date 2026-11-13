@@ -114,6 +114,8 @@ The private SQLite database stores sources, run state, per-source/model completi
 
 The workspace shows the last check, target weeks, request count and issues. **Run saved instructions for new subjects** triggers a bounded background check; refresh the queue afterwards to load its drafts. Provider failures remain visible; retry manually after configuration repair or quota reset.
 
+**Retry subjects without drafts** explicitly retries the selected weeks, including unchanged subjects previously held for manual concept review or invalid provider output. Normal runs continue to reuse those saved outcomes to avoid repeated billing. Retry uses the selected provider/model, saved instructions, shared request cap and paid-model confirmation; it never replaces existing drafts, rejected entries, approvals or published artwork. It does not relax validation or guarantee a concept: the same issue may return. Clarify instructions or select another model if appropriate, then refresh the queue when the run finishes.
+
 For an explicit command-line run instead of the admin button, use the same private environment and persistent data path:
 
 ```powershell

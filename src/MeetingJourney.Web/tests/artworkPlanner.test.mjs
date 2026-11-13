@@ -305,6 +305,41 @@ test('saved instructions persist without generating and permit retry after clari
     assert.ok(f.database().list().every(entry=>entry.prompt.includes('false god')));
   }finally{f.close();}
 });
+test('explicit review retry honours date range and quota, preserves artwork and stops repeating after success',async()=>{
+  const f=fixture(),calls=[];
+  let succeed=false;
+  const range={force:true,startWeek:'2026-11-02',endWeek:'2026-11-09'};
+  try{
+    const planner=createArtworkPlanner({config:{...config,maxCallsPerDay:4},database:f.database,reviewedItems:()=>[],
+      now:()=>new Date('2026-11-13T12:00:00Z'),
+      discover:async week=>({subjects:[subjects(week)[0]],missing:[]}),
+      generate:async item=>{calls.push(item.weekOf);return succeed?generated(item):{needsReview:true,reason:'More source context needed.',concepts:[]};}
+    });
+    await planner.run(range);
+    assert.deepEqual(calls,['2026-11-09','2026-11-02']);
+    await planner.run(range);
+    assert.equal(calls.length,2,'Ordinary runs must keep reusing saved review outcomes.');
+    assert.equal(f.database().sources().length,2,'Review outcomes must not hide discovered subjects from manual selection.');
+    const first=f.database().sources().find(item=>item.weekOf==='2026-11-02');
+    const existing=f.database().create(generated(first).concepts[0],'administrator');
+    f.database().update(existing.id,existing.revision,'administrator','reject',current=>({data:{...current.data,state:'rejected'},image:null}));
+    const protectedArtwork=f.database().list();
+    const retry={force:true,retryReviews:true,startWeek:'2026-11-09',endWeek:'2026-11-09'};
+    await planner.run(retry);
+    assert.deepEqual(calls,['2026-11-09','2026-11-02','2026-11-09']);
+    succeed=true;
+    await planner.run(retry);
+    assert.equal(calls.length,4);
+    assert.equal(f.database().list().length,4);
+    assert.deepEqual(f.database().list().find(item=>item.id===existing.id),protectedArtwork[0]);
+    await planner.run(retry);
+    assert.equal(calls.length,4,'A successful retry must not duplicate drafts.');
+    const capped=await planner.run({...range,retryReviews:true});
+    assert.equal(calls.length,4,'Retry must not bypass the shared request cap.');
+    assert.ok(capped.issues.some(issue=>/cap reached/.test(issue.message)));
+    assert.deepEqual(f.database().list().find(item=>item.id===existing.id),protectedArtwork[0]);
+  }finally{f.close();}
+});
 test('regeneration rolls back a subject if a draft is approved while Gemini is working',async()=>{
   const f=fixture(),item={...subjects('2026-12-07')[0],sourceHash:'fixture-hash'};
   try{

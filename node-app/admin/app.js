@@ -23,6 +23,7 @@ function applyState(){
   const unsaved=!planningInstructions||$('#planning-text').value!==planningInstructions.instructions;
   $('#plan-now').disabled=!planner?.enabled||planner.running||unsaved;
   $('#plan-regenerate').disabled=!planner?.enabled||planner.running||unsaved;
+  $('#plan-retry').disabled=!planner?.enabled||planner.running||unsaved;
   const state=selected?.state;
   $('#approve-concept').hidden=state!=='draft';
   $('#upload').hidden=!selected?.conceptApproval;
@@ -176,9 +177,10 @@ $('#planning-instructions').addEventListener('submit',event=>{
     message('Planning instructions saved. Nothing has been generated; run them when ready.');
   });
 });
-for(const [button,path,regenerate] of [
-  ['#plan-now','/api/admin/planner/run',false],
-  ['#plan-regenerate','/api/admin/planner/regenerate',true]
+for(const [button,path,regenerate,retry] of [
+  ['#plan-now','/api/admin/planner/run',false,false],
+  ['#plan-regenerate','/api/admin/planner/regenerate',true,false],
+  ['#plan-retry','/api/admin/planner/retry',false,true]
 ])$(button).addEventListener('click',()=>void run(async()=>{
   const provider=$('#planning-provider').value,model=$('#planning-model').value.trim();
   if(!model)throw Error('Choose a model ID before running.');
@@ -186,7 +188,8 @@ for(const [button,path,regenerate] of [
   if(!startWeek||!endWeek)throw Error('Choose planning start and end dates before running.');
   const paid=provider==='openrouter'&&model!=='openrouter/free'&&!model.endsWith(':free');
   const warnings=[...(paid?[`Use PAID OpenRouter model ${model}? This run can incur charges at the provider's current rates.`]:[]),
-    ...(regenerate?['Replace outdated unapproved AI drafts? Approved concepts and images will not change.']:[])];
+    ...(regenerate?['Replace outdated unapproved AI drafts? Approved concepts and images will not change.']:[]),
+    ...(retry?['Retry subjects without drafts in the selected weeks, including previous manual-review or invalid-response outcomes? This uses the shared AI allowance and may return the same issues. Existing artwork will not change.']:[])];
   if(warnings.length&&!confirm(warnings.join('\n\n')))return;
   await api(path,jsonOptions({instructionsRevision:planningInstructions.revision,provider,model,allowPaid:paid,startWeek,endWeek}));
   await updatePlanner();message('AI planning requested. Refresh the queue after it finishes; review any source-context issues.');

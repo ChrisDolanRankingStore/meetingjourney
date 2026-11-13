@@ -151,7 +151,7 @@ export function createArtworkPlanner({config,database,reviewedItems,discover=loa
       weeks:state.weeks??artworkPlanningWeeks(localDateKey(now())),defaultWeeks:artworkPlanningWeeks(localDateKey(now())),
       callsToday:database().plannerCalls(now().toISOString().slice(0,10)),maxCallsPerDay:config.maxCallsPerDay};
   };
-  const run=({force=false,regenerateDrafts=false,startWeek,endWeek,...selection}={})=>{
+  const run=({force=false,regenerateDrafts=false,retryReviews=false,startWeek,endWeek,...selection}={})=>{
     if(active)return active;
     const selected=selectPlannerConfig(config,selection),maxCalls=config.maxCallsPerDay;
     const started=now(),weeks=artworkPlanningWeeks(localDateKey(started),{startWeek,endWeek});
@@ -193,7 +193,7 @@ export function createArtworkPlanner({config,database,reviewedItems,discover=loa
           if(regenerateDrafts?!targets.length:database().hasPlannerBatch(key)||alreadyGenerated){result.skipped++;continue;}
           const reviewKey=artworkHash(`${regenerateDrafts?'regenerate':'plan'}/${promptVersion}/${instructionsHash}/${key}`);
           const review=database().plannerReview(reviewKey);
-          if(review){result.issues.push(review);result.skipped++;continue;}
+          if(review&&!retryReviews){result.issues.push(review);result.skipped++;continue;}
           try{
             if(!regenerateDrafts)database().requireArtworkCapacity(3);
             if(!database().reservePlannerCall(now().toISOString().slice(0,10),maxCalls)){

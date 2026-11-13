@@ -15,6 +15,8 @@ input[type=checkbox] { min-height:24px; width:24px; }
 textarea { width:100%; resize:vertical; }
 button { cursor:pointer; }
 button:disabled { cursor:wait; }
+.admin-text-action { border:0; background:transparent; color:#20334c; text-decoration:underline; text-underline-offset:3px; }
+.admin-text-action:focus-visible { outline:2px solid #526ca0; outline-offset:2px; }
 #queue,#audit { list-style:none; padding:0; }
 #queue button { width:100%; margin-block:4px; text-align:left; overflow-wrap:anywhere; }
 #audit li { padding-block:6px; overflow-wrap:anywhere; }

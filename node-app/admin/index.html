@@ -37,7 +37,9 @@
       </form>
       <button id="plan-now" type="button" disabled>Run saved instructions for new subjects</button>
       <button id="plan-regenerate" type="button" disabled>Run saved instructions for outdated drafts</button>
-      <p>Both actions use the shared daily AI request allowance. The second replaces only unapproved AI drafts created with older or different instructions, provider or model. Approved concepts, uploaded images, published artwork, rejected entries and manual concepts stay unchanged. Switching providers does not duplicate existing suggestions. Source-context issues require review. Re-running unchanged settings does not request fresh alternatives for rejected entries.</p>
+      <button id="plan-retry" class="admin-text-action" type="button" disabled>Retry subjects without drafts</button>
+      <p>All three actions use the shared daily AI request allowance. The outdated-drafts action replaces only unapproved AI drafts created with older or different instructions, provider or model. Approved concepts, uploaded images, published artwork, rejected entries and manual concepts stay unchanged. Switching providers does not duplicate existing suggestions. Source-context issues require review. Re-running unchanged settings does not request fresh alternatives for rejected entries.</p>
+      <p>Retry explicitly asks the selected provider again for subjects without drafts in the selected weeks, including saved manual-review and invalid-response outcomes. It uses the same daily allowance, does not bypass validation, and may report the same issue again. Existing drafts and artwork are never replaced. Consider clarifying the instructions or choosing another model before retrying.</p>
       <ul id="planner-issues"></ul>
     </section>
     <aside>
