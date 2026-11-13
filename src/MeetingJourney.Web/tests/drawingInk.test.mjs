@@ -46,6 +46,60 @@ test('fill is iterative on large empty paper and leaves opaque boundaries intact
  assert.deepEqual([...pixels.slice(-4)],[10,20,30,255]);
 });
 
+test('outline fill blends the antialiased fringe without crossing or blurring a dark line',()=>{
+ const values=[255,255,255,245,200,120,0,120,200,245,255],width=values.length;
+ const source=new Uint8ClampedArray(width*3*4),ink=new Uint8ClampedArray(source.length);
+ for(let y=0;y<3;y++)for(let x=0;x<width;x++)source.set([values[x],values[x],values[x],255],(y*width+x)*4);
+ const original=source.slice(),colour=[197,77,67,255];
+ const composite=()=>{
+  const mask=source.slice();
+  for(let offset=0;offset<mask.length;offset+=4)for(let channel=0;channel<3;channel++)mask[offset+channel]=ink[offset+channel]*ink[offset+3]/255+source[offset+channel]*(1-ink[offset+3]/255);
+  return mask;
+ };
+ for(const fill of [colour,[0,0,0,255],[22,59,92,255],colour]){
+  floodFillPixels(composite(),width,3,1,1,fill,ink,{pixels:source,hidden:false});
+  for(let x=0;x<6;x++){
+   const offset=(width+x)*4;
+   assert.deepEqual([...ink.slice(offset,offset+4)],[...fill.slice(0,3).map(value=>Math.round(value*values[x]/255)),255]);
+  }
+  assert.ok(ink.slice((width+6)*4,(width+11)*4).every(value=>value===0),'Neither the black line nor its far side is painted.');
+ }
+ assert.deepEqual(source,original,'Smoothing never rewrites the saved outline.');
+});
+
+test('removed outlines keep smooth fill coverage without copying grey lines or building up on recolouring',()=>{
+ const values=[255,255,245,200,120,0,120,200,245,255],width=values.length;
+ const source=Uint8ClampedArray.from(values.flatMap(value=>[value,value,value,255]));
+ const ink=new Uint8ClampedArray(source.length);
+ for(const fill of [[197,77,67,255],[0,0,0,255],[22,59,92,255],[197,77,67,255]]){
+  const mask=source.slice();
+  for(let offset=0;offset<mask.length;offset+=4)for(let channel=0;channel<3;channel++)mask[offset+channel]=ink[offset+channel]*ink[offset+3]/255+source[offset+channel]*(1-ink[offset+3]/255);
+  floodFillPixels(mask,width,1,0,0,fill,ink,{pixels:source,hidden:true});
+  for(let x=0;x<5;x++)assert.deepEqual([...ink.slice(x*4,x*4+4)],[...fill.slice(0,3),values[x]]);
+  assert.ok(ink.slice(5*4).every(value=>value===0),'The removed line cannot leak into the colouring.');
+ }
+});
+
+test('outline edge smoothing leaves unrelated pen ink intact and does not jump diagonals',()=>{
+ const source=Uint8ClampedArray.from([255,200,0,0,0,255,0,255,255].flatMap(value=>[value,value,value,255]));
+ const mask=source.slice(),ink=new Uint8ClampedArray(source.length),green=[20,180,90,255];
+ ink.set(green,4);mask.set(green,4);
+ floodFillPixels(mask,3,3,0,0,[197,77,67,255],ink,{pixels:source,hidden:false});
+ assert.deepEqual([...ink.slice(4,8)],green);
+ assert.ok(ink.slice(8).every(value=>value===0),'Neither diagonal paper nor the other side of a pen boundary is coloured.');
+});
+
+test('hidden fill recolouring tolerates canvas premultiplication rounding at faint edges',()=>{
+ const source=Uint8ClampedArray.from([255,3,0,3,255].flatMap(value=>[value,value,value,255]));
+ const ink=new Uint8ClampedArray(source.length);
+ ink.set([197,77,67,255]);ink.set([170,85,85,3],4);
+ const mask=source.slice();
+ mask.set(ink.slice(0,4));mask.set([5,4,4,255],4);
+ floodFillPixels(mask,5,1,0,0,[22,59,92,255],ink,{pixels:source,hidden:true});
+ assert.deepEqual([...ink.slice(4,8)],[22,59,92,3]);
+ assert.ok(ink.slice(8).every(value=>value===0));
+});
+
 test('fast strokes keep coalesced curve samples and the final pointer position',()=>{
  const samples=[{clientX:10,clientY:20},{clientX:20,clientY:60},{clientX:40,clientY:20}];
  const event={clientX:50,clientY:10,getCoalescedEvents:()=>samples};

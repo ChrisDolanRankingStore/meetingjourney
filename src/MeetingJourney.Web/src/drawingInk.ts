@@ -31,6 +31,7 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
   const context = canvas.getContext('2d', {willReadFrequently:true});
   if (!context) throw new Error('Drawing canvas is unavailable.');
   context.lineCap = 'round'; context.lineJoin = 'round';
+  let fillSource:{canvas:HTMLCanvasElement;pixels:ImageData}|undefined;
   for (const stroke of strokes) {
     if (stroke.points.length < 2) continue;
     if(stroke.mode==='fill'){
@@ -39,21 +40,31 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
       const fillHeight=Math.min(canvas.height,Math.ceil(bounds.height*scale));
       const ink=context.getImageData(0,0,fillWidth,fillHeight);
       let pixels=ink;
+      let edges:OutlineFillEdges|undefined;
       // Keep the outline only as a boundary mask so removing it cannot remove colouring.
       if(artwork&&(!artwork.hidden||stroke.fillUsesOutline)){
+        if(!fillSource||fillSource.canvas.width!==fillWidth||fillSource.canvas.height!==fillHeight){
+          const source=document.createElement('canvas');source.width=fillWidth;source.height=fillHeight;
+          const sourceContext=source.getContext('2d',{willReadFrequently:true});
+          if(!sourceContext)throw new Error('Drawing canvas is unavailable.');
+          sourceContext.fillStyle='#fff';sourceContext.fillRect(0,0,fillWidth,fillHeight);
+          sourceContext.drawImage(artwork.image,0,0,artwork.width*scale,artwork.height*scale);
+          fillSource={canvas:source,pixels:sourceContext.getImageData(0,0,fillWidth,fillHeight)};
+        }
         const mask=document.createElement('canvas');mask.width=fillWidth;mask.height=fillHeight;
         const maskContext=mask.getContext('2d',{willReadFrequently:true});
         if(!maskContext)throw new Error('Drawing canvas is unavailable.');
-        maskContext.drawImage(artwork.image,0,0,artwork.width*scale,artwork.height*scale);
+        maskContext.drawImage(fillSource.canvas,0,0);
         maskContext.drawImage(canvas,0,0);
         pixels=maskContext.getImageData(0,0,fillWidth,fillHeight);
+        edges={pixels:fillSource.pixels.data,hidden:Boolean(artwork.hidden)};
       }
       const swatch=document.createElement('canvas');
       swatch.width=swatch.height=1;
       const colour=swatch.getContext('2d');
       if(!colour)throw new Error('Drawing canvas is unavailable.');
       colour.fillStyle=stroke.color;colour.fillRect(0,0,1,1);
-      floodFillPixels(pixels.data,fillWidth,fillHeight,Math.floor(stroke.points[0]*scale),Math.floor(stroke.points[1]*scale),colour.getImageData(0,0,1,1).data,ink.data);
+      floodFillPixels(pixels.data,fillWidth,fillHeight,Math.floor(stroke.points[0]*scale),Math.floor(stroke.points[1]*scale),colour.getImageData(0,0,1,1).data,ink.data,edges);
       context.putImageData(ink,0,0);
       continue;
     }
@@ -84,13 +95,45 @@ export function renderDrawingInk(strokes: Stroke[], width: number, height: numbe
   return canvas;
 }
 
-export function floodFillPixels(pixels:Uint8ClampedArray,width:number,height:number,x:number,y:number,colour:ArrayLike<number>,ink?:Uint8ClampedArray){
+type OutlineFillEdges={pixels:Uint8ClampedArray;hidden:boolean};
+
+function outlineCoverage(source:Uint8ClampedArray,offset:number){
+  const r=source[offset],g=source[offset+1],b=source[offset+2];
+  return Math.max(r,g,b)-Math.min(r,g,b)<=2?r/255:0;
+}
+
+function colourOutlineEdge(pixels:Uint8ClampedArray,ink:Uint8ClampedArray,offset:number,target:Uint8ClampedArray,colour:ArrayLike<number>,outline:OutlineFillEdges){
+  const coverage=outlineCoverage(outline.pixels,offset);
+  if(coverage<=0||coverage>=1)return false;
+  if(outline.hidden){
+    const alpha=ink[offset+3]/255;
+    let untouched=alpha===0,recolouring=alpha>0&&Math.abs(alpha-coverage)<=1/255;
+    for(let channel=0;channel<3;channel++){
+      if(Math.abs(pixels[offset+channel]-target[channel]*coverage)>24)untouched=false;
+      // Canvas readback quantises premultiplied RGB, especially at very low alpha.
+      if(Math.abs((ink[offset+channel]-target[channel])*alpha)>24*alpha+1)recolouring=false;
+    }
+    if(!untouched&&!recolouring)return false;
+    for(let channel=0;channel<3;channel++)ink[offset+channel]=colour[channel];
+    ink[offset+3]=255*coverage;
+  }else{
+    for(let channel=0;channel<3;channel++)if(Math.abs(pixels[offset+channel]-target[channel]*coverage)>24)return false;
+    // Replace only the paper-colour contribution, retaining the line's antialiasing.
+    for(let channel=0;channel<3;channel++)ink[offset+channel]=outline.pixels[offset+channel]+(colour[channel]-255)*coverage;
+    ink[offset+3]=255;
+  }
+  return true;
+}
+
+export function floodFillPixels(pixels:Uint8ClampedArray,width:number,height:number,x:number,y:number,colour:ArrayLike<number>,ink?:Uint8ClampedArray,outline?:OutlineFillEdges){
   if(x<0||y<0||x>=width||y>=height)return;
   const start=(y*width+x)*4;
   const target=pixels.slice(start,start+4);
   if(target.every((value,index)=>value===colour[index]))return;
+  const smooth=outline&&ink&&target[3]===255&&colour[3]===255&&outlineCoverage(outline.pixels,start)>=231/255?outline:undefined;
   const seen=new Uint8Array(width*height);
   const queue=new Int32Array(width*height);
+  const edges:number[]=[];
   let head=0,tail=0;
   queue[tail++]=y*width+x;seen[y*width+x]=1;
   const matches=(index:number)=>{
@@ -100,17 +143,36 @@ export function floodFillPixels(pixels:Uint8ClampedArray,width:number,height:num
     for(let channel=0;channel<3;channel++)if(Math.abs(pixels[offset+channel]-target[channel])>24)return false;
     return true;
   };
-  const enqueue=(next:number)=>{
-    if(!seen[next]){seen[next]=1;if(matches(next))queue[tail++]=next;}
+  const enqueue=(next:number,from:number)=>{
+    if(seen[next])return;
+    seen[next]=1;
+    const coverage=smooth?outlineCoverage(smooth.pixels,next*4):1;
+    // A dark previous fill must not make a matching black outline floodable paper.
+    if(matches(next)&&coverage>=231/255)queue[tail++]=next;
+    else if(smooth&&coverage<outlineCoverage(smooth.pixels,from*4))edges.push(next);
   };
   while(head<tail){
     const index=queue[head++],offset=index*4;
+    if(ink&&!(smooth&&colourOutlineEdge(pixels,ink,offset,target,colour,smooth)))ink.set(colour,offset);
     pixels.set(colour,offset);
-    ink?.set(colour,offset);
-    if(index%width>0)enqueue(index-1);
-    if(index%width<width-1)enqueue(index+1);
-    if(index>=width)enqueue(index-width);
-    if(index<width*(height-1))enqueue(index+width);
+    if(index%width>0)enqueue(index-1,index);
+    if(index%width<width-1)enqueue(index+1,index);
+    if(index>=width)enqueue(index-width,index);
+    if(index<width*(height-1))enqueue(index+width,index);
+  }
+  for(let head=0;head<edges.length;head++){
+    const index=edges[head],offset=index*4;
+    if(!smooth||!ink||!colourOutlineEdge(pixels,ink,offset,target,colour,smooth))continue;
+    const coverage=outlineCoverage(smooth.pixels,offset);
+    const extend=(next:number)=>{
+      if(seen[next]||outlineCoverage(smooth.pixels,next*4)>=coverage)return;
+      seen[next]=1;edges.push(next);
+    };
+    // Walk only down the light-to-dark fringe, never up the far side of a line.
+    if(index%width>0)extend(index-1);
+    if(index%width<width-1)extend(index+1);
+    if(index>=width)extend(index-width);
+    if(index<width*(height-1))extend(index+width);
   }
 }
 
